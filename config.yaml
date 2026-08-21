@@ -1,7 +1,8 @@
 # arXiv open questions feed -- configuration.
 #
-# Everything the daily run needs except the two secrets, which come from the
-# environment (see README): ANTHROPIC_API_KEY and SMTP_PASSWORD.
+# Everything the daily run needs except the secrets and addresses, which come
+# from the environment (see README): ANTHROPIC_API_KEY, SMTP_PASSWORD,
+# LAKERA_GUARD_API_KEY, FEED_EMAIL_TO, SMTP_USER.
 
 # ---------------------------------------------------------------------------
 # arXiv lists to read each day.
