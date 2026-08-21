@@ -169,6 +169,14 @@ fetches every paper submitted to the configured categories on the day that
 anchor appeared, ranks them against the remaining anchors, and checks the
 held-out paper still lands in the top 40. Threshold: 8 of 10.
 
+**It has been run: 10 of 10 passed** (`data/eval/leave-one-out.json`, seed 0,
+`allenai/specter2_base`). Seven of the ten came back at rank 1 in day pools of
+63-311 papers; the worst was rank 28 of 166 (zkLLM, a zero-knowledge-proofs
+paper — the most methodologically distant anchor in the set), comfortably
+inside the top 40. One anchor (`2408.02784`) was not in its own day's pool
+because its primary list is outside the configured categories, so it was
+injected before ranking; the report marks it `injected_into_pool`.
+
 ## Cost
 
 | Step | Cost |
@@ -215,6 +223,18 @@ whole point is arriving once a day without supervision.
   Rendering is tested; delivery is not.
 - Both are covered by one first run: `python main.py --dry-run` exercises
   everything except `smtplib`.
+- `python main.py --dry-run` **has been run end to end** against a real arXiv
+  day (2026-08-20) with no API key present, to check the failure paths hold: the
+  scoring call failed twice and the run fell back to the similarity ranking, all
+  ten question calls failed and were recorded per paper, and the JSON was still
+  written. Both output files were deleted afterwards rather than committed — an
+  archive entry with real papers and no questions would misrepresent a day, and
+  `latest.json` is what the site reads.
+- **Volume runs lower than the spec's 300-600/day.** These seven lists gave 185
+  papers on 2026-08-20; the day pools in the leave-one-out runs ranged from 63
+  (2022) to 311 (2024). It costs less than budgeted rather than more, but if you
+  want the wider net, add categories (`cs.CY`, `cs.GT`, `q-fin.*`) rather than
+  loosening the filter.
 - The spec's test 6 ("you read seven days of emails, at least one question a
   week is worth working on") is a judgement only you can make, and the profile
   in `config.yaml` is the first thing to change if it fails.
@@ -241,6 +261,11 @@ docs/spec.md                the specification this implements
 ```
 
 ## Embedding model
+
+Observed similarity range on real data: 0.90-0.97 for the ten held-out anchors,
+and ~0.82 between a compiler paper and an agent-economics paper. The absolute
+numbers are compressed and near-meaningless on their own — read them as a
+ranking, not as a percentage.
 
 `allenai/specter2_base`, loaded with **CLS pooling** — SPECTER-family models put
 the document vector in the CLS token, and sentence-transformers would otherwise
