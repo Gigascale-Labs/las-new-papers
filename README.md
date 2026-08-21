@@ -44,12 +44,61 @@ anchor set deliberately spans simulation, market design, governance and safety;
 the mean of those directions points at no real paper, and a market-design paper
 should be allowed to score on the market-design anchors alone.
 
+## Injection defences
+
+Every word this pipeline sends to a model comes from outside it. An arXiv
+abstract is user-generated content as far as the model is concerned: anyone who
+can submit a preprint can write one, and it reaches two model calls, an HTML
+email, a CSV people open in Excel, and a JSON file a website reads.
+
+Three layers, in `arxiv_feed/guard.py`, in order of how much weight they carry:
+
+1. **Structural — always on, no key, no network.** Invisible characters are
+   stripped (zero-width, bidi overrides, and the Unicode Tags block, which is
+   the standard way to hide an instruction inside visible text), text is
+   length-capped, and every abstract is fenced inside a tag carrying a random
+   per-call nonce, under a system prompt that says the fenced text is data and
+   cannot change the task. Content inside the fence cannot close it early
+   because it cannot know the nonce. This is the layer that actually holds: it
+   does not depend on recognising an attack.
+2. **Lakera Guard — optional, needs `LAKERA_GUARD_API_KEY`.** Screens the 45
+   shortlisted papers before any model call and withholds the ones it flags,
+   following Lakera's own rule that a flagged input should not reach the LLM at
+   all. Withheld papers are still archived and still named in the email —
+   removed from the model calls, not from the record. 45 calls a day, not ~500:
+   a paper that never reaches a model needs no screening.
+3. **Heuristics — always on, never blocking.** Named patterns
+   (`ignore-previous`, `fake-turn`, `prompt-extraction`, `markdown-image-exfil`
+   …) are reported next to the paper in the email and stored in the archive.
+
+**Layer 3 never blocks, and that is the important design decision here.** This
+corpus is partly *about* prompt injection — "Prompt Infection: LLM-to-LLM Prompt
+Injection within Multi-Agent Systems" is one of the 33 anchors. Any keyword rule
+strong enough to catch a real attack would silently censor exactly the papers
+this feed exists to surface. So keywords annotate, and only a trained classifier
+withholds.
+
+Sinks are handled where they live:
+
+| Sink | Risk | Defence |
+|---|---|---|
+| HTML email | XSS / markup injection from a title or abstract | every field escaped (`emailer.py`), tested |
+| `finalists.csv` | formula injection — `=HYPERLINK(...)` in a title executes on open in Excel or Sheets | cells starting `= + - @ 	 ` prefixed with `'` (`canon.py`) |
+| Email headers | header injection via a config address | CR/LF stripped, and rejected at config load |
+| Links in the email | a forged arXiv ID becoming a `javascript:` href | IDs validated against arXiv's two real formats at parse time |
+| Model output | invented values, wrong shape | JSON-schema structured output, closed-list values dropped if off-list, arXiv IDs checked against the shortlist |
+
+Failure behaviour is a setting, not a guess: `guard.on_error` is `allow` by
+default (a screening outage costs you a warning in the email, not the email),
+and `block` if you would rather withhold everything that could not be screened.
+
 ## Setup
 
 ```bash
 pip install -r requirements.txt          # ~2.5GB: torch comes with sentence-transformers
 export ANTHROPIC_API_KEY=sk-ant-...      # model calls
 export SMTP_PASSWORD=...                 # Gmail app password, not your account password
+export LAKERA_GUARD_API_KEY=...          # optional; without it the other defences still run
 
 python main.py --dry-run                 # full run, writes the JSON, sends nothing
 python main.py                           # and send the email
@@ -83,6 +132,7 @@ keeping the data.
 | `data/YYYY-MM-DD.json` | The day's full record: every kept paper, its scores, its questions, and every problem hit along the way. |
 | `data/latest.json` | A copy of the most recent day, at a stable URL for the site to read. |
 | `data/canon/finalists.csv` | Every finalist ever kept, tagged in the site canon's schema. |
+| `data/raw/YYYY-MM-DD.jsonl.gz` | Every paper scraped that day, not just the ten sent. ~120KB/day gzipped. |
 | `data/seen.json` | arXiv IDs already sent. Nothing is sent twice. |
 | `data/eval/leave-one-out.json` | The most recent retrieval evaluation (see Tests). |
 | `data/ground-truth/` | A frozen copy of the human canon. Read on, this one matters. |
@@ -149,7 +199,7 @@ needs a change here.
 ## Tests
 
 ```bash
-python -m unittest discover tests          # 27 unit tests, no network, no API key
+python -m unittest discover tests          # 50 unit tests, no network, no API key
 python -m tests.leave_one_out              # the retrieval evaluation, real arXiv
 ```
 
@@ -162,6 +212,14 @@ dropped; that any label other than exactly `approachable` becomes "not
 approachable"; that bad JSON is retried exactly once and then gives up; that a
 corrupt seen-list starts empty instead of stopping the run; and that failures
 reach the email instead of vanishing.
+
+The guard tests cover the defences the same way: Unicode Tag smuggling stripped
+while ordinary scientific text (α, ≥, §, em dashes) survives untouched; a forged
+closing fence inside the content failing to close the real one; the Lakera client
+sending bearer auth and reading only *detected* breakdown entries; an outage
+allowing by default and blocking when configured; formula injection neutralised
+on the way into the CSV; header injection stripped; and — the one that matters
+most — a real prompt-injection *paper* being annotated and kept, not dropped.
 
 `tests/leave_one_out.py` is the spec's test 5, and it is the one that says
 whether the filter works at all. For each anchor tested it removes that anchor,
@@ -221,6 +279,12 @@ whole point is arriving once a day without supervision.
   filter — has been run for real, as has the leave-one-out evaluation.
 - The **email has never been sent**, for the same reason: no SMTP credentials.
   Rendering is tested; delivery is not.
+- The **Lakera call has never been made against the live service** — no
+  `LAKERA_GUARD_API_KEY` here either. The client is written against Lakera's
+  current v2 `/v2/guard` contract (bearer auth, OpenAI-shaped `messages`,
+  `flagged` plus an optional `breakdown`) and tested against a mocked
+  transport, including the malformed-response and outage paths. First real run
+  with a key set is what confirms the wire format.
 - Both are covered by one first run: `python main.py --dry-run` exercises
   everything except `smtplib`.
 - `python main.py --dry-run` **has been run end to end** against a real arXiv
@@ -254,10 +318,14 @@ arxiv_feed/
   canon.py                  the site canon's schema, mirrored
   llm.py                    structured output, retry once, then give up
   seen.py                   never send the same paper twice
+  guard.py                  sanitising, fencing, Lakera, sink protection
   emailer.py                part 1 (questions), part 2 (papers)
   run.py                    the day, in order
+scrapers/
+  arxiv_scraper.py          standalone: one day of papers -> data/raw/
 tests/                      unit tests + the leave-one-out evaluation
 docs/spec.md                the specification this implements
+docs/running.md             how to run it, step by step
 ```
 
 ## Embedding model
