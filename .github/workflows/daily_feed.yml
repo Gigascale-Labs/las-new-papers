@@ -61,6 +61,9 @@ jobs:
       - name: Run the feed
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Addresses are secrets here, not config: this repository is public.
+          FEED_EMAIL_TO: ${{ secrets.FEED_EMAIL_TO }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           # Optional. Without it the run still applies its structural defences
           # and says so in the email, rather than failing.

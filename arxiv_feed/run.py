@@ -76,7 +76,9 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
         "counts": counts,
         "papers": [],
         "problems": problems,
-        "email": {"sent": False, "to": cfg.email_to, "error": None, "dry_run": dry_run},
+        # No address here: data/*.json is committed to a public repository by
+        # the daily workflow.
+        "email": {"sent": False, "error": None, "dry_run": dry_run},
     }
 
     if not unseen:

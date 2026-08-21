@@ -99,6 +99,7 @@ and `block` if you would rather withhold everything that could not be screened.
 pip install -r requirements.txt          # ~2.5GB: torch comes with sentence-transformers
 export ANTHROPIC_API_KEY=sk-ant-...      # model calls
 export SMTP_PASSWORD=...                 # Gmail app password, not your account password
+export FEED_EMAIL_TO=you@example.com     # where the digest goes; never stored in the repo
 export LAKERA_GUARD_API_KEY=...          # optional; without it the other defences still run
 
 python main.py --dry-run                 # full run, writes the JSON, sends nothing
@@ -111,15 +112,21 @@ The first run downloads the embedding model (~440MB) and builds the anchor
 vectors (one arXiv call plus a few seconds of CPU). Both are cached afterwards.
 
 Everything else lives in `config.yaml`: categories, anchors, your profile,
-`shortlist_n` / `explore_n` / `top_n`, the two model names, and the email
-address. The anchor vectors rebuild by themselves whenever the anchor list or
+`shortlist_n` / `explore_n` / `top_n`, and the two model names.
+
+**No email address is stored in this repository.** It is public, and an address
+in a public repo is scraped within days, so `FEED_EMAIL_TO` (and optionally
+`FEED_EMAIL_FROM` and `SMTP_USER`) come from the environment. `config.yaml`
+refuses to load if it finds an address, and the archive files the daily job
+commits do not record the recipient. The anchor vectors rebuild by themselves whenever the anchor list or
 the embedding model changes — there is nothing to remember to re-run.
 
 ### Daily, without a machine of your own
 
 `.github/workflows/daily_feed.yml` runs the whole thing at 07:23 UTC and commits
-that day's archive back to the repo. It needs two repository secrets,
-`ANTHROPIC_API_KEY` and `SMTP_PASSWORD`. The embedding model and the anchor
+that day's archive back to the repo. It needs four repository
+secrets: `ANTHROPIC_API_KEY`, `SMTP_PASSWORD`, `FEED_EMAIL_TO` and `SMTP_USER`
+(plus `LAKERA_GUARD_API_KEY` if you use it). The embedding model and the anchor
 vectors are cached between runs, so a normal day is a couple of minutes of CPU.
 
 The commit step runs even when the run failed: a day that produced its JSON but

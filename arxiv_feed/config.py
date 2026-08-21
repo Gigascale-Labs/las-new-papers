@@ -25,11 +25,8 @@ class Config:
     categories: list[str]
     anchors: list[str]
     profile: str
-    email_to: str
-    email_from: str
-    smtp_host: str
-    smtp_port: int
-    smtp_user: str
+    smtp_host: str = "smtp.gmail.com"
+    smtp_port: int = 587
     shortlist_n: int = 40
     explore_n: int = 5
     top_n: int = 10
@@ -72,6 +69,23 @@ class Config:
     def lakera_key() -> str | None:
         return os.environ.get("LAKERA_GUARD_API_KEY")
 
+    # ---- addresses ---------------------------------------------------------
+    #
+    # Never stored in config.yaml. This is a public repository, and an address
+    # committed to one is scraped. They come from the environment, and nothing
+    # writes them to the archive files the daily job commits.
+    @staticmethod
+    def email_to() -> str:
+        return os.environ.get("FEED_EMAIL_TO", "").strip()
+
+    @classmethod
+    def email_from(cls) -> str:
+        return os.environ.get("FEED_EMAIL_FROM", "").strip() or cls.email_to()
+
+    @classmethod
+    def smtp_user(cls) -> str:
+        return os.environ.get("SMTP_USER", "").strip() or cls.email_from()
+
     # ---- guard settings, with the defaults spelled out ---------------------
     @property
     def guard_enabled(self) -> bool:
@@ -102,7 +116,7 @@ class Config:
         return int(self.guard.get("max_abstract_chars", 6000))
 
 
-_REQUIRED = ["categories", "anchors", "profile", "email_to"]
+_REQUIRED = ["categories", "anchors", "profile"]
 
 _EFFORTS = {"low", "medium", "high", "xhigh", "max"}
 
@@ -122,16 +136,12 @@ def load_config(path: str | Path = REPO_ROOT / "config.yaml") -> Config:
     if missing:
         raise ConfigError(f"{path}: missing or empty required key(s): {', '.join(missing)}")
 
-    email_to = str(raw["email_to"]).strip()
     cfg = Config(
         categories=[str(c).strip() for c in raw["categories"]],
         anchors=[str(a).strip() for a in raw["anchors"]],
         profile=str(raw["profile"]).strip(),
-        email_to=email_to,
-        email_from=str(raw.get("email_from") or email_to).strip(),
         smtp_host=str(raw.get("smtp_host", "smtp.gmail.com")).strip(),
         smtp_port=int(raw.get("smtp_port", 587)),
-        smtp_user=str(raw.get("smtp_user") or raw.get("email_from") or email_to).strip(),
         shortlist_n=int(raw.get("shortlist_n", 40)),
         explore_n=int(raw.get("explore_n", 5)),
         top_n=int(raw.get("top_n", 10)),
@@ -151,9 +161,13 @@ def load_config(path: str | Path = REPO_ROOT / "config.yaml") -> Config:
         raise ConfigError(
             f"guard.on_error must be 'allow' or 'block', got {cfg.guard_on_error!r}"
         )
-    for addr in (cfg.email_to, cfg.email_from):
-        if "\n" in addr or "\r" in addr:
-            raise ConfigError(f"email address contains a newline: {addr!r}")
+    for key in ("email_to", "email_from", "smtp_user"):
+        if raw.get(key):
+            raise ConfigError(
+                f"{path}: {key} must not be set in this file -- it is public. "
+                f"Use the FEED_EMAIL_TO / FEED_EMAIL_FROM / SMTP_USER environment "
+                f"variables instead."
+            )
     if cfg.effort not in _EFFORTS:
         raise ConfigError(f"effort must be one of {sorted(_EFFORTS)}, got {cfg.effort!r}")
     for n in ("shortlist_n", "explore_n", "top_n"):

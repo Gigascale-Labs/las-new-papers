@@ -55,15 +55,21 @@ This downloads about 2.5GB. Most of it is PyTorch. It takes a few minutes.
 export ANTHROPIC_API_KEY=sk-ant-...
 export SMTP_PASSWORD=your-16-letter-app-password
 export LAKERA_GUARD_API_KEY=lakera-...
+
+export FEED_EMAIL_TO=you@example.com          # where the email goes
+export SMTP_USER=you@example.com              # the account that sends it
 ```
 
-These last until you close the terminal. To keep them, put the three lines in
+These last until you close the terminal. To keep them, put the lines in
 `~/.bashrc` or `~/.zshrc`.
 
-**Step 8. Check the settings.**
-Open `config.yaml`. Check two things:
+Your address is an environment variable, not a config setting, on purpose. This
+repository is public, and an address written into a file in it is scraped
+within days. `config.yaml` refuses to load if it finds one.
 
-- `email_to` is your address.
+**Step 8. Check the settings.**
+Open `config.yaml`. Check one thing:
+
 - `profile` describes you. It is about 300 words. It decides which papers count
   as significant, and which questions count as approachable. Change it to match
   what you actually work on and what tools you actually have.
@@ -134,11 +140,16 @@ python -m unittest discover tests
 **Step 14. Put the keys in GitHub.**
 Go to your repository on GitHub.
 Open Settings, then Secrets and variables, then Actions.
-Add three secrets with these exact names:
+Add these secrets, with these exact names:
 
 - `ANTHROPIC_API_KEY`
+- `FEED_EMAIL_TO` -- where the email goes
+- `SMTP_USER` -- the account that sends it
 - `SMTP_PASSWORD`
-- `LAKERA_GUARD_API_KEY`
+- `LAKERA_GUARD_API_KEY` (optional)
+
+The two addresses are secrets, not config, so they never appear in the
+repository or in the data the workflow commits.
 
 **Step 15. Turn the workflow on.**
 Open the Actions tab. Enable workflows if GitHub asks.

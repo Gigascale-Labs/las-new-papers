@@ -193,8 +193,8 @@ def build_message(result: dict, cfg) -> EmailMessage:
         f"arXiv open questions — {result['date']} — "
         f"{len(result['papers'])} papers, {n} questions"
     )
-    msg["From"] = safe_header_value(cfg.email_from)
-    msg["To"] = safe_header_value(cfg.email_to)
+    msg["From"] = safe_header_value(cfg.email_from())
+    msg["To"] = safe_header_value(cfg.email_to())
     msg.set_content(render_text(result))
     msg.add_alternative(render_html(result), subtype="html")
     return msg
@@ -202,6 +202,8 @@ def build_message(result: dict, cfg) -> EmailMessage:
 
 def send(result: dict, cfg) -> None:
     """Send over SMTP with STARTTLS. Raises EmailError; the caller keeps the JSON."""
+    if not cfg.email_to():
+        raise EmailError("FEED_EMAIL_TO is not set")
     password = cfg.smtp_password()
     if not password:
         raise EmailError("SMTP_PASSWORD is not set")
@@ -210,8 +212,10 @@ def send(result: dict, cfg) -> None:
     try:
         with smtplib.SMTP(cfg.smtp_host, cfg.smtp_port, timeout=60) as smtp:
             smtp.starttls()
-            smtp.login(cfg.smtp_user, password)
+            smtp.login(cfg.smtp_user(), password)
             smtp.send_message(msg)
     except Exception as exc:
-        raise EmailError(f"could not send to {cfg.email_to}: {exc}") from exc
-    log.info("email sent to %s", cfg.email_to)
+        # The address is deliberately absent from the message: this string ends
+        # up in logs and in the committed archive.
+        raise EmailError(f"send failed: {exc}") from exc
+    log.info("email sent")

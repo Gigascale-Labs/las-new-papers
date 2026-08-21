@@ -155,10 +155,18 @@ guard:
   max_abstract_chars: 6000
 
 # ---------------------------------------------------------------------------
-# Email. The password/token comes from $SMTP_PASSWORD, never from this file.
+# Email delivery.
+#
+# No address is stored in this file. This repository is public, and a
+# plain-text address in it would be scraped within days. Every address comes
+# from the environment instead:
+#
+#   FEED_EMAIL_TO    where the digest is sent          (required to send)
+#   FEED_EMAIL_FROM  the From: header                  (optional, defaults to FEED_EMAIL_TO)
+#   SMTP_USER        the account that logs in to send  (optional, defaults to FEED_EMAIL_FROM)
+#   SMTP_PASSWORD    that account's app password       (required to send)
+#
+# Only the server settings, which identify nobody, live here.
 # ---------------------------------------------------------------------------
-email_to: \"\"  # set by environment; see README
-email_from: \"\"  # set by environment; see README
 smtp_host: smtp.gmail.com
 smtp_port: 587
-smtp_user: \"\"  # set by environment; see README
