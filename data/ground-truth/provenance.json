@@ -1,0 +1,10 @@
+{
+  "snapshot_date": "2026-08-21",
+  "source_repo": "Gigascale-Labs/largeagentsystems.org",
+  "source_commit": "1e9322c48feff410d1c173a9eb16418a61d4aba4",
+  "source_path": "data/las-canon.airtable.json",
+  "upstream_source_of_truth": "Airtable base apps8rBIORsmE7ij8, table Canon (tbl2XEeh8Rlnrlw0j)",
+  "row_count": 42,
+  "arxiv_row_count": 33,
+  "why_frozen": "Human-curated ground truth for evaluating this repo's retrieval. It must not track upstream automatically: if the canon moves under the evaluation, leave-one-out results stop being comparable across runs."
+}
