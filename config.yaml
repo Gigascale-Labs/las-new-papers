@@ -1,0 +1,142 @@
+# arXiv open questions feed -- configuration.
+#
+# Everything the daily run needs except the two secrets, which come from the
+# environment (see README): ANTHROPIC_API_KEY and SMTP_PASSWORD.
+
+# ---------------------------------------------------------------------------
+# arXiv lists to read each day.
+#
+# The spec names "econ" as one entry. arXiv has no bare `econ` list to query --
+# it is an archive with three lists -- so all three are named here explicitly.
+# Together these run ~300-600 new papers on a weekday, which is the volume the
+# spec's cost estimates assume.
+# ---------------------------------------------------------------------------
+categories:
+  - cs.MA      # Multiagent Systems
+  - cs.AI      # Artificial Intelligence
+  - cs.LG      # Machine Learning
+  - cs.DC      # Distributed, Parallel, and Cluster Computing
+  - econ.GN    # General Economics
+  - econ.TH    # Theoretical Economics
+  - econ.EM    # Econometrics
+
+# ---------------------------------------------------------------------------
+# Anchor papers: arXiv IDs of work already known to be in-field.
+#
+# These are the 33 arXiv-hosted entries of the 42-paper LAS canon, frozen in
+# data/ground-truth/. The canon is human-curated and deliberately spread across
+# the field (simulation, markets, safety, governance, observability), which is
+# what the spec asks anchors to be -- not one corner of it.
+#
+# The other 9 canon entries are not on arXiv (government reports, SSRN, MDPI,
+# an FHI tech report) and so have no ID to anchor on.
+#
+# Add or remove freely. The vectors rebuild automatically when this list
+# changes -- there is nothing else to update by hand.
+# ---------------------------------------------------------------------------
+anchors:
+  - "2503.13395"  # Causal Emergence 2.0: Quantifying Emergent Complexity
+  - "2410.07283"  # Prompt Infection: LLM-to-LLM Prompt Injection within Multi-Agent ...
+  - "2603.03140"  # How to Model AI Agents as Personas?: Applying the Persona Ecosyst...
+  - "2411.11581"  # OASIS: Open Agent Social Interaction Simulations with One Million...
+  - "2505.17479"  # Twin-2K-500: A dataset for building digital twins of over 2,000 p...
+  - "2512.02682"  # Beyond Single-Agent Safety: A Taxonomy of Risks in LLM-to-LLM Int...
+  - "2605.24413"  # Habermolt: Delegating Deliberation to AI Representatives
+  - "2409.02822"  # AI agents can coordinate beyond human scale
+  - "2211.03074"  # A Survey on Influence Maximization: From an ML-Based Combinatoria...
+  - "2406.12137"  # IDs for AI Systems
+  - "2602.16136"  # Retrieval Collapses When AI Pollutes the Web
+  - "2402.08567"  # Agent Smith: A Single Image Can Jailbreak One Million Multimodal ...
+  - "2409.10568"  # On the Limits of Agency in Agent-Based Models
+  - "2603.23471"  # Regulating AI Agents
+  - "2411.10109"  # LLM Agents Grounded in Self-Reports Enable General-Purpose Simula...
+  - "2502.14143"  # Multi-Agent Risks from Advanced AI
+  - "2408.02784"  # LLM economicus? Mapping the Behavioral Biases of LLMs via Utility...
+  - "2509.01063"  # An Economy of AI Agents
+  - "2510.22422"  # Group size effects and collective misalignment in LLM multi-agent...
+  - "2606.04592"  # Synthetic Personalities: How Well Can LLMs Mimic Individual Respo...
+  - "2501.16946"  # Gradual Disempowerment: Systemic Existential Risks from Increment...
+  - "2502.08691"  # AgentSociety: Large-Scale Simulation of LLM-Driven Generative Age...
+  - "2602.11865"  # Intelligent AI Delegation
+  - "2604.10290"  # AI Organizations are More Effective but Less Aligned than Individ...
+  - "2404.16109"  # zkLLM: Zero Knowledge Proofs for Large Language Models
+  - "2508.16279"  # AgentScope 1.0: A Developer-Centric Framework for Building Agenti...
+  - "2506.12078"  # Modeling Earth-Scale Human-Like Societies with One Billion Agents
+  - "2512.16856"  # Distributional AGI Safety
+  - "2604.01151"  # Detecting Multi-Agent Collusion Through Multi-Agent Interpretability
+  - "2605.13860"  # The Moltbook Observatory Archive: an incremental dataset of agent...
+  - "2604.04604"  # AI Agents Under EU Law: A Compliance Architecture for AI Providers
+  - "2604.15236"  # Agentic Microphysics: A Manifesto for Generative AI Safety
+  - "2509.10147"  # Virtual Agent Economies
+
+# ---------------------------------------------------------------------------
+# Your background, skills and projects. Used by both model calls: to judge
+# significance/novelty *for you*, and to decide whether a question is
+# approachable *by you*. Roughly 300 words.
+#
+# This is the first thing to change if the emails are interesting but not
+# useful (spec section 10, test 6).
+# ---------------------------------------------------------------------------
+profile: |
+  I work on large agent systems: the economies, markets, social networks and
+  organisations that emerge when many AI agents interact with each other and
+  with people at scale. My interest is system-level rather than model-level.
+  A paper about making one agent more capable is not for me; a paper about
+  what happens when thousands of such agents transact, coordinate, compete,
+  collude or deceive each other is.
+
+  Concretely I care about: multi-agent simulation of societies and markets
+  (generative-agent simulations, agent-based models, digital twins of
+  populations); the observability of these systems (what can be measured
+  from aggregate behaviour, from interaction logs, or from the agents
+  themselves); mechanism and market design for populations that include
+  autonomous agents; monitoring and steering interventions that work at the
+  population level; and the failure modes that only appear in aggregate --
+  systemic instability, herding and monoculture, collusion, information
+  cascades, gradual disempowerment of human decision-makers, and
+  concentration of power.
+
+  My background is applied and empirical rather than pure theory. I can
+  implement and run simulations, train and evaluate models, work with
+  network and time-series data, do econometric and causal analysis, and
+  build and analyse scraped datasets. I read economics and complex-systems
+  work comfortably but I am not a theorist: I can use a mechanism-design
+  result, not prove a new one. I do not run human-subject experiments and I
+  have no access to proprietary platform data, so questions that require
+  either are not approachable for me even when they are interesting.
+
+  I am looking for open questions I could actually start on within a few
+  weeks with public data, public APIs, or a simulation I can write myself.
+  Questions that require frontier-scale pretraining compute, a large
+  engineering team, or privileged access to a deployed platform are not
+  approachable.
+
+# ---------------------------------------------------------------------------
+# Filter and scoring sizes. Defaults are the spec's.
+# ---------------------------------------------------------------------------
+shortlist_n: 40      # papers kept by similarity
+explore_n: 5         # random papers added from the next 100 (anti-tunnel-vision)
+top_n: 10            # papers kept after the scoring call
+
+# ---------------------------------------------------------------------------
+# Models.
+# ---------------------------------------------------------------------------
+# Embedding model, loaded locally via sentence-transformers. SPECTER2 is
+# trained on scientific title+abstract pairs, which is exactly this input.
+# See README ("Embedding model") for the CLS-pooling and adapter caveats.
+embed_model: allenai/specter2_base
+
+# Model for the two calls (scoring, question extraction).
+model: claude-opus-5
+
+# Reasoning effort for the model calls: low | medium | high | xhigh | max.
+effort: medium
+
+# ---------------------------------------------------------------------------
+# Email. The password/token comes from $SMTP_PASSWORD, never from this file.
+# ---------------------------------------------------------------------------
+email_to: \"\"  # set by environment; see README
+email_from: \"\"  # set by environment; see README
+smtp_host: smtp.gmail.com
+smtp_port: 587
+smtp_user: \"\"  # set by environment; see README
