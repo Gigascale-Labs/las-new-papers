@@ -85,16 +85,20 @@ could not send the email exits non-zero, and that day's data is still kept.
 
 | Path | What it is |
 |---|---|
-| `data/YYYY-MM-DD.json` | The day's papers, scores, questions, and any problems. |
+| `data/YYYY-MM-DD.json` | The day's ten papers with questions, the full 45-paper shortlist with scores, and any problems. |
 | `data/latest.json` | The newest day, at a fixed URL the site can read. |
 | `data/raw/YYYY-MM-DD.jsonl.gz` | Every paper scraped that day. ~120KB. |
-| `data/canon/finalists.csv` | Finalists tagged in the site canon's schema. |
+| `data/canon/candidates.csv` | Every shortlisted paper ever seen, in the canon's schema. |
 | `data/seen.json` | IDs already sent. Nothing is sent twice. |
 | `data/eval/leave-one-out.json` | The most recent filter evaluation. |
 | `data/ground-truth/` | A frozen copy of the human canon. |
 
 `data/raw/` is what makes this an archive. You can re-rank an old day with
 different anchors, or a different embedding model, without fetching again.
+
+Nothing the filter learns is thrown away. The scoring call rates all 45
+shortlisted papers, so the 35 that miss the top ten keep their scores in both
+`data/YYYY-MM-DD.json` and `candidates.csv`, at no extra cost.
 
 ## The canon
 
@@ -110,15 +114,23 @@ commit when you want to measure against a newer canon.
 The 33 anchors are the arXiv entries of that corpus. The other 9 are not on
 arXiv.
 
-Every finalist paper is tagged in the same six dimensions the canon uses and
-appended to `data/canon/finalists.csv`, in the canon's column order. That file
-is a proposal, not a promotion: nothing here writes to Airtable, and a human
-decides what is admitted.
+Every shortlisted paper is appended to `data/canon/candidates.csv`, in the
+canon's column order. One file, not two: the ten that were emailed carry their
+six dimension tags and an `emailed` mark, and the other 35 carry their
+similarity, rank and scores with the dimensions blank. Blank dimensions are
+normal in the canon.
 
-Two limits on those tags. They are read from the abstract, so every row is
+This is the pool the canon grows from. Sort by `significance` and `novelty`,
+read what looks worth reading, and copy the row across — the first 15 columns
+are the canon's own, in its order.
+
+The file is a proposal, not a promotion. Nothing here writes to Airtable, and a
+human decides what is admitted.
+
+Two limits on the tags. They are read from the abstract, so every row is
 `tag_confidence: summary-only`. `institutions` stays blank, because an abstract
 does not carry affiliations. A value that is not on the closed list is dropped
-rather than forced; an empty dimension is normal in the canon.
+rather than forced.
 
 The choice lists in `arxiv_feed/canon.py` are copied by hand from
 `lib/canon-schema.ts` in the site repository. A change there needs a change
@@ -152,7 +164,7 @@ Each output is protected where it lands:
 | Output | Risk | Defence |
 |---|---|---|
 | HTML email | markup from a title or abstract | every field escaped |
-| `finalists.csv` | `=HYPERLINK(...)` in a title runs when Excel opens it | cells starting `= + - @` prefixed with `'` |
+| `candidates.csv` | `=HYPERLINK(...)` in a title runs when Excel opens it | cells starting `= + - @` prefixed with `'` |
 | Email headers | a newline adding a header | CR/LF stripped, and rejected at config load |
 | Links | a forged ID becoming a `javascript:` href | IDs checked against arXiv's two real formats |
 | Model output | invented values or wrong shape | JSON schema, closed lists, IDs checked against the shortlist |

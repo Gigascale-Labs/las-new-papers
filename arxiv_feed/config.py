@@ -50,8 +50,8 @@ class Config:
         return DATA_DIR / "seen.json"
 
     @property
-    def finalists_csv(self) -> Path:
-        return DATA_DIR / "canon" / "finalists.csv"
+    def candidates_csv(self) -> Path:
+        return DATA_DIR / "canon" / "candidates.csv"
 
     def output_path(self, day: str) -> Path:
         return DATA_DIR / f"{day}.json"

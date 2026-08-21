@@ -6,11 +6,15 @@ Two things use it.
 set for the filter and the source of the anchor list. It is frozen because a
 test set that follows the canon makes older results incomparable.
 
-Every finalist paper is tagged in the same six dimensions and appended to
-`data/canon/finalists.csv`, in the canon's column order. That file is a
-proposal. Nothing here writes to Airtable, and a human decides what is
-admitted. The shared schema makes admitting a paper a copy rather than a
-re-tagging job.
+Every shortlisted paper is appended to `data/canon/candidates.csv`, in the
+canon's column order. That is one file, not two: the ten papers that were
+emailed carry their dimension tags and an `emailed` mark, and the rest carry
+their similarity and scores with the dimensions left blank. Blank dimensions
+are normal in the canon.
+
+The file is a proposal. Nothing here writes to Airtable, and a human decides
+what is admitted. The shared column order makes admitting a paper a copy rather
+than a re-tagging job.
 
 The choice lists below are copied by hand from `lib/canon-schema.ts` in the
 site repository. A change there needs a change here.
@@ -63,12 +67,13 @@ DIMENSION_CHOICES: dict[str, list[str]] = {
     "claim_type": CLAIM_TYPES,
 }
 
-# Extra columns this repo adds beyond the canon's. They are appended after the
-# canon columns so the first 15 columns can be lifted straight into the canon.
-EXTRA_COLUMNS = ["arxiv_id", "first_seen", "similarity", "nearest_anchor_id",
-                 "significance", "novelty", "from_random"]
+# Extra columns this repo adds beyond the canon's. They come after the canon
+# columns, so the first 15 columns lift straight into the canon.
+EXTRA_COLUMNS = ["arxiv_id", "first_seen", "similarity", "similarity_rank",
+                 "nearest_anchor_id", "from_random", "significance", "novelty",
+                 "emailed"]
 
-FINALIST_COLUMNS = CANON_COLUMNS + EXTRA_COLUMNS
+CANDIDATE_COLUMNS = CANON_COLUMNS + EXTRA_COLUMNS
 
 
 def clean_multi(values, allowed: list[str]) -> list[str]:
@@ -94,13 +99,20 @@ def to_canon_row(
     tags: dict,
     summary: str,
     similarity: float,
+    similarity_rank: int,
     nearest_anchor_id: str,
     significance,
     novelty,
     from_random: bool,
     first_seen: str,
+    emailed: bool = False,
 ) -> dict:
-    """One finalist, in canon column order plus this repo's extra columns."""
+    """One shortlisted paper, in canon column order plus the extra columns.
+
+    `tags` is empty for a paper that was shortlisted but not emailed. It never
+    got the question-extraction call, so it has no dimension values, and the
+    dimension columns stay blank.
+    """
     date = (paper.published or "")[:4]
     return {
         "title": paper.title,
@@ -126,14 +138,16 @@ def to_canon_row(
         "arxiv_id": paper.arxiv_id,
         "first_seen": first_seen,
         "similarity": f"{similarity:.4f}",
+        "similarity_rank": similarity_rank,
         "nearest_anchor_id": nearest_anchor_id,
+        "from_random": "yes" if from_random else "",
         "significance": significance if significance is not None else "",
         "novelty": novelty if novelty is not None else "",
-        "from_random": "yes" if from_random else "",
+        "emailed": "yes" if emailed else "",
     }
 
 
-def append_finalists(path: Path, rows: list[dict]) -> int:
+def append_candidates(path: Path, rows: list[dict]) -> int:
     """Append rows, skipping URLs already present. Returns the number written."""
     if not rows:
         return 0
@@ -147,7 +161,7 @@ def append_finalists(path: Path, rows: list[dict]) -> int:
     fresh = [r for r in rows if r["url"] not in existing]
     write_header = not path.exists()
     with path.open("a", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=FINALIST_COLUMNS)
+        w = csv.DictWriter(f, fieldnames=CANDIDATE_COLUMNS)
         if write_header:
             w.writeheader()
         for r in fresh:
@@ -155,7 +169,7 @@ def append_finalists(path: Path, rows: list[dict]) -> int:
             # people open in Excel. A cell starting = + - @ executes there.
             w.writerow({k: neutralize_cell(v) for k, v in r.items()})
 
-    log.info("finalists.csv: %d new row(s), %d skipped as already present",
+    log.info("candidates.csv: %d new row(s), %d already present",
              len(fresh), len(rows) - len(fresh))
     return len(fresh)
 

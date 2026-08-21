@@ -177,7 +177,13 @@ The whole system has one test: at least one question a week worth working on.
 If it fails, change `profile` in `config.yaml` first. Change the prompts
 second.
 
-**Step 19. Change the anchors when your interests change.**
+**Step 19. Grow the corpus from the shortlist.**
+`data/canon/candidates.csv` holds every paper the filter shortlisted, not just
+the ten that were emailed. Sort it by `significance` and `novelty`. The first
+15 columns are the canon's own columns, in its order, so a paper you want to
+keep is a copy across, not a re-tagging job.
+
+**Step 20. Change the anchors when your interests change.**
 Edit the `anchors` list in `config.yaml`. Add or remove arXiv IDs.
 Nothing else to do. The system rebuilds the vectors on the next run.
 
