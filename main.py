@@ -53,8 +53,8 @@ def main(argv: list[str] | None = None) -> int:
     for problem in result["problems"]:
         print(f"  problem: {problem}")
 
-    # A run that produced its JSON but could not send is a failure worth a red
-    # X in CI, even though the data was saved.
+    # A run that wrote its JSON but could not send is still a failure. CI must
+    # show it, even though the data was saved.
     if not args.dry_run and not result["email"]["sent"]:
         return 1
     return 0

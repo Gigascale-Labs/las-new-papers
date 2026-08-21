@@ -1,8 +1,9 @@
-"""The similarity filter: 40 nearest + 5 from the tail.
+"""The similarity filter: the 40 nearest papers, plus 5 from the tail.
 
-This is the step that makes the whole thing affordable -- ~500 papers in, 45
-out, for the cost of a numpy dot product. It is a *filter*, not a judgement:
-significance and novelty are decided later, by the model.
+This step makes the run affordable. About 500 papers go in and 45 come out, for
+the cost of a numpy dot product.
+
+It filters. It does not judge. The model calls decide significance and novelty.
 """
 
 from __future__ import annotations

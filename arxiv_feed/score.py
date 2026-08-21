@@ -1,12 +1,11 @@
-"""Call 1: score the 45 shortlisted papers for significance and novelty.
+"""Call 1: score the 45 shortlisted papers.
 
-One call for all of them, not one per paper. Scores are only meaningful in
-comparison -- "4 out of 5 for novelty" means little unless the model can see the
-other 44 papers from the same day while deciding.
+One call for all of them, not one per paper. A score only means something in
+comparison, so the model sees the whole shortlist at once.
 
-The embedding filter cannot do this job. Cosine similarity says a paper is
-*about* the same things as your anchors; it says nothing about whether the paper
-is any good or whether anyone has done it before.
+Similarity cannot do this job. It says a paper is about the right subject. It
+says nothing about whether the paper is good, or whether anyone has done it
+before.
 """
 
 from __future__ import annotations

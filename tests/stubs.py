@@ -1,8 +1,7 @@
-"""Test doubles: papers, vectors and a scripted model client.
+"""Test doubles: papers, vectors, and a scripted model client.
 
-The point of these is that the pipeline's logic -- ranking, labelling, the
-failure paths, the email -- can be tested without a network call, an API key, or
-a 400MB model download.
+These let the pipeline logic be tested with no network, no API key, and no
+model download.
 """
 
 from __future__ import annotations

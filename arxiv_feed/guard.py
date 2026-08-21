@@ -1,33 +1,27 @@
-"""Injection defences for untrusted text.
+"""Defences for untrusted text.
 
-Everything this pipeline feeds to a model comes from outside it: arXiv titles
-and abstracts, written by anyone who can submit a preprint. An abstract is
-user-generated content as far as the model is concerned, and it reaches two
-model calls, an HTML email, a CSV, and a JSON file that a website reads.
+Every abstract comes from outside. Anyone who can submit a preprint writes one,
+and that text reaches two model calls, an HTML email, a CSV, and a JSON file
+the site reads.
 
-Three layers, in order of how much they are relied on:
+Three layers:
 
-1. **Structural** (always on, no network, no key). Untrusted text is stripped of
-   invisible control characters, length-capped, and fenced inside a delimiter
-   carrying a random nonce, under a system prompt that says the fenced text is
-   data. This is the layer that actually holds -- it does not depend on
-   recognising an attack.
+1. Structural. Always on, no key, no network. Invisible characters are removed,
+   text is length-capped, and each abstract is fenced in a tag with a random
+   id. The system prompt states that fenced text is data. Text inside cannot
+   close the fence, because it cannot know the id. This layer works without
+   recognising the attack, so it is the one that holds.
+2. Lakera Guard. Optional, needs a key. Screens papers before any model call
+   and withholds what it flags.
+3. Keyword patterns. Always on. They annotate. They never block.
 
-2. **Lakera Guard** (optional, needs a key). Screens each paper before any model
-   call and drops the ones it flags. Lakera's own guidance is that if the
-   guardrail detects a threat you do not call the LLM at all.
+Layer 3 never blocks because this corpus includes papers about prompt
+injection. One anchor is "Prompt Infection: LLM-to-LLM Prompt Injection within
+Multi-Agent Systems". A keyword rule strong enough to catch a real attack would
+hide exactly those papers.
 
-3. **Heuristics** (always on, never blocking). Flags text that looks like an
-   injection attempt so it is visible in the email and the archive.
-
-Layer 3 never blocks, and that is deliberate rather than lazy. This corpus is
-partly *about* prompt injection -- "Prompt Infection: LLM-to-LLM Prompt Injection
-within Multi-Agent Systems" is one of the anchor papers. Any keyword rule strong
-enough to catch a real attack would silently censor exactly the papers this feed
-exists to surface. So keywords annotate; only a dedicated classifier blocks.
-
-Sinks are handled where they live: HTML escaping in emailer.py, spreadsheet
-formula neutralisation in canon.py, arXiv ID validation in arxiv.py.
+Output is protected where it lands: HTML escaping in emailer.py, spreadsheet
+cells in canon.py, arXiv IDs in arxiv.py.
 """
 
 from __future__ import annotations
@@ -57,8 +51,8 @@ _INVISIBLE = re.compile(
     "]"
 )
 
-# Annotation only. Wide on purpose: a false positive costs a line in the email,
-# and these must never gate anything.
+# Annotation only. Wide by design: a false positive costs one line in the
+# email, and these never gate anything.
 _SUSPICIOUS = [
     (re.compile(r"ignore\s+(all\s+)?(previous|prior|above|earlier)\s+", re.I), "ignore-previous"),
     (re.compile(r"disregard\s+(all\s+)?(previous|prior|above|the)\s+", re.I), "disregard"),
@@ -260,8 +254,8 @@ def neutralize_cell(value: str) -> str:
     `=HYPERLINK(...)` or `=cmd|...` in a title runs when the CSV is opened in
     Excel or Sheets. Prefixing an apostrophe is the standard fix: spreadsheets
     read it as "this is text" and hide it; anything reading the CSV as data
-    sees one extra leading character, which is why it is applied only to cells
-    that would actually trigger.
+    sees one extra leading character, so this applies only to cells that would
+    trigger.
     """
     if isinstance(value, str) and value[:1] in _FORMULA_START:
         return "'" + value

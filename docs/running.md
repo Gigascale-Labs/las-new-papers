@@ -1,7 +1,7 @@
 # How to run it
 
-Written in simplified technical English, in the order you do it.
-Every step says what it does and how you know it worked.
+Steps in the order you do them. Each step says what it does and how you know
+it worked.
 
 ## Part 1. Get the keys
 
@@ -20,7 +20,7 @@ If you use a different email provider, change `smtp_host`, `smtp_port` and
 Go to https://platform.lakera.ai. Make an account. Make a project.
 Copy the API key. Copy the project ID if you made one.
 This key is optional. Without it the system still runs and still defends
-itself, but it does not screen papers with Lakera. It tells you so in the
+itself. It just does not screen papers with Lakera, and it says so in the
 email.
 
 ## Part 2. Set it up on your computer
@@ -63,16 +63,16 @@ export SMTP_USER=you@example.com              # the account that sends it
 These last until you close the terminal. To keep them, put the lines in
 `~/.bashrc` or `~/.zshrc`.
 
-Your address is an environment variable, not a config setting, on purpose. This
-repository is public, and an address written into a file in it is scraped
-within days. `config.yaml` refuses to load if it finds one.
+Your address is an environment variable, not a config setting. This repository
+is public, and an address in a public file is scraped. `config.yaml` refuses to
+load if it finds one.
 
 **Step 8. Check the settings.**
 Open `config.yaml`. Check one thing:
 
-- `profile` describes you. It is about 300 words. It decides which papers count
-  as significant, and which questions count as approachable. Change it to match
-  what you actually work on and what tools you actually have.
+- `profile` describes you, in about 300 words. It decides which papers count
+  as significant and which questions count as approachable. Change it to match
+  what you work on and what tools you have.
 
 ## Part 3. First run
 
@@ -121,11 +121,11 @@ terminal output.
 python -m tests.leave_one_out
 ```
 
-This takes one anchor out of the set. It then checks the system still finds that
-anchor's own paper. It repeats this ten times.
-It must pass at least 8 of 10. It costs nothing. It makes no model calls.
+It takes one anchor out of the set, then checks the system still finds that
+anchor's own paper. It repeats this ten times. At least 8 of 10 must pass.
+It costs nothing and makes no model calls.
 
-If it fails: add more anchors first. Change the embedding model second.
+If it fails: add more anchors first, then change the embedding model.
 
 **Step 13. Run the unit tests.**
 
@@ -133,7 +133,7 @@ If it fails: add more anchors first. Change the embedding model second.
 python -m unittest discover tests
 ```
 
-50 tests. They take one second. They use no network and no keys.
+53 tests. One second. No network, no keys.
 
 ## Part 5. Make it daily
 
@@ -148,8 +148,8 @@ Add these secrets, with these exact names:
 - `SMTP_PASSWORD`
 - `LAKERA_GUARD_API_KEY` (optional)
 
-The two addresses are secrets, not config, so they never appear in the
-repository or in the data the workflow commits.
+The two addresses are secrets, not config. They never appear in the repository
+or in the data the workflow commits.
 
 **Step 15. Turn the workflow on.**
 Open the Actions tab. Enable workflows if GitHub asks.
@@ -168,15 +168,14 @@ repository.
 ## Part 6. Normal use
 
 **Step 17. Read the email each morning.**
-Part 1 is the list of questions. Read that first.
-An `approachable` label means you could start on it in a few weeks with public
-data or your own simulation.
+Part 1 is the list of questions. Read that first. `approachable` means you
+could start on it within a few weeks, with public data or a simulation you
+write yourself.
 
 **Step 18. Judge it after seven days.**
-The spec asks one thing of the whole system: at least one question a week that
-is worth working on.
-If it fails that test, change `profile` in `config.yaml` first. Change the
-prompts second.
+The whole system has one test: at least one question a week worth working on.
+If it fails, change `profile` in `config.yaml` first. Change the prompts
+second.
 
 **Step 19. Change the anchors when your interests change.**
 Edit the `anchors` list in `config.yaml`. Add or remove arXiv IDs.
@@ -190,7 +189,7 @@ Nothing else to do. The system rebuilds the vectors on the next run.
 python scrapers/arxiv_scraper.py --date 2026-08-19
 ```
 
-This writes `data/raw/2026-08-19.jsonl.gz`. Every paper from that day is in it.
+This writes `data/raw/2026-08-19.jsonl.gz`, with every paper from that day.
 
 **Re-read a past day:**
 

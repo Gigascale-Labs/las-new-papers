@@ -1,11 +1,10 @@
-"""The daily run, in the order the spec lays it out.
+"""The daily run, in order.
 
-fetch -> drop seen -> embed -> similarity filter -> score (1 call) -> keep top N
--> questions (1 call per paper) -> email -> save.
+fetch -> drop seen -> embed -> filter -> screen -> score -> keep the top 10 ->
+questions -> email -> save.
 
-The one rule that shapes the error handling throughout: never stop the whole run
-because one paper failed. Every failure below is collected into `problems` and
-reported in the email rather than raised.
+One rule shapes the error handling: one bad paper never stops the run. Every
+failure below is collected and reported, never raised.
 """
 
 from __future__ import annotations
@@ -169,7 +168,7 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
             entry["open_questions"] = extracted["open_questions"]
             entry["canon"] = extracted["canon"]
         except ModelError as exc:
-            # Spec section 9: keep the other papers, mark the failure.
+            # Keep the other papers. Mark the failure.
             msg = f"{c.paper.arxiv_id}: question extraction failed ({exc})"
             problems.append(msg)
             log.error(msg)

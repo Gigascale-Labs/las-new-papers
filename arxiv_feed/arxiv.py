@@ -1,8 +1,7 @@
-"""arXiv API client: the day's new papers, and metadata for anchor IDs.
+"""arXiv API client: one day of new papers, and metadata for anchor IDs.
 
-Only the public Atom API is used (no key, no scraping). arXiv asks for at least
-3 seconds between requests; `_MIN_INTERVAL` enforces that even when the caller
-pages fast.
+Uses the public Atom API. No key needed. arXiv asks for three seconds between
+requests, and `_MIN_INTERVAL` enforces that.
 """
 
 from __future__ import annotations
@@ -25,7 +24,7 @@ _MIN_INTERVAL = 3.0          # arXiv's requested politeness delay, seconds
 _PAGE_SIZE = 100
 _MAX_PAGES = 20              # 2,000 papers/day ceiling; far above the ~600 expected
 
-# Spec section 9: "If arXiv does not answer, wait 60 seconds. Try three times in total."
+# If arXiv does not answer: wait 60 seconds, try three times in total.
 _ATTEMPTS = 3
 _RETRY_WAIT = 60.0
 
@@ -90,7 +89,7 @@ def is_valid_id(arxiv_id: str) -> bool:
 
 
 def _get(params: dict) -> str:
-    """One API call, with the spec's retry rule and the politeness delay."""
+    """One API call, with the retry rule and the politeness delay."""
     global _last_request
     last_error: Exception | None = None
 

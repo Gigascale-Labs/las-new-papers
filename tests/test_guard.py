@@ -1,8 +1,7 @@
-"""Tests for the injection defences.
+"""Tests for the defences against untrusted text.
 
-The case that matters most here is the last class: this corpus contains papers
-*about* prompt injection, and a defence that silently drops them would be worse
-than no defence at all.
+The last class matters most: this corpus contains papers about prompt
+injection, and a defence that dropped them would be worse than no defence.
 """
 
 from __future__ import annotations

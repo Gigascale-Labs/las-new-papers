@@ -1,7 +1,6 @@
-"""The seen list: arXiv IDs already sent, so nothing is ever sent twice.
+"""The seen list: arXiv IDs already sent.
 
-Plain JSON. At ~10 papers a day this file grows by a few hundred bytes a day
-and stays readable by eye, which matters more here than any lookup speed.
+Plain JSON. About ten new IDs a day, so the file stays small and readable.
 """
 
 from __future__ import annotations

@@ -1,12 +1,11 @@
 """Model calls, always with structured output.
 
-Both calls in this pipeline want JSON back, so there is exactly one way to make
-a call here: give it a JSON schema and get a validated dict. `output_config`'s
-json_schema format constrains generation, so malformed JSON is close to
-impossible -- but the spec's rule ("if the model returns bad JSON, ask once
-more, then skip that paper") still has to hold for the cases that schema
-enforcement does not cover: a refusal, a response truncated at max_tokens, or a
-transport error.
+Both calls in this pipeline want JSON, so there is one way to call a model
+here: pass a JSON schema, get a checked dict back. The schema constrains
+generation, so broken JSON is rare.
+
+The retry still exists, for the cases a schema cannot cover: a refusal, a
+response cut off at max_tokens, or a transport error.
 """
 
 from __future__ import annotations
@@ -24,8 +23,8 @@ class ModelError(Exception):
 class ModelClient:
     """Thin wrapper over the Anthropic Messages API.
 
-    Kept small on purpose: the interesting logic is in the prompts, and a small
-    surface is what lets the tests substitute a stub for it.
+    Small by design. The logic lives in the prompts, and a small surface lets
+    the tests swap in a stub.
     """
 
     def __init__(self, model: str, effort: str = "medium", api_key: str | None = None):

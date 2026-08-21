@@ -1,7 +1,7 @@
 """Local embeddings.
 
-Runs on your own machine (CPU is fine at this volume) and costs nothing, so the
-expensive model calls only ever see ~45 papers instead of ~500.
+Runs on your own CPU and costs nothing. This is what keeps the model calls down
+to 45 papers a day instead of 500.
 """
 
 from __future__ import annotations

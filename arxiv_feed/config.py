@@ -1,7 +1,7 @@
-"""Config loading and validation.
+"""Config loading and checking.
 
-One YAML file holds everything except the two secrets, which are read from the
-environment: ANTHROPIC_API_KEY and SMTP_PASSWORD.
+One YAML file holds every setting. Secrets and email addresses come from the
+environment instead, because this repository is public.
 """
 
 from __future__ import annotations

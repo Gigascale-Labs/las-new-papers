@@ -1,25 +1,20 @@
 #!/usr/bin/env python3
 """Standalone arXiv scraper: one day of new papers, archived to disk.
 
-Runnable on its own, like the scrapers in las-usage-stats:
-
     python scrapers/arxiv_scraper.py                    # yesterday, UTC
     python scrapers/arxiv_scraper.py --date 2026-08-19
     python scrapers/arxiv_scraper.py --categories cs.MA cs.AI --no-store
 
 The daily feed calls the same function, so the archive is a by-product of the
-run rather than a second scrape: every paper the filter ever saw is kept, not
-just the ten that made the email. That is what makes this an archive rather
-than a mailing list -- you can re-rank a past day with different anchors, or a
-different embedding model, without re-fetching anything.
+run. Every paper the filter saw is kept, not just the ten that were emailed.
+You can re-rank an old day with different anchors, or a different embedding
+model, without fetching anything again.
 
-Text is sanitised before it is stored (invisible characters stripped, length
-capped) so anything reading the archive later -- including a website -- is
-reading text a human would recognise. Papers whose text carries injection-like
-patterns are recorded with a marker rather than dropped.
+Text is sanitised before it is stored, so anything reading the archive later
+reads text a human would recognise. Papers with injection-like patterns are
+marked, not dropped.
 
-Size: roughly 100-200KB gzipped per day at current volumes, so a few tens of MB
-a year. `--no-store` skips writing if you only want the count.
+Size: about 120KB gzipped per day. `--no-store` skips writing.
 """
 
 from __future__ import annotations

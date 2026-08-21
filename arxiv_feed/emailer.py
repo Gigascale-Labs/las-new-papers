@@ -1,8 +1,8 @@
-"""Composing and sending the daily email. The email is the whole interface.
+"""Building and sending the email. The email is the whole interface.
 
-Part 1 is every question from every paper in one list -- the part you actually
-read. Part 2 is the papers, so a question that catches your eye can be traced
-back to its source, its nearest anchor, and its scores.
+Part 1 is every question in one list. That is the part you read. Part 2 is the
+papers, so a question that catches your eye can be traced back to its source,
+its nearest anchor and its scores.
 """
 
 from __future__ import annotations
@@ -215,7 +215,7 @@ def send(result: dict, cfg) -> None:
             smtp.login(cfg.smtp_user(), password)
             smtp.send_message(msg)
     except Exception as exc:
-        # The address is deliberately absent from the message: this string ends
-        # up in logs and in the committed archive.
+        # No address in the message. This string reaches the log and the
+        # committed archive.
         raise EmailError(f"send failed: {exc}") from exc
     log.info("email sent")

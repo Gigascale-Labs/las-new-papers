@@ -1,24 +1,19 @@
-"""The LAS canon schema, mirrored for the finalist papers.
+"""The LAS canon schema, mirrored here.
 
-The site's canon (`lib/canon-schema.ts` in largeagentsystems.org) is the human
-side of this project: 42 papers, hand-tagged. This module keeps two things
-aligned with it.
+Two things use it.
 
-1. `data/ground-truth/` holds a frozen copy of that canon. It is the evaluation
-   set for the retrieval filter (see the leave-one-out test) and the source of
-   the anchor list. Frozen on purpose -- an evaluation set that tracks upstream
-   silently invalidates every earlier measurement.
+`data/ground-truth/` holds a frozen copy of the site's canon. It is the test
+set for the filter and the source of the anchor list. It is frozen because a
+test set that follows the canon makes older results incomparable.
 
-2. Every finalist paper is tagged against the same six dimensions and appended
-   to `data/canon/finalists.csv`, which has the canon's exact column order. That
-   file is a *proposal*, produced by a model from an abstract. Nothing here
-   writes to Airtable or to the site's canon; a human still decides what is
-   admitted. Keeping the schema identical is what makes that decision a copy
-   rather than a re-tagging job.
+Every finalist paper is tagged in the same six dimensions and appended to
+`data/canon/finalists.csv`, in the canon's column order. That file is a
+proposal. Nothing here writes to Airtable, and a human decides what is
+admitted. The shared schema makes admitting a paper a copy rather than a
+re-tagging job.
 
-Any change to the choice lists in `lib/canon-schema.ts` has to be mirrored here
-by hand -- there is no import path between a TypeScript file in one repo and a
-Python file in another.
+The choice lists below are copied by hand from `lib/canon-schema.ts` in the
+site repository. A change there needs a change here.
 """
 
 from __future__ import annotations

@@ -1,16 +1,14 @@
-# arXiv open questions feed -- configuration.
+# arXiv open questions feed -- settings.
 #
-# Everything the daily run needs except the secrets and addresses, which come
-# from the environment (see README): ANTHROPIC_API_KEY, SMTP_PASSWORD,
-# LAKERA_GUARD_API_KEY, FEED_EMAIL_TO, SMTP_USER.
+# Secrets and email addresses are not in this file. They come from the
+# environment: ANTHROPIC_API_KEY, SMTP_PASSWORD, LAKERA_GUARD_API_KEY,
+# FEED_EMAIL_TO, SMTP_USER. See the README.
 
 # ---------------------------------------------------------------------------
 # arXiv lists to read each day.
 #
-# The spec names "econ" as one entry. arXiv has no bare `econ` list to query --
-# it is an archive with three lists -- so all three are named here explicitly.
-# Together these run ~300-600 new papers on a weekday, which is the volume the
-# spec's cost estimates assume.
+# arXiv has no bare `econ` list to query, so its three real lists are named.
+# Together these give about 200-500 new papers a day.
 # ---------------------------------------------------------------------------
 categories:
   - cs.MA      # Multiagent Systems
@@ -22,18 +20,16 @@ categories:
   - econ.EM    # Econometrics
 
 # ---------------------------------------------------------------------------
-# Anchor papers: arXiv IDs of work already known to be in-field.
+# Anchor papers: work already known to be in the field.
 #
-# These are the 33 arXiv-hosted entries of the 42-paper LAS canon, frozen in
-# data/ground-truth/. The canon is human-curated and deliberately spread across
-# the field (simulation, markets, safety, governance, observability), which is
-# what the spec asks anchors to be -- not one corner of it.
+# These 33 are the arXiv entries of the 42-paper LAS canon, frozen in
+# data/ground-truth/. They spread across simulation, markets, safety and
+# governance. Anchors need that spread; anchors from one corner of the field
+# only find that corner.
 #
-# The other 9 canon entries are not on arXiv (government reports, SSRN, MDPI,
-# an FHI tech report) and so have no ID to anchor on.
+# The other 9 canon entries are not on arXiv, so they have no ID to anchor on.
 #
-# Add or remove freely. The vectors rebuild automatically when this list
-# changes -- there is nothing else to update by hand.
+# Add or remove any of them. The vectors rebuild on the next run.
 # ---------------------------------------------------------------------------
 anchors:
   - "2503.13395"  # Causal Emergence 2.0: Quantifying Emergent Complexity
@@ -71,12 +67,12 @@ anchors:
   - "2509.10147"  # Virtual Agent Economies
 
 # ---------------------------------------------------------------------------
-# Your background, skills and projects. Used by both model calls: to judge
-# significance/novelty *for you*, and to decide whether a question is
-# approachable *by you*. Roughly 300 words.
+# Your background, skills and projects, in about 300 words.
 #
-# This is the first thing to change if the emails are interesting but not
-# useful (spec section 10, test 6).
+# Both model calls read it: to score significance for you, and to decide
+# whether a question is approachable by you.
+#
+# Change this first if the emails are interesting but not useful.
 # ---------------------------------------------------------------------------
 profile: |
   I work on large agent systems: the economies, markets, social networks and
@@ -113,7 +109,7 @@ profile: |
   approachable.
 
 # ---------------------------------------------------------------------------
-# Filter and scoring sizes. Defaults are the spec's.
+# Filter and scoring sizes.
 # ---------------------------------------------------------------------------
 shortlist_n: 40      # papers kept by similarity
 explore_n: 5         # random papers added from the next 100 (anti-tunnel-vision)
@@ -122,9 +118,9 @@ top_n: 10            # papers kept after the scoring call
 # ---------------------------------------------------------------------------
 # Models.
 # ---------------------------------------------------------------------------
-# Embedding model, loaded locally via sentence-transformers. SPECTER2 is
-# trained on scientific title+abstract pairs, which is exactly this input.
-# See README ("Embedding model") for the CLS-pooling and adapter caveats.
+# Embedding model, loaded locally. SPECTER2 is trained on paper titles and
+# abstracts, which is the exact input here. See the README for the pooling and
+# adapter notes.
 embed_model: allenai/specter2_base
 
 # Model for the two calls (scoring, question extraction).
@@ -134,23 +130,22 @@ model: claude-opus-5
 effort: medium
 
 # ---------------------------------------------------------------------------
-# Injection defences for untrusted text (arXiv titles and abstracts).
+# Defences for untrusted text (arXiv titles and abstracts).
 #
-# The structural defences -- stripping invisible characters, length caps, and
-# fencing every abstract inside a random-id tag under a "this is data" system
-# prompt -- are always on and need no key. This block only configures the
-# Lakera Guard screening layer on top of them.
+# The structural defences always run and need no key: invisible characters
+# removed, length capped, each abstract fenced under a "this is data" prompt.
+# This block configures only the Lakera screening layer above them.
 #
-# The API key comes from $LAKERA_GUARD_API_KEY. With no key set, the run logs a
-# warning, reports it in the email, and continues with the structural defences.
+# The key comes from $LAKERA_GUARD_API_KEY. With no key the run warns, says so
+# in the email, and continues.
 # ---------------------------------------------------------------------------
 guard:
   enabled: true
   # project_id: project-xxxxxxxx   # optional: screen under a specific Lakera policy
   endpoint: https://api.lakera.ai/v2/guard
   timeout_seconds: 20
-  # What an unreachable Lakera means. `allow` keeps the day's email and reports
-  # the failure; `block` withholds every paper that could not be screened.
+  # What an unreachable Lakera means. `allow` keeps the day's email and
+  # reports the failure. `block` withholds every paper it could not screen.
   on_error: allow
   max_title_chars: 500
   max_abstract_chars: 6000
@@ -158,16 +153,15 @@ guard:
 # ---------------------------------------------------------------------------
 # Email delivery.
 #
-# No address is stored in this file. This repository is public, and a
-# plain-text address in it would be scraped within days. Every address comes
-# from the environment instead:
+# No address is stored in this file. This repository is public, and an address
+# in a public file is scraped. Addresses come from the environment:
 #
 #   FEED_EMAIL_TO    where the digest is sent          (required to send)
 #   FEED_EMAIL_FROM  the From: header                  (optional, defaults to FEED_EMAIL_TO)
 #   SMTP_USER        the account that logs in to send  (optional, defaults to FEED_EMAIL_FROM)
 #   SMTP_PASSWORD    that account's app password       (required to send)
 #
-# Only the server settings, which identify nobody, live here.
+# Only the server settings, which identify nobody, are here.
 # ---------------------------------------------------------------------------
 smtp_host: smtp.gmail.com
 smtp_port: 587

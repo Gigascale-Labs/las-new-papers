@@ -1,23 +1,23 @@
 #!/usr/bin/env python3
-"""Leave-one-out: does the filter still find a paper you already care about?
+"""Leave-one-out: does the filter still find a paper you already value?
 
-Spec section 10, test 5. For each anchor tested:
+For each anchor tested:
 
-  1. take that anchor out of the anchor set;
+  1. remove that anchor from the set;
   2. fetch every paper submitted to the configured categories on the day that
-     anchor was submitted;
-  3. rank them against the *remaining* anchors;
-  4. the held-out paper must come back in the top `shortlist_n`.
+     anchor appeared;
+  3. rank them against the remaining anchors;
+  4. the removed paper must come back in the top `shortlist_n`.
 
 At least 8 of 10 must pass. A failure means the anchor set does not cover that
-part of the field, or the embedding model cannot see the resemblance -- the
-spec's two remedies, in that order.
+part of the field, or the embedding model cannot see the resemblance. Add more
+anchors first. Change the embedding model second.
 
-This test makes real arXiv calls and runs the real embedding model. It makes no
-model API calls and costs nothing. Day pools are cached under data/.loo_cache/
-so a re-run is fast.
+This calls arXiv and runs the embedding model. It makes no model API calls and
+costs nothing. Day pools are cached under data/.loo_cache/, so a re-run is
+fast.
 
-    python -m tests.leave_one_out                 # 10 anchors, seeded sample
+    python -m tests.leave_one_out                 # 10 anchors
     python -m tests.leave_one_out --anchors all
     python -m tests.leave_one_out --anchors 3 --seed 1
 """

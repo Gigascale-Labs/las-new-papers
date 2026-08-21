@@ -1,15 +1,8 @@
-"""Call 2: extract the open questions from one paper, and tag it for the canon.
+"""Call 2: the open questions in one paper, and its canon tags.
 
-One call per kept paper. Two jobs in one call, because both read the same
-abstract and the spec budgets one call per paper:
+One call per kept paper. Both jobs read the same abstract.
 
-1. The open questions -- what the paper leaves unanswered -- each labelled
-   approachable or not approachable *for this researcher*, with a short reason.
-2. The canon tags, so a finalist arrives already in the schema the human canon
-   uses (see canon.py).
-
-Abstracts only. The spec puts full-PDF reading out of scope, so every tag this
-produces is `summary-only` confidence, exactly like the hand-tagged canon rows.
+Abstracts only, never the PDF, so every tag is `summary-only` confidence.
 """
 
 from __future__ import annotations
@@ -120,8 +113,7 @@ def extract(client: ModelClient, profile: str, paper: Paper,
     """Questions and canon tags for one paper.
 
     Raises ModelError if the call failed twice -- the caller drops that paper and
-    marks it in the email, per the spec's rule that one bad paper never stops the
-    run.
+    marks it in the email. One bad paper never stops the run.
     """
     tag_vocab = canon.known_tags() if tag_vocab is None else tag_vocab
     body, _ = fence(

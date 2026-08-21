@@ -1,9 +1,8 @@
-"""The anchor store: one vector per anchor paper, cached on disk.
+"""Anchor vectors, cached on disk.
 
-Anchors change rarely and cost an arXiv round trip plus an embedding pass to
-build, so they are built once and reused. The cache records which IDs and which
-model produced it; if either changes the store rebuilds itself, which is what
-"the system rebuilds the vectors when the list changes" means in practice.
+Anchors change rarely, and building them costs one arXiv call plus a few
+seconds of CPU, so the result is saved. The cache records which anchor IDs and
+which model produced it. If either changes, the store rebuilds itself.
 """
 
 from __future__ import annotations
