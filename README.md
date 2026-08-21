@@ -83,7 +83,8 @@ Sinks are handled where they live:
 | Sink | Risk | Defence |
 |---|---|---|
 | HTML email | XSS / markup injection from a title or abstract | every field escaped (`emailer.py`), tested |
-| `finalists.csv` | formula injection — `=HYPERLINK(...)` in a title executes on open in Excel or Sheets | cells starting `= + - @ 	 ` prefixed with `'` (`canon.py`) |
+| `finalists.csv` | formula injection — `=HYPERLINK(...)` in a title executes on open in Excel or Sheets | cells starting `= + - @ 	 
+` prefixed with `'` (`canon.py`) |
 | Email headers | header injection via a config address | CR/LF stripped, and rejected at config load |
 | Links in the email | a forged arXiv ID becoming a `javascript:` href | IDs validated against arXiv's two real formats at parse time |
 | Model output | invented values, wrong shape | JSON-schema structured output, closed-list values dropped if off-list, arXiv IDs checked against the shortlist |
@@ -270,38 +271,26 @@ whole point is arriving once a day without supervision.
   The retry-once-on-bad-JSON rule is implemented anyway, because schema
   enforcement does not cover a refusal or a response truncated at `max_tokens`.
 
-## Known state
+## Current state
 
-- The **model calls have not been run against the live API**. The environment
-  this was built in has no `ANTHROPIC_API_KEY`, so calls 1 and 2 are covered by
-  unit tests against a scripted client, not by a real request. Everything
-  upstream of them — arXiv fetching, embedding, the anchor store, the similarity
-  filter — has been run for real, as has the leave-one-out evaluation.
-- The **email has never been sent**, for the same reason: no SMTP credentials.
-  Rendering is tested; delivery is not.
-- The **Lakera call has never been made against the live service** — no
-  `LAKERA_GUARD_API_KEY` here either. The client is written against Lakera's
-  current v2 `/v2/guard` contract (bearer auth, OpenAI-shaped `messages`,
-  `flagged` plus an optional `breakdown`) and tested against a mocked
-  transport, including the malformed-response and outage paths. First real run
-  with a key set is what confirms the wire format.
-- Both are covered by one first run: `python main.py --dry-run` exercises
-  everything except `smtplib`.
-- `python main.py --dry-run` **has been run end to end** against a real arXiv
-  day (2026-08-20) with no API key present, to check the failure paths hold: the
-  scoring call failed twice and the run fell back to the similarity ranking, all
-  ten question calls failed and were recorded per paper, and the JSON was still
-  written. Both output files were deleted afterwards rather than committed — an
-  archive entry with real papers and no questions would misrepresent a day, and
-  `latest.json` is what the site reads.
-- **Volume runs lower than the spec's 300-600/day.** These seven lists gave 185
-  papers on 2026-08-20; the day pools in the leave-one-out runs ranged from 63
-  (2022) to 311 (2024). It costs less than budgeted rather than more, but if you
-  want the wider net, add categories (`cs.CY`, `cs.GT`, `q-fin.*`) rather than
-  loosening the filter.
-- The spec's test 6 ("you read seven days of emails, at least one question a
-  week is worth working on") is a judgement only you can make, and the profile
-  in `config.yaml` is the first thing to change if it fails.
+Three things have never run against a live service, because this environment
+has no credentials for them: the **model calls**, the **email send**, and the
+**Lakera call**. Each is written against the current API and tested with a
+stubbed transport, including the malformed-response and outage paths. One real
+run with the secrets set confirms all three.
+
+Everything else has run against live data: arXiv fetching, embedding, the
+anchor store, the similarity filter, and the leave-one-out evaluation.
+
+Two things to know before you tune anything:
+
+- **Volume is lower than the spec's 300-600/day.** These seven lists gave 185
+  papers on 2026-08-20; day pools in the leave-one-out runs ranged from 63
+  (2022) to 311 (2024). If you want a wider net, add categories (`cs.CY`,
+  `cs.GT`, `q-fin.*`) rather than loosening the filter.
+- **The spec's test 6** — seven days of emails, at least one question a week
+  worth working on — is a judgement only you can make. If it fails, change
+  `profile` in `config.yaml` first, prompts second.
 
 ## Layout
 
