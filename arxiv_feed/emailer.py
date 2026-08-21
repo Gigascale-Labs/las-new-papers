@@ -12,6 +12,8 @@ import logging
 import smtplib
 from email.message import EmailMessage
 
+from .guard import safe_header_value
+
 log = logging.getLogger(__name__)
 
 
@@ -70,6 +72,10 @@ def render_text(result: dict) -> str:
         )
         lines.append(f"   significance {p.get('significance', '?')}/5, "
                      f"novelty {p.get('novelty', '?')}/5")
+        if p.get("suspicious_markers"):
+            lines.append(f"   note: text contains injection-like patterns "
+                         f"({', '.join(p['suspicious_markers'])}) -- advisory, the "
+                         f"paper may simply be about prompt injection")
         if p.get("one_sentence"):
             lines.append(f"   {p['one_sentence']}")
         if p["open_questions"]:
@@ -149,6 +155,12 @@ def render_html(result: dict) -> str:
             f"significance {p.get('significance', '?')}/5 · "
             f"novelty {p.get('novelty', '?')}/5</div>"
         )
+        if p.get("suspicious_markers"):
+            out.append(
+                f"<div style=\"color:#8a6d00;font-size:.9em\">note: injection-like "
+                f"patterns in the text ({e(', '.join(p['suspicious_markers']))}) — "
+                f"advisory; the paper may simply be about prompt injection</div>"
+            )
         if p.get("one_sentence"):
             out.append(f"<div style=\"margin:.3em 0\">{e(p['one_sentence'])}</div>")
         if p["open_questions"]:
@@ -181,8 +193,8 @@ def build_message(result: dict, cfg) -> EmailMessage:
         f"arXiv open questions — {result['date']} — "
         f"{len(result['papers'])} papers, {n} questions"
     )
-    msg["From"] = cfg.email_from
-    msg["To"] = cfg.email_to
+    msg["From"] = safe_header_value(cfg.email_from)
+    msg["To"] = safe_header_value(cfg.email_to)
     msg.set_content(render_text(result))
     msg.add_alternative(render_html(result), subtype="html")
     return msg

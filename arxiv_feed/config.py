@@ -36,6 +36,7 @@ class Config:
     embed_model: str = "allenai/specter2_base"
     model: str = "claude-opus-5"
     effort: str = "medium"
+    guard: dict = field(default_factory=dict)
     path: Path | None = field(default=None, compare=False)
 
     # ---- derived paths -----------------------------------------------------
@@ -66,6 +67,39 @@ class Config:
     @staticmethod
     def smtp_password() -> str | None:
         return os.environ.get("SMTP_PASSWORD")
+
+    @staticmethod
+    def lakera_key() -> str | None:
+        return os.environ.get("LAKERA_GUARD_API_KEY")
+
+    # ---- guard settings, with the defaults spelled out ---------------------
+    @property
+    def guard_enabled(self) -> bool:
+        return bool(self.guard.get("enabled", True))
+
+    @property
+    def guard_on_error(self) -> str:
+        return str(self.guard.get("on_error", "allow"))
+
+    @property
+    def guard_project_id(self) -> str | None:
+        return self.guard.get("project_id") or None
+
+    @property
+    def guard_endpoint(self) -> str:
+        return str(self.guard.get("endpoint") or "https://api.lakera.ai/v2/guard")
+
+    @property
+    def guard_timeout(self) -> float:
+        return float(self.guard.get("timeout_seconds", 20))
+
+    @property
+    def max_title_chars(self) -> int:
+        return int(self.guard.get("max_title_chars", 500))
+
+    @property
+    def max_abstract_chars(self) -> int:
+        return int(self.guard.get("max_abstract_chars", 6000))
 
 
 _REQUIRED = ["categories", "anchors", "profile", "email_to"]
@@ -104,6 +138,7 @@ def load_config(path: str | Path = REPO_ROOT / "config.yaml") -> Config:
         embed_model=str(raw.get("embed_model", "allenai/specter2_base")).strip(),
         model=str(raw.get("model", "claude-opus-5")).strip(),
         effort=str(raw.get("effort", "medium")).strip(),
+        guard=dict(raw.get("guard") or {}),
         path=path,
     )
 
@@ -112,6 +147,13 @@ def load_config(path: str | Path = REPO_ROOT / "config.yaml") -> Config:
     if len(set(cfg.anchors)) != len(cfg.anchors):
         dupes = sorted({a for a in cfg.anchors if cfg.anchors.count(a) > 1})
         raise ConfigError(f"duplicate anchor IDs: {', '.join(dupes)}")
+    if cfg.guard_on_error not in ("allow", "block"):
+        raise ConfigError(
+            f"guard.on_error must be 'allow' or 'block', got {cfg.guard_on_error!r}"
+        )
+    for addr in (cfg.email_to, cfg.email_from):
+        if "\n" in addr or "\r" in addr:
+            raise ConfigError(f"email address contains a newline: {addr!r}")
     if cfg.effort not in _EFFORTS:
         raise ConfigError(f"effort must be one of {sorted(_EFFORTS)}, got {cfg.effort!r}")
     for n in ("shortlist_n", "explore_n", "top_n"):

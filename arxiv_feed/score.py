@@ -13,6 +13,8 @@ from __future__ import annotations
 
 import logging
 
+from .guard import (DATA_NOT_INSTRUCTIONS, MAX_ABSTRACT_CHARS, MAX_TITLE_CHARS,
+                    fence, sanitize)
 from .llm import ModelClient, ModelError
 from .select import Candidate
 
@@ -46,7 +48,8 @@ unrelated to the profile. Score them honestly on the same scales: an unrelated
 paper is simply low significance for this researcher.
 
 Return a score for every paper you are given, keyed by its exact arxiv_id.
-"""
+
+""" + DATA_NOT_INSTRUCTIONS
 
 SCHEMA = {
     "type": "object",
@@ -72,14 +75,19 @@ SCHEMA = {
 
 
 def _render(candidates: list[Candidate]) -> str:
+    """One fenced block per paper.
+
+    The arxiv_id sits outside the fence: it is the key the model must return,
+    it is validated against the shortlist afterwards, and keeping it out means
+    no abstract can appear to relabel another paper's id.
+    """
     blocks = []
     for c in candidates:
-        blocks.append(
-            f"arxiv_id: {c.paper.arxiv_id}\n"
-            f"title: {c.paper.title}\n"
-            f"abstract: {c.paper.abstract}"
-        )
-    return "\n\n---\n\n".join(blocks)
+        title = sanitize(c.paper.title, MAX_TITLE_CHARS)
+        abstract = sanitize(c.paper.abstract, MAX_ABSTRACT_CHARS)
+        body, _ = fence(f"title: {title}\nabstract: {abstract}")
+        blocks.append(f"arxiv_id: {c.paper.arxiv_id}\n{body}")
+    return "\n\n".join(blocks)
 
 
 def score_candidates(

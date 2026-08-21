@@ -16,12 +16,13 @@ import random
 from datetime import datetime, timezone
 
 from . import anchors as anchors_mod
-from . import arxiv, canon, emailer, questions, score
+from . import arxiv, canon, emailer, guard, questions, score
 from .config import Config, anchor_count_warning
 from .embed import Embedder
 from .llm import ModelClient, ModelError
 from .seen import SeenStore
 from .select import shortlist
+from scrapers.arxiv_scraper import scrape_day
 
 log = logging.getLogger(__name__)
 
@@ -41,8 +42,12 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
     embedder = Embedder(cfg.embed_model)
     store = anchors_mod.load_or_build(cfg, embedder, force=rebuild_anchors)
 
-    # 2. the day's papers, minus anything already sent
-    papers = arxiv.fetch_new_papers(cfg.categories, day)
+    # 2. the day's papers, minus anything already sent.
+    #
+    # Via the standalone scraper, so the full day is archived to data/raw/ as a
+    # by-product: every paper the filter saw, not just the ten that were sent.
+    # A past day can then be re-ranked with different anchors without re-fetching.
+    papers = scrape_day(cfg.categories, day)
     log.info("fetched %d papers for %s", len(papers), day)
     seen = SeenStore(cfg.seen_path)
     unseen = seen.filter_unseen(papers)
@@ -88,6 +93,45 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
     )
     counts["shortlisted"] = len(candidates)
 
+    # 4b. screen the shortlist before anything reaches a model.
+    #
+    # The shortlist, not the whole day: 45 screening calls instead of ~500, and
+    # a paper that never reaches a model needs no screening. Layer 1 of guard.py
+    # (fencing, sanitising) applies to every paper regardless of this step.
+    guard_info = {
+        "lakera_enabled": cfg.guard_enabled,
+        "lakera_available": False,
+        "on_error": cfg.guard_on_error,
+        "screened": 0,
+        "blocked": [],
+    }
+    if cfg.guard_enabled:
+        client_guard = guard.LakeraGuard(
+            Config.lakera_key(),
+            endpoint=cfg.guard_endpoint,
+            project_id=cfg.guard_project_id,
+            timeout=cfg.guard_timeout,
+            on_error=cfg.guard_on_error,
+        )
+        guard_info["lakera_available"] = client_guard.available
+        if client_guard.available:
+            safe, blocked = guard.screen_papers([c.paper for c in candidates], client_guard)
+            safe_ids = {p.arxiv_id for p in safe}
+            candidates = [c for c in candidates if c.paper.arxiv_id in safe_ids]
+            guard_info["screened"] = len(safe) + len(blocked)
+            guard_info["blocked"] = blocked
+            for b in blocked:
+                problems.append(
+                    f"{b['arxiv_id']}: withheld from the model calls -- {b['reason']}"
+                    + (f" ({', '.join(b['detectors'])})" if b["detectors"] else "")
+                )
+        else:
+            msg = ("Lakera screening did not run: LAKERA_GUARD_API_KEY is not set. "
+                   "Prompt fencing and sanitising still applied.")
+            log.warning(msg)
+            problems.append(msg)
+    result["guard"] = guard_info
+
     # 5. one scoring call for the whole shortlist
     client = ModelClient(cfg.model, effort=cfg.effort)
     scores, score_problems = score.score_candidates(client, cfg.profile, candidates)
@@ -113,6 +157,10 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
         entry["one_sentence"] = s.get("one_sentence", "")
         entry["open_questions"] = []
         entry["canon"] = {}
+        # Advisory only -- see guard.py on why keyword hits never block here.
+        entry["suspicious_markers"] = guard.suspicious_markers(
+            f"{c.paper.title}\n{c.paper.abstract}"
+        )
 
         try:
             extracted = questions.extract(client, cfg.profile, c.paper, tag_vocab)

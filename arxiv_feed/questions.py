@@ -18,6 +18,8 @@ import logging
 
 from . import canon
 from .arxiv import Paper
+from .guard import (DATA_NOT_INSTRUCTIONS, MAX_ABSTRACT_CHARS, MAX_TITLE_CHARS,
+                    fence, sanitize)
 from .llm import ModelClient, ModelError
 
 log = logging.getLogger(__name__)
@@ -56,7 +58,8 @@ leaving it blank.
 
 The summary is one to three sentences describing what the paper does, factual
 and free of adjectives, written the way a catalogue entry is written.
-"""
+
+""" + DATA_NOT_INSTRUCTIONS
 
 
 def _schema(tag_vocab: list[str]) -> dict:
@@ -121,13 +124,14 @@ def extract(client: ModelClient, profile: str, paper: Paper,
     run.
     """
     tag_vocab = canon.known_tags() if tag_vocab is None else tag_vocab
+    body, _ = fence(
+        f"title: {sanitize(paper.title, MAX_TITLE_CHARS)}\n"
+        f"authors: {sanitize(', '.join(paper.authors), MAX_TITLE_CHARS)}\n"
+        f"abstract: {sanitize(paper.abstract, MAX_ABSTRACT_CHARS)}"
+    )
     user = (
         f"RESEARCHER PROFILE\n{profile}\n\n"
-        f"PAPER\n"
-        f"title: {paper.title}\n"
-        f"authors: {', '.join(paper.authors)}\n"
-        f"arxiv_id: {paper.arxiv_id}\n"
-        f"abstract: {paper.abstract}"
+        f"PAPER (arxiv_id: {paper.arxiv_id})\n{body}"
     )
     data = client.structured(
         system=SYSTEM,

@@ -62,6 +62,9 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          # Optional. Without it the run still applies its structural defences
+          # and says so in the email, rather than failing.
+          LAKERA_GUARD_API_KEY: ${{ secrets.LAKERA_GUARD_API_KEY }}
         run: |
           python main.py \
             ${{ inputs.date && format('--date {0}', inputs.date) || '' }} \

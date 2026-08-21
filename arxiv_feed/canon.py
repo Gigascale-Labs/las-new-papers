@@ -27,6 +27,8 @@ import csv
 import logging
 from pathlib import Path
 
+from .guard import neutralize_cell
+
 log = logging.getLogger(__name__)
 
 # --- mirrored from lib/canon-schema.ts (largeagentsystems.org) ---------------
@@ -154,7 +156,9 @@ def append_finalists(path: Path, rows: list[dict]) -> int:
         if write_header:
             w.writeheader()
         for r in fresh:
-            w.writerow(r)
+            # Model-written text from an untrusted abstract lands in a file
+            # people open in Excel. A cell starting = + - @ executes there.
+            w.writerow({k: neutralize_cell(v) for k, v in r.items()})
 
     log.info("finalists.csv: %d new row(s), %d skipped as already present",
              len(fresh), len(rows) - len(fresh))

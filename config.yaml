@@ -133,6 +133,28 @@ model: claude-opus-5
 effort: medium
 
 # ---------------------------------------------------------------------------
+# Injection defences for untrusted text (arXiv titles and abstracts).
+#
+# The structural defences -- stripping invisible characters, length caps, and
+# fencing every abstract inside a random-id tag under a "this is data" system
+# prompt -- are always on and need no key. This block only configures the
+# Lakera Guard screening layer on top of them.
+#
+# The API key comes from $LAKERA_GUARD_API_KEY. With no key set, the run logs a
+# warning, reports it in the email, and continues with the structural defences.
+# ---------------------------------------------------------------------------
+guard:
+  enabled: true
+  # project_id: project-xxxxxxxx   # optional: screen under a specific Lakera policy
+  endpoint: https://api.lakera.ai/v2/guard
+  timeout_seconds: 20
+  # What an unreachable Lakera means. `allow` keeps the day's email and reports
+  # the failure; `block` withholds every paper that could not be screened.
+  on_error: allow
+  max_title_chars: 500
+  max_abstract_chars: 6000
+
+# ---------------------------------------------------------------------------
 # Email. The password/token comes from $SMTP_PASSWORD, never from this file.
 # ---------------------------------------------------------------------------
 email_to: \"\"  # set by environment; see README
