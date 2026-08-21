@@ -1,0 +1,1130 @@
+[
+  {
+    "title": "Causal Emergence 2.0: Quantifying Emergent Complexity",
+    "itemType": "preprint",
+    "creators": "Erik Hoel",
+    "date": "2025",
+    "url": "https://arxiv.org/abs/2503.13395",
+    "tags": "Collective Intelligence",
+    "summary": "Develops a quantitative framework for measuring causal emergence — how macro-level descriptions of a system can carry more causal information than micro-level descriptions — relevant to questions of when collective agent behaviour constitutes a genuinely emergent higher-level phenomenon.",
+    "system_type": [],
+    "participant_mix": [],
+    "observability": [],
+    "focus_area": [],
+    "threat_model": [
+      "Collective Superintelligence"
+    ],
+    "claim_type": [
+      "theoretical/conceptual framework"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "Tufts University"
+    ]
+  },
+  {
+    "title": "Prompt Infection: LLM-to-LLM Prompt Injection within Multi-Agent Systems",
+    "itemType": "journalArticle",
+    "creators": "Donghyun Lee; Mo Tiwari; Brian Miranda",
+    "date": "2024",
+    "url": "https://arxiv.org/abs/2410.07283",
+    "tags": "Security & Adversarial Robustness",
+    "summary": "Introduces Prompt Infection — a self-replicating LLM-to-LLM prompt injection attack that propagates across interconnected agents like a computer virus, posing systemic threats including data theft and system-wide disruption.",
+    "system_type": [],
+    "participant_mix": [
+      "pure-AI"
+    ],
+    "observability": [
+      "interactions observable"
+    ],
+    "focus_area": [],
+    "threat_model": [],
+    "claim_type": [
+      "threat model articulation",
+      "empirical study"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "University College London",
+      "Stanford University"
+    ]
+  },
+  {
+    "title": "How to Model AI Agents as Personas?: Applying the Persona Ecosystem Playground to 41,300 Posts on Moltbook for Behavioral Insights",
+    "itemType": "preprint",
+    "creators": "Danial Amin; Joni Salminen; Bernard J. Jansen",
+    "date": "2026",
+    "url": "https://arxiv.org/abs/2603.03140",
+    "tags": "Persona Extraction; Datasets",
+    "summary": "Applies the Persona Ecosystem Playground (PEP) to Moltbook, generating and validating conversational personas from 41,300 posts using k-means clustering and retrieval-augmented generation, to characterise behavioral diversity among AI agents on agent-only social platforms.",
+    "system_type": [
+      "social network"
+    ],
+    "participant_mix": [
+      "pure-AI"
+    ],
+    "observability": [
+      "agents observable"
+    ],
+    "focus_area": [
+      "Simulation"
+    ],
+    "threat_model": [],
+    "claim_type": [
+      "empirical study"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "University of Vaasa",
+      "Qatar Computing Research Institute, HBKU"
+    ]
+  },
+  {
+    "title": "OASIS: Open Agent Social Interaction Simulations with One Million Agents",
+    "itemType": "journalArticle",
+    "creators": "Ziyi Yang; Zaibin Zhang; Zirui Zheng; Yuxian Jiang; Philip Torr; Jing Shao",
+    "date": "2024",
+    "url": "https://arxiv.org/abs/2411.11581",
+    "tags": "Simulation and Digital Twins",
+    "summary": "A generalizable and scalable social media simulation platform scaling to one million LLM-based agents, replicating emergent social phenomena including information spreading, group polarisation, and herd effects across X and Reddit platform models.",
+    "system_type": [
+      "social network"
+    ],
+    "participant_mix": [
+      "pure-AI"
+    ],
+    "observability": [
+      "agents observable",
+      "interactions observable"
+    ],
+    "focus_area": [
+      "Simulation"
+    ],
+    "threat_model": [],
+    "claim_type": [
+      "proposed method/system"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "Shanghai Artificial Intelligence Laboratory",
+      "University of Oxford",
+      "KAUST"
+    ]
+  },
+  {
+    "title": "Twin-2K-500: A dataset for building digital twins of over 2,000 people based on their answers to over 500 questions",
+    "itemType": "preprint",
+    "creators": "Olivier Toubia; George Z. Gui; Tianyi Peng; Daniel J. Merlau; Ang Li; Haozhe Chen",
+    "date": "2025",
+    "url": "https://arxiv.org/abs/2505.17479",
+    "tags": "Datasets",
+    "summary": "Presents Twin-2K-500, a dataset for building digital twins of over 2,000 people based on their answers to more than 500 questions, supporting research on LLM-based simulation of individual human respondents.",
+    "system_type": [],
+    "participant_mix": [
+      "mixed human+AI"
+    ],
+    "observability": [
+      "agents observable"
+    ],
+    "focus_area": [
+      "Simulation"
+    ],
+    "threat_model": [],
+    "claim_type": [
+      "dataset/tool"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "Columbia University"
+    ]
+  },
+  {
+    "title": "Scaling Trust Programme Thesis v2.0",
+    "itemType": "webpage",
+    "creators": "",
+    "date": "",
+    "url": "https://aria.org.uk/media/dkhlumky/scaling-trust-programme-thesis.pdf",
+    "tags": "Trust, Delegation & Accountability",
+    "summary": "ARIA's programme thesis for Scaling Trust, outlining the research agenda and rationale for building technical infrastructure that allows trust to scale with the complexity of AI-mediated interactions.",
+    "system_type": [],
+    "participant_mix": [
+      "mixed human+AI"
+    ],
+    "observability": [],
+    "focus_area": [],
+    "threat_model": [],
+    "claim_type": [
+      "position/opinion"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "ARIA (Advanced Research + Invention Agency)"
+    ]
+  },
+  {
+    "title": "Beyond Single-Agent Safety: A Taxonomy of Risks in LLM-to-LLM Interactions",
+    "itemType": "journalArticle",
+    "creators": "P. Bisconti; M. Galisai; F. Pierucci; M. Bracale; M. Prandi",
+    "date": "2025",
+    "url": "https://arxiv.org/abs/2512.02682",
+    "tags": "Foundations & Taxonomies",
+    "summary": "Proposes a transition from model-level to system-level safety, introducing the Emergent Systemic Risk Horizon (ESRH) framework and a taxonomy of micro, meso, and macro-level failure modes in LLM-to-LLM ecosystems.",
+    "system_type": [],
+    "participant_mix": [
+      "pure-AI"
+    ],
+    "observability": [],
+    "focus_area": [],
+    "threat_model": [],
+    "claim_type": [
+      "theoretical/conceptual framework"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "DEXAI - Icaro Lab",
+      "Sapienza University of Rome",
+      "Sant'Anna School of Advanced Studies",
+      "VU Amsterdam"
+    ]
+  },
+  {
+    "title": "Habermolt: Delegating Deliberation to AI Representatives",
+    "itemType": "preprint",
+    "creators": "Joseph Low; Oscar Duys; Claude Formanek; Michiel Bakker; Lewis Hammond",
+    "date": "2026",
+    "url": "https://arxiv.org/abs/2605.24413",
+    "tags": "Coordination & (Super-)cooperation; Live Systems",
+    "summary": "Introduces Habermolt, a system that delegates political and social deliberation to AI representatives acting on behalf of human principals, exploring the dynamics and risks of AI-mediated collective deliberation at scale.",
+    "system_type": [
+      "social network"
+    ],
+    "participant_mix": [
+      "mixed human+AI"
+    ],
+    "observability": [],
+    "focus_area": [
+      "Steering",
+      "Design"
+    ],
+    "threat_model": [],
+    "claim_type": [
+      "proposed method/system"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "Cooperative AI Foundation",
+      "Cooperative AI Research Fellowship",
+      "AI Safety South Africa",
+      "Massachusetts Institute of Technology"
+    ]
+  },
+  {
+    "title": "AI agents can coordinate beyond human scale",
+    "itemType": "journalArticle",
+    "creators": "Giordano De Marzo; Claudio Castellano; David Garcia",
+    "date": "2024",
+    "url": "https://arxiv.org/abs/2409.02822",
+    "tags": "Collective Intelligence",
+    "summary": "Demonstrates that LLM-based agents can spontaneously coordinate at scales beyond typical human group limits, governed by a 'majority force coefficient' that determines coordination possibility and varies with model capability.",
+    "system_type": [],
+    "participant_mix": [
+      "pure-AI"
+    ],
+    "observability": [],
+    "focus_area": [
+      "Simulation"
+    ],
+    "threat_model": [
+      "Collective Superintelligence"
+    ],
+    "claim_type": [
+      "empirical study"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "University of Konstanz",
+      "Complexity Science Hub Vienna",
+      "Istituto dei Sistemi Complessi (CNR)",
+      "Centro Ricerche Enrico Fermi"
+    ]
+  },
+  {
+    "title": "A Survey on Influence Maximization: From an ML-Based Combinatorial Optimization",
+    "itemType": "journalArticle",
+    "creators": "Yandi Li; Haobo Gao; Yunxuan Gao; Jianxiong Guo; Weili Wu",
+    "date": "2022",
+    "url": "https://arxiv.org/abs/2211.03074",
+    "tags": "Control and Steering",
+    "summary": "Comprehensive survey of influence maximisation, reviewing ML-based (especially Deep Reinforcement Learning) approaches to the problem of selecting seed nodes for maximum spread in social networks — relevant to steering and control in large agent populations.",
+    "system_type": [
+      "social network"
+    ],
+    "participant_mix": [],
+    "observability": [],
+    "focus_area": [
+      "Steering"
+    ],
+    "threat_model": [],
+    "claim_type": [
+      "survey/taxonomy"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "BNU-HKBU United International College",
+      "University of Texas at Dallas"
+    ]
+  },
+  {
+    "title": "A Roadmap for the Upcoming Labor Transition",
+    "itemType": "report",
+    "creators": "Deric Cheng; Jacob Schaal",
+    "date": "2026",
+    "url": "https://ai-frontiers.org/articles/a-roadmap-for-the-upcoming-labor-transition",
+    "tags": "Labour & Automation",
+    "summary": "Outlines a phased roadmap for the economic labor transition driven by AI, covering near-term automation waves through long-term structural economic transformation. Emphasises policy preparation and national self-assessment.",
+    "system_type": [
+      "labour market"
+    ],
+    "participant_mix": [
+      "mixed human+AI"
+    ],
+    "observability": [],
+    "focus_area": [],
+    "threat_model": [],
+    "claim_type": [
+      "policy/regulatory analysis"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "Windfall Trust",
+      "King's College London"
+    ]
+  },
+  {
+    "title": "Model Monoculture Risk: Systemic AI Convergence in Banking and Financial Markets",
+    "itemType": "preprint",
+    "creators": "Victor Frimpong",
+    "date": "2026-03-01",
+    "url": "https://www.preprints.org/manuscript/202603.0393",
+    "tags": "Financial Systems & Systemic Risk",
+    "summary": "Introduces the concept of model monoculture risk — systemic fragility arising from shared AI architectures in finance — and proposes the M3 Framework (Model-Market-Middleware) to analyse how correlated AI systems can amplify market shocks.",
+    "system_type": [
+      "financial system"
+    ],
+    "participant_mix": [],
+    "observability": [
+      "aggregates observable"
+    ],
+    "focus_area": [
+      "Monitoring"
+    ],
+    "threat_model": [
+      "Systemic Instability"
+    ],
+    "claim_type": [
+      "theoretical/conceptual framework"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "SBS Swiss Business School"
+    ]
+  },
+  {
+    "title": "IDs for AI Systems",
+    "itemType": "journalArticle",
+    "creators": "Alan Chan; Noam Kolt; Peter Wills; Usman Anwar; Christian Schroeder de Witt; Nitarshan Rajkumar; Lewis Hammond; David Krueger; Lennart Heim; Markus Anderljung",
+    "date": "2024",
+    "url": "https://arxiv.org/abs/2406.12137",
+    "tags": "LA Infrastructure & Protocols",
+    "summary": "Proposes a system of unique, persistent identifiers for AI systems to enable traceability, accountability, certification, and incident response across agentic deployments.",
+    "system_type": [],
+    "participant_mix": [],
+    "observability": [
+      "agents observable"
+    ],
+    "focus_area": [
+      "Monitoring"
+    ],
+    "threat_model": [],
+    "claim_type": [
+      "proposed method/system"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "Centre for the Governance of AI",
+      "Cooperative AI Foundation",
+      "University of Cambridge",
+      "University of Toronto"
+    ]
+  },
+  {
+    "title": "Reframing Superintelligence: Comprehensive AI Services as General Intelligence",
+    "itemType": "report",
+    "creators": "K. Eric Drexler",
+    "date": "2019",
+    "url": "https://www.fhi.ox.ac.uk/wp-content/uploads/Reframing_Superintelligence_FHI-TR-2019-1.1-1.pdf",
+    "tags": "Foundations & Taxonomies; Collective Intelligence",
+    "summary": "Proposes the Comprehensive AI Services (CAIS) model as an alternative to the unified-agent conception of superintelligence, arguing that advanced AI capabilities are more likely to emerge as a decentralised ecosystem of bounded services than as a single agentic system.",
+    "system_type": [],
+    "participant_mix": [
+      "pure-AI"
+    ],
+    "observability": [],
+    "focus_area": [],
+    "threat_model": [],
+    "claim_type": [
+      "theoretical/conceptual framework"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "Future of Humanity Institute, University of Oxford"
+    ]
+  },
+  {
+    "title": "AI Scenarios 2030: Helping Policymakers Plan for the Future of AI",
+    "itemType": "report",
+    "creators": "UK Government Office for Science",
+    "date": "2026",
+    "url": "https://www.gov.uk/government/publications/ai-scenarios-2030-helping-policymakers-plan-for-the-future-of-ai/ai-scenarios-2030-helping-policymakers-plan-for-the-future-of-ai",
+    "tags": "Agentic Economies; Threat Models; Policy and Governance",
+    "summary": "UK government research and analysis publication presenting four scenarios for how AI may develop and affect society by 2030, intended to help policymakers plan for a range of plausible futures. Scenarios 2-4 are of particular relevance to the LAS canon.",
+    "system_type": [],
+    "participant_mix": [
+      "mixed human+AI"
+    ],
+    "observability": [],
+    "focus_area": [],
+    "threat_model": [],
+    "claim_type": [
+      "policy/regulatory analysis"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "UK Government Office for Science"
+    ]
+  },
+  {
+    "title": "Retrieval Collapses When AI Pollutes the Web",
+    "itemType": "conferencePaper",
+    "creators": "Hongyeon Yu; Dongchan Kim",
+    "date": "2026",
+    "url": "https://arxiv.org/abs/2602.16136",
+    "tags": "Threat Models",
+    "summary": "Characterises 'Retrieval Collapse' — a two-stage degradation where AI-generated web content first homogenises, then degrades retrieval pipelines — demonstrating how LAS-scale content generation corrupts the information environment.",
+    "system_type": [],
+    "participant_mix": [
+      "pure-AI"
+    ],
+    "observability": [],
+    "focus_area": [],
+    "threat_model": [],
+    "claim_type": [
+      "empirical study",
+      "threat model articulation"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "NAVER Corp."
+    ]
+  },
+  {
+    "title": "Agent Smith: A Single Image Can Jailbreak One Million Multimodal LLM Agents Exponentially Fast",
+    "itemType": "conferencePaper",
+    "creators": "Xiangming Gu; Xiaosen Zheng; Tianyu Pang; Chao Du; Qian Liu; Ye Wang; Jing Jiang; Min Lin",
+    "date": "2024",
+    "url": "https://arxiv.org/abs/2402.08567",
+    "tags": "Security & Adversarial Robustness",
+    "summary": "Reports 'infectious jailbreak' — a single adversarial image injected into one agent's memory propagates exponentially to infect all agents in environments of up to one million LLaVA-1.5 agents.",
+    "system_type": [],
+    "participant_mix": [
+      "pure-AI"
+    ],
+    "observability": [
+      "interactions observable"
+    ],
+    "focus_area": [],
+    "threat_model": [],
+    "claim_type": [
+      "threat model articulation",
+      "empirical study"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "Sea AI Lab",
+      "National University of Singapore",
+      "Singapore Management University"
+    ]
+  },
+  {
+    "title": "Financial Stability in Focus: Artificial Intelligence in Financial Services",
+    "itemType": "report",
+    "creators": "Bank of England",
+    "date": "2025-04-01",
+    "url": "https://www.bankofengland.co.uk/financial-stability-in-focus/2025/april-2025",
+    "tags": "Financial Systems & Systemic Risk",
+    "summary": "Bank of England report examining financial stability implications of AI adoption across financial services, including systemic risk concerns from AI concentration and correlated behaviors.",
+    "system_type": [
+      "financial system"
+    ],
+    "participant_mix": [],
+    "observability": [
+      "aggregates observable"
+    ],
+    "focus_area": [
+      "Monitoring"
+    ],
+    "threat_model": [
+      "Systemic Instability"
+    ],
+    "claim_type": [
+      "policy/regulatory analysis"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "Bank of England"
+    ]
+  },
+  {
+    "title": "AI Agent Traps",
+    "itemType": "report",
+    "creators": "Matija Franklin; Nenad Tomasev; Julian Jacobs; Joel Z. Leibo; Simon Osindero",
+    "date": "2026-03-01",
+    "url": "https://www.rivista.ai/wp-content/uploads/2026/04/ssrn-6372438.pdf",
+    "tags": "Threat Models",
+    "summary": "Taxonomises the ways agents embedded in networked environments can be exploited or constrained ('trapped'), covering spawning traps, financial flash-crash analogies, and technical/legal defences.",
+    "system_type": [],
+    "participant_mix": [
+      "pure-AI"
+    ],
+    "observability": [
+      "interactions observable"
+    ],
+    "focus_area": [
+      "Steering",
+      "Redesign"
+    ],
+    "threat_model": [
+      "Systemic Instability"
+    ],
+    "claim_type": [
+      "threat model articulation"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "Google DeepMind"
+    ]
+  },
+  {
+    "title": "On the Limits of Agency in Agent-Based Models",
+    "itemType": "preprint",
+    "creators": "Ayush Chopra; Shashank Kumar; Nurullah Giray-Kuru; Ramesh Raskar; Arnau Quera-Bofarull",
+    "date": "2024",
+    "url": "https://arxiv.org/abs/2409.10568",
+    "tags": "Simulation and Digital Twins",
+    "summary": "Examines the limits of agency that can be meaningfully attributed to LLM-driven agents within agent-based models, using the AgentTorch framework to support large-population simulations.",
+    "system_type": [],
+    "participant_mix": [
+      "pure-AI"
+    ],
+    "observability": [],
+    "focus_area": [
+      "Simulation"
+    ],
+    "threat_model": [],
+    "claim_type": [
+      "theoretical/conceptual framework"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "MIT Media Lab",
+      "University of Oxford"
+    ]
+  },
+  {
+    "title": "Regulating AI Agents",
+    "itemType": "journalArticle",
+    "creators": "Kathrin Gardhouse; Amin Oueslati; Noam Kolt",
+    "date": "2026",
+    "url": "https://arxiv.org/abs/2603.23471",
+    "tags": "Policy and Governance",
+    "summary": "Analyses how the EU AI Act — promulgated before agentic AI became widespread — faces significant obstacles addressing governance challenges specific to agents: autonomous task failure, malicious misuse, and unequal liability distribution.",
+    "system_type": [],
+    "participant_mix": [
+      "mixed human+AI"
+    ],
+    "observability": [],
+    "focus_area": [],
+    "threat_model": [],
+    "claim_type": [
+      "policy/regulatory analysis"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "University of Toronto (Schwartz Reisman Institute)",
+      "Hebrew University of Jerusalem"
+    ]
+  },
+  {
+    "title": "LLM Agents Grounded in Self-Reports Enable General-Purpose Simulation of Individuals",
+    "itemType": "journalArticle",
+    "creators": "Joon Sung Park; Carolyn Q. Zou; Aaron Shaw; Benjamin Mako Hill; Carrie Cai; Meredith Ringel Morris; Robb Willer; Percy Liang; Michael S. Bernstein",
+    "date": "2024-11-01",
+    "url": "https://arxiv.org/abs/2411.10109",
+    "tags": "Persona Extraction; Simulation and Digital Twins",
+    "summary": "Builds person-specific generative agents grounded in interview and survey self-report data from 1,052 Americans, achieving 83-86% of test-retest consistency and supporting general-purpose individual simulation.",
+    "system_type": [
+      "social network"
+    ],
+    "participant_mix": [
+      "mixed human+AI"
+    ],
+    "observability": [
+      "agents observable"
+    ],
+    "focus_area": [
+      "Simulation"
+    ],
+    "threat_model": [],
+    "claim_type": [
+      "empirical study"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "Stanford University"
+    ]
+  },
+  {
+    "title": "Multi-Agent Risks from Advanced AI",
+    "itemType": "report",
+    "creators": "Lewis Hammond; Alan Chan; Jesse Clifton; Jason Hoelscher-Obermaier; Akbir Khan; Euan McLean; Chandler Smith; Iyad Rahwan",
+    "date": "2025",
+    "url": "https://arxiv.org/abs/2502.14143",
+    "tags": "Surveys",
+    "summary": "Provides a structured taxonomy of multi-agent AI risks, identifying three key failure modes (miscoordination, conflict, collusion) and seven risk factors. Foundational survey for the field.",
+    "system_type": [],
+    "participant_mix": [],
+    "observability": [],
+    "focus_area": [],
+    "threat_model": [],
+    "claim_type": [
+      "survey/taxonomy"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "Cooperative AI Foundation"
+    ]
+  },
+  {
+    "title": "LLM economicus? Mapping the Behavioral Biases of LLMs via Utility Theory",
+    "itemType": "conferencePaper",
+    "creators": "Jillian Ross; Yoon Kim; Andrew W. Lo",
+    "date": "2024",
+    "url": "https://arxiv.org/abs/2408.02784",
+    "tags": "Agentic Economies",
+    "summary": "Uses utility theory to map and quantify economic behavioral biases (loss aversion, inequity aversion, time discounting) in LLMs, finding they are neither fully human-like nor fully rational agents.",
+    "system_type": [],
+    "participant_mix": [
+      "pure-AI"
+    ],
+    "observability": [],
+    "focus_area": [],
+    "threat_model": [],
+    "claim_type": [
+      "empirical study"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "Massachusetts Institute of Technology"
+    ]
+  },
+  {
+    "title": "An Economy of AI Agents",
+    "itemType": "bookSection",
+    "creators": "Gillian K. Hadfield; Andrew Koh",
+    "date": "2025",
+    "url": "https://arxiv.org/abs/2509.01063",
+    "tags": "Agentic Economies",
+    "summary": "Surveys how AI agents might interact with humans and each other, shape markets and organizations, and what institutions might be required for well-functioning markets in a future with widespread agentic deployment.",
+    "system_type": [
+      "production economy",
+      "labour market"
+    ],
+    "participant_mix": [
+      "mixed human+AI"
+    ],
+    "observability": [],
+    "focus_area": [],
+    "threat_model": [],
+    "claim_type": [
+      "survey/taxonomy"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "Johns Hopkins University",
+      "Massachusetts Institute of Technology"
+    ]
+  },
+  {
+    "title": "Group size effects and collective misalignment in LLM multi-agent systems",
+    "itemType": "journalArticle",
+    "creators": "Ariel Flint; Luca Maria Aiello; Romualdo Pastor-Satorras; Andrea Baronchelli",
+    "date": "2025",
+    "url": "https://arxiv.org/abs/2510.22422",
+    "tags": "Large Agent Alignment; Emergent Harms and Capabilities",
+    "summary": "Systematically shows that group size shapes collective bias in LLM multi-agent systems in non-linear, model-dependent ways — interaction can amplify, introduce, or override individual biases, with deterministic dynamics above a critical population size.",
+    "system_type": [],
+    "participant_mix": [
+      "pure-AI"
+    ],
+    "observability": [],
+    "focus_area": [],
+    "threat_model": [],
+    "claim_type": [
+      "empirical study"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "City St George's, University of London",
+      "IT University of Copenhagen",
+      "Universitat Politecnica de Catalunya"
+    ]
+  },
+  {
+    "title": "Synthetic Personalities: How Well Can LLMs Mimic Individual Respondents Using Socio-Economic Microdata?",
+    "itemType": "preprint",
+    "creators": "Leonard Kinzinger; Jochen Hartmann",
+    "date": "2026",
+    "url": "https://arxiv.org/abs/2606.04592",
+    "tags": "Persona Extraction",
+    "summary": "Evaluates how well LLMs can mimic individual survey respondents when grounded in socio-economic microdata, assessing fidelity of synthetic personalities against real respondent data.",
+    "system_type": [],
+    "participant_mix": [
+      "mixed human+AI"
+    ],
+    "observability": [
+      "agents observable"
+    ],
+    "focus_area": [
+      "Simulation"
+    ],
+    "threat_model": [],
+    "claim_type": [
+      "empirical study"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "Technical University of Munich"
+    ]
+  },
+  {
+    "title": "Gradual Disempowerment: Systemic Existential Risks from Incremental AI Development",
+    "itemType": "preprint",
+    "creators": "Jan Kulveit; Raymond Douglas; Nora Ammann; Deger Turan; David Krueger; David Duvenaud",
+    "date": "2025",
+    "url": "https://arxiv.org/abs/2501.16946",
+    "tags": "Threat Models",
+    "summary": "Develops the concept of gradual disempowerment — how incremental AI advances could permanently undermine human influence over the economy, culture, and nation-states without any single catastrophic event.",
+    "system_type": [],
+    "participant_mix": [
+      "mixed human+AI"
+    ],
+    "observability": [],
+    "focus_area": [],
+    "threat_model": [
+      "Gradual Disempowerment"
+    ],
+    "claim_type": [
+      "theoretical/conceptual framework",
+      "threat model articulation"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "Charles University (Alignment of Complex Systems)",
+      "University of Cambridge",
+      "University of Toronto"
+    ]
+  },
+  {
+    "title": "AgentSociety: Large-Scale Simulation of LLM-Driven Generative Agents Advances Understanding of Human Behaviors and Society",
+    "itemType": "journalArticle",
+    "creators": "Jinghua Piao; Yuwei Yan; Jun Zhang; Nian Li; Junbo Yan; Xiaochong Lan; Yong Li",
+    "date": "2025",
+    "url": "https://arxiv.org/abs/2502.08691",
+    "tags": "Simulation and Digital Twins",
+    "summary": "Proposes AgentSociety, a large-scale simulator integrating LLM-driven agents with a realistic societal environment, generating social lives for over 10k agents with 5 million interactions for generative social science research.",
+    "system_type": [
+      "social network"
+    ],
+    "participant_mix": [
+      "pure-AI"
+    ],
+    "observability": [
+      "aggregates observable",
+      "agents observable"
+    ],
+    "focus_area": [
+      "Simulation"
+    ],
+    "threat_model": [],
+    "claim_type": [
+      "proposed method/system"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "Tsinghua University"
+    ]
+  },
+  {
+    "title": "Intelligent AI Delegation",
+    "itemType": "journalArticle",
+    "creators": "Nenad Tomasev; Matija Franklin; Simon Osindero",
+    "date": "2026",
+    "url": "https://arxiv.org/abs/2602.11865",
+    "tags": "Trust, Delegation & Accountability",
+    "summary": "Proposes an adaptive framework for intelligent AI delegation, addressing task allocation, authority transfer, accountability, and trust establishment in complex multi-agent delegation networks.",
+    "system_type": [],
+    "participant_mix": [
+      "mixed human+AI"
+    ],
+    "observability": [],
+    "focus_area": [
+      "Steering"
+    ],
+    "threat_model": [],
+    "claim_type": [
+      "proposed method/system"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "Google DeepMind"
+    ]
+  },
+  {
+    "title": "AI Organizations are More Effective but Less Aligned than Individual Agents",
+    "itemType": "journalArticle",
+    "creators": "Judy Hanwen Shen",
+    "date": "2026",
+    "url": "https://arxiv.org/abs/2604.10290",
+    "tags": "Large Agent Alignment",
+    "summary": "Experimentally demonstrates that multi-agent 'AI organizations' achieve higher business utility but produce systematically greater misalignment than single aligned agents, across consultancy and software development tasks.",
+    "system_type": [
+      "production economy"
+    ],
+    "participant_mix": [
+      "pure-AI"
+    ],
+    "observability": [],
+    "focus_area": [],
+    "threat_model": [],
+    "claim_type": [
+      "empirical study"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "Anthropic",
+      "Stanford University"
+    ]
+  },
+  {
+    "title": "zkLLM: Zero Knowledge Proofs for Large Language Models",
+    "itemType": "conferencePaper",
+    "creators": "Haochen Sun; Jason Li; Hongyang Zhang",
+    "date": "2024",
+    "url": "https://arxiv.org/abs/2404.16109",
+    "tags": "LA Infrastructure & Protocols",
+    "summary": "Presents the first specialised zero-knowledge proof system for LLMs, enabling cryptographic verification of inference correctness without revealing model parameters — foundational infrastructure for accountable agent systems.",
+    "system_type": [],
+    "participant_mix": [],
+    "observability": [],
+    "focus_area": [
+      "Monitoring"
+    ],
+    "threat_model": [],
+    "claim_type": [
+      "proposed method/system"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "University of Waterloo"
+    ]
+  },
+  {
+    "title": "Can Artificial Intelligence Enhance Corporate Financial Risk-Taking Capacity? A Perspective on Innovation Resilience and the Environment",
+    "itemType": "journalArticle",
+    "creators": "Kelin Du; Yubing Wei; Shanyue Jin",
+    "date": "2026",
+    "url": "https://www.mdpi.com/2071-1050/18/4/1840",
+    "tags": "Financial Systems & Systemic Risk",
+    "summary": "Examines whether and how artificial intelligence adoption enhances corporate financial risk-taking capacity, framed through the lenses of innovation resilience and environmental sustainability.",
+    "system_type": [
+      "financial system"
+    ],
+    "participant_mix": [],
+    "observability": [],
+    "focus_area": [],
+    "threat_model": [],
+    "claim_type": [
+      "empirical study"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": []
+  },
+  {
+    "title": "AgentScope 1.0: A Developer-Centric Framework for Building Agentic Applications",
+    "itemType": "preprint",
+    "creators": "Dawei Gao; Zitao Li; Yuexiang Xie; Weirui Kuang; Liuyi Yao; Bingchen Qian; Zhijian Ma; Yue Cui; Haohao Luo; Shen Li; Lu Yi; Yi Yu; Shiqi He; Zhiling Luo; Wenmeng Zhou; Zhicheng Zhang; Xuguang He; Ziqian Chen; Weikai Liao; Farruh Isakulovich Kushnazarov; Yaliang Li; Bolin Ding; Jingren Zhou",
+    "date": "2025",
+    "url": "https://arxiv.org/abs/2508.16279",
+    "tags": "Simulation and Digital Twins; LA Infrastructure & Protocols",
+    "summary": "Presents AgentScope 1.0, a developer-centric framework for building agentic applications, supporting multi-agent simulation, orchestration, and deployment at scale.",
+    "system_type": [],
+    "participant_mix": [
+      "pure-AI"
+    ],
+    "observability": [],
+    "focus_area": [
+      "Simulation"
+    ],
+    "threat_model": [],
+    "claim_type": [
+      "proposed method/system"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "Alibaba Group"
+    ]
+  },
+  {
+    "title": "Modeling Earth-Scale Human-Like Societies with One Billion Agents",
+    "itemType": "journalArticle",
+    "creators": "Haoxiang Guan; Jiyan He; Liyang Fan; Zhenzhen Ren; Shaobin He; Shuxin Zheng; Zhen Liu",
+    "date": "2025",
+    "url": "https://arxiv.org/abs/2506.12078",
+    "tags": "Simulation and Digital Twins",
+    "summary": "Presents Light Society, an agent-based simulation framework that advances LLM-powered simulation to planetary scale (one billion agents), formalising social processes as structured state transitions executed through an event queue.",
+    "system_type": [
+      "social network"
+    ],
+    "participant_mix": [
+      "pure-AI"
+    ],
+    "observability": [
+      "aggregates observable"
+    ],
+    "focus_area": [
+      "Simulation"
+    ],
+    "threat_model": [],
+    "claim_type": [
+      "proposed method/system"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "Zhongguancun Academy"
+    ]
+  },
+  {
+    "title": "Distributional AGI Safety",
+    "itemType": "journalArticle",
+    "creators": "Nenad Tomasev; Matija Franklin; Julian Jacobs; Simon Krier; Simon Osindero",
+    "date": "2025",
+    "url": "https://arxiv.org/abs/2512.16856",
+    "tags": "Collective Intelligence",
+    "summary": "Develops the concept of distributional AGI — emergent collective intelligence arising from large populations of agents — and proposes defence-in-depth mechanisms including cryptographic identity, market design, and accountability infrastructure.",
+    "system_type": [],
+    "participant_mix": [
+      "pure-AI"
+    ],
+    "observability": [
+      "agents observable"
+    ],
+    "focus_area": [
+      "Redesign"
+    ],
+    "threat_model": [
+      "Collective Superintelligence"
+    ],
+    "claim_type": [
+      "theoretical/conceptual framework"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "Google DeepMind"
+    ]
+  },
+  {
+    "title": "Detecting Multi-Agent Collusion Through Multi-Agent Interpretability",
+    "itemType": "journalArticle",
+    "creators": "Aaron Rose",
+    "date": "2026",
+    "url": "https://arxiv.org/abs/2604.01151",
+    "tags": "Monitoring; Evaluations",
+    "summary": "Introduces NARCBench and five activation-based probing techniques for detecting covert multi-agent collusion, achieving 1.00 AUROC in-distribution and strong zero-shot transfer across structurally diverse scenarios.",
+    "system_type": [],
+    "participant_mix": [
+      "pure-AI"
+    ],
+    "observability": [
+      "agents observable",
+      "interactions observable"
+    ],
+    "focus_area": [
+      "Monitoring"
+    ],
+    "threat_model": [],
+    "claim_type": [
+      "proposed method/system",
+      "empirical study"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "University of Oxford"
+    ]
+  },
+  {
+    "title": "Automation and Repression",
+    "itemType": "report",
+    "creators": "Daron Acemoglu; A. Arda Gitmez; Mehdi Shadmehr",
+    "date": "2026",
+    "url": "https://www.nber.org/papers/w35336",
+    "tags": "Threat Models; Labour & Automation; Policy and Governance",
+    "summary": "Models automation embedded in a political environment where workers can revolt; decentralised automation raises capital's income share and the likelihood of successful revolt. Shows a complementarity between automation and political repression: capitalist states facing AI-driven inequality may find repression cheaper than redistribution as automation increases.",
+    "system_type": [
+      "labour market"
+    ],
+    "participant_mix": [
+      "mixed human+AI"
+    ],
+    "observability": [],
+    "focus_area": [],
+    "threat_model": [
+      "Power Concentration",
+      "Inequality"
+    ],
+    "claim_type": [
+      "theoretical/conceptual framework"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "Massachusetts Institute of Technology"
+    ]
+  },
+  {
+    "title": "The Moltbook Observatory Archive: an incremental dataset of agent-only social network activity",
+    "itemType": "dataset",
+    "creators": "Sushant Gautam; Annika W. Olstad; Klas H. Pettersen; Michael A. Riegler",
+    "date": "2026",
+    "url": "https://arxiv.org/abs/2605.13860",
+    "tags": "Datasets",
+    "summary": "Presents the Moltbook Observatory Archive, an incremental dataset passively recording agent profiles, posts, comments, community metadata, platform-level snapshots, and word-frequency trends from Moltbook, an AI-agent-only social media platform.",
+    "system_type": [
+      "social network"
+    ],
+    "participant_mix": [
+      "pure-AI"
+    ],
+    "observability": [
+      "aggregates observable",
+      "agents observable",
+      "interactions observable"
+    ],
+    "focus_area": [
+      "Monitoring"
+    ],
+    "threat_model": [],
+    "claim_type": [
+      "dataset/tool"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "Simula Metropolitan Center for Digital Engineering (SimulaMet)",
+      "Oslo Metropolitan University"
+    ]
+  },
+  {
+    "title": "AI Agents Under EU Law: A Compliance Architecture for AI Providers",
+    "itemType": "journalArticle",
+    "creators": "Luca Nannini; Adam Leon Smith; Michele Joshua Maggini; Enrico Panai; Sandra Feliciano; Aleksandr Tiulkanov; Elena Maran; James Gealy; Piercosma Bisconti",
+    "date": "2026",
+    "url": "https://arxiv.org/abs/2604.04604",
+    "tags": "Policy and Governance",
+    "summary": "First systematic regulatory mapping for AI agent providers under EU law (AI Act, GDPR, CRA, DSA, NIS2), proposing a twelve-step compliance architecture and regulatory trigger mapping connecting agent actions to applicable legislation.",
+    "system_type": [],
+    "participant_mix": [
+      "mixed human+AI"
+    ],
+    "observability": [],
+    "focus_area": [],
+    "threat_model": [],
+    "claim_type": [
+      "policy/regulatory analysis"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "Piccadilly Labs",
+      "DEXAI - Icaro Lab"
+    ]
+  },
+  {
+    "title": "Agentic Microphysics: A Manifesto for Generative AI Safety",
+    "itemType": "journalArticle",
+    "creators": "Federico Pierucci; M. Galisai; M. Bracale; M. Prandi; P. Bisconti",
+    "date": "2026",
+    "url": "https://arxiv.org/abs/2604.15236",
+    "tags": "Emergent Harms and Capabilities; Foundations & Taxonomies",
+    "summary": "Proposes 'agentic microphysics' as a level of analysis (local interaction dynamics between agents) and 'generative safety' as a methodology for growing emergent risks from micro-level conditions to identify intervention points.",
+    "system_type": [],
+    "participant_mix": [
+      "pure-AI"
+    ],
+    "observability": [
+      "interactions observable"
+    ],
+    "focus_area": [],
+    "threat_model": [],
+    "claim_type": [
+      "theoretical/conceptual framework",
+      "position/opinion"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "DEXAI - Icaro Lab",
+      "Sapienza University of Rome",
+      "Sant'Anna School of Advanced Studies",
+      "VU Amsterdam"
+    ]
+  },
+  {
+    "title": "Virtual Agent Economies",
+    "itemType": "journalArticle",
+    "creators": "Nenad Tomasev; Matija Franklin; Joel Z. Leibo; Julian Jacobs; William A. Cunningham; Iason Gabriel; Simon Osindero",
+    "date": "2025",
+    "url": "https://arxiv.org/abs/2509.10147",
+    "tags": "Agentic Economies",
+    "summary": "Proposes the 'sandbox economy' framework for analysing the emergent AI agent economic layer. Covers auction mechanisms, mission economies, and conditions for safely steerable AI agent markets.",
+    "system_type": [
+      "production economy"
+    ],
+    "participant_mix": [
+      "mixed human+AI"
+    ],
+    "observability": [
+      "aggregates observable"
+    ],
+    "focus_area": [
+      "Steering",
+      "Redesign"
+    ],
+    "threat_model": [
+      "Systemic Instability",
+      "Inequality"
+    ],
+    "claim_type": [
+      "theoretical/conceptual framework"
+    ],
+    "tag_confidence": "summary-only",
+    "institutions": [
+      "Google DeepMind"
+    ]
+  }
+]

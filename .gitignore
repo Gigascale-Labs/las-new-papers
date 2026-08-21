@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+
+# Derived state, regenerable from config.yaml + the embedding model.
+# Anchor vectors are model-specific and ~100KB of binary per rebuild --
+# not source data, and they'd churn every time the anchor list changes.
+data/anchors.npy
+data/anchors.meta.json
+
+# Model cache (sentence-transformers / HuggingFace)
+.cache/
+data/.loo_cache/

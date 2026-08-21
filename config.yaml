@@ -1,0 +1,167 @@
+# arXiv open questions feed -- settings.
+#
+# Secrets and email addresses are not in this file. They come from the
+# environment: ANTHROPIC_API_KEY, SMTP_PASSWORD, LAKERA_GUARD_API_KEY,
+# FEED_EMAIL_TO, SMTP_USER. See the README.
+
+# ---------------------------------------------------------------------------
+# arXiv lists to read each day.
+#
+# arXiv has no bare `econ` list to query, so its three real lists are named.
+# Together these give about 200-500 new papers a day.
+# ---------------------------------------------------------------------------
+categories:
+  - cs.MA      # Multiagent Systems
+  - cs.AI      # Artificial Intelligence
+  - cs.LG      # Machine Learning
+  - cs.DC      # Distributed, Parallel, and Cluster Computing
+  - econ.GN    # General Economics
+  - econ.TH    # Theoretical Economics
+  - econ.EM    # Econometrics
+
+# ---------------------------------------------------------------------------
+# Anchor papers: work already known to be in the field.
+#
+# These 33 are the arXiv entries of the 42-paper LAS canon, frozen in
+# data/ground-truth/. They spread across simulation, markets, safety and
+# governance. Anchors need that spread; anchors from one corner of the field
+# only find that corner.
+#
+# The other 9 canon entries are not on arXiv, so they have no ID to anchor on.
+#
+# Add or remove any of them. The vectors rebuild on the next run.
+# ---------------------------------------------------------------------------
+anchors:
+  - "2503.13395"  # Causal Emergence 2.0: Quantifying Emergent Complexity
+  - "2410.07283"  # Prompt Infection: LLM-to-LLM Prompt Injection within Multi-Agent ...
+  - "2603.03140"  # How to Model AI Agents as Personas?: Applying the Persona Ecosyst...
+  - "2411.11581"  # OASIS: Open Agent Social Interaction Simulations with One Million...
+  - "2505.17479"  # Twin-2K-500: A dataset for building digital twins of over 2,000 p...
+  - "2512.02682"  # Beyond Single-Agent Safety: A Taxonomy of Risks in LLM-to-LLM Int...
+  - "2605.24413"  # Habermolt: Delegating Deliberation to AI Representatives
+  - "2409.02822"  # AI agents can coordinate beyond human scale
+  - "2211.03074"  # A Survey on Influence Maximization: From an ML-Based Combinatoria...
+  - "2406.12137"  # IDs for AI Systems
+  - "2602.16136"  # Retrieval Collapses When AI Pollutes the Web
+  - "2402.08567"  # Agent Smith: A Single Image Can Jailbreak One Million Multimodal ...
+  - "2409.10568"  # On the Limits of Agency in Agent-Based Models
+  - "2603.23471"  # Regulating AI Agents
+  - "2411.10109"  # LLM Agents Grounded in Self-Reports Enable General-Purpose Simula...
+  - "2502.14143"  # Multi-Agent Risks from Advanced AI
+  - "2408.02784"  # LLM economicus? Mapping the Behavioral Biases of LLMs via Utility...
+  - "2509.01063"  # An Economy of AI Agents
+  - "2510.22422"  # Group size effects and collective misalignment in LLM multi-agent...
+  - "2606.04592"  # Synthetic Personalities: How Well Can LLMs Mimic Individual Respo...
+  - "2501.16946"  # Gradual Disempowerment: Systemic Existential Risks from Increment...
+  - "2502.08691"  # AgentSociety: Large-Scale Simulation of LLM-Driven Generative Age...
+  - "2602.11865"  # Intelligent AI Delegation
+  - "2604.10290"  # AI Organizations are More Effective but Less Aligned than Individ...
+  - "2404.16109"  # zkLLM: Zero Knowledge Proofs for Large Language Models
+  - "2508.16279"  # AgentScope 1.0: A Developer-Centric Framework for Building Agenti...
+  - "2506.12078"  # Modeling Earth-Scale Human-Like Societies with One Billion Agents
+  - "2512.16856"  # Distributional AGI Safety
+  - "2604.01151"  # Detecting Multi-Agent Collusion Through Multi-Agent Interpretability
+  - "2605.13860"  # The Moltbook Observatory Archive: an incremental dataset of agent...
+  - "2604.04604"  # AI Agents Under EU Law: A Compliance Architecture for AI Providers
+  - "2604.15236"  # Agentic Microphysics: A Manifesto for Generative AI Safety
+  - "2509.10147"  # Virtual Agent Economies
+
+# ---------------------------------------------------------------------------
+# Your background, skills and projects, in about 300 words.
+#
+# Both model calls read it: to score significance for you, and to decide
+# whether a question is approachable by you.
+#
+# Change this first if the emails are interesting but not useful.
+# ---------------------------------------------------------------------------
+profile: |
+  I work on large agent systems: the economies, markets, social networks and
+  organisations that emerge when many AI agents interact with each other and
+  with people at scale. My interest is system-level rather than model-level.
+  A paper about making one agent more capable is not for me; a paper about
+  what happens when thousands of such agents transact, coordinate, compete,
+  collude or deceive each other is.
+
+  Concretely I care about: multi-agent simulation of societies and markets
+  (generative-agent simulations, agent-based models, digital twins of
+  populations); the observability of these systems (what can be measured
+  from aggregate behaviour, from interaction logs, or from the agents
+  themselves); mechanism and market design for populations that include
+  autonomous agents; monitoring and steering interventions that work at the
+  population level; and the failure modes that only appear in aggregate --
+  systemic instability, herding and monoculture, collusion, information
+  cascades, gradual disempowerment of human decision-makers, and
+  concentration of power.
+
+  My background is applied and empirical rather than pure theory. I can
+  implement and run simulations, train and evaluate models, work with
+  network and time-series data, do econometric and causal analysis, and
+  build and analyse scraped datasets. I read economics and complex-systems
+  work comfortably but I am not a theorist: I can use a mechanism-design
+  result, not prove a new one. I do not run human-subject experiments and I
+  have no access to proprietary platform data, so questions that require
+  either are not approachable for me even when they are interesting.
+
+  I am looking for open questions I could actually start on within a few
+  weeks with public data, public APIs, or a simulation I can write myself.
+  Questions that require frontier-scale pretraining compute, a large
+  engineering team, or privileged access to a deployed platform are not
+  approachable.
+
+# ---------------------------------------------------------------------------
+# Filter and scoring sizes.
+# ---------------------------------------------------------------------------
+shortlist_n: 40      # papers kept by similarity
+explore_n: 5         # random papers added from the next 100 (anti-tunnel-vision)
+top_n: 10            # papers kept after the scoring call
+
+# ---------------------------------------------------------------------------
+# Models.
+# ---------------------------------------------------------------------------
+# Embedding model, loaded locally. SPECTER2 is trained on paper titles and
+# abstracts, which is the exact input here. See the README for the pooling and
+# adapter notes.
+embed_model: allenai/specter2_base
+
+# Model for the two calls (scoring, question extraction).
+model: claude-opus-5
+
+# Reasoning effort for the model calls: low | medium | high | xhigh | max.
+effort: medium
+
+# ---------------------------------------------------------------------------
+# Defences for untrusted text (arXiv titles and abstracts).
+#
+# The structural defences always run and need no key: invisible characters
+# removed, length capped, each abstract fenced under a "this is data" prompt.
+# This block configures only the Lakera screening layer above them.
+#
+# The key comes from $LAKERA_GUARD_API_KEY. With no key the run warns, says so
+# in the email, and continues.
+# ---------------------------------------------------------------------------
+guard:
+  enabled: true
+  # project_id: project-xxxxxxxx   # optional: screen under a specific Lakera policy
+  endpoint: https://api.lakera.ai/v2/guard
+  timeout_seconds: 20
+  # What an unreachable Lakera means. `allow` keeps the day's email and
+  # reports the failure. `block` withholds every paper it could not screen.
+  on_error: allow
+  max_title_chars: 500
+  max_abstract_chars: 6000
+
+# ---------------------------------------------------------------------------
+# Email delivery.
+#
+# No address is stored in this file. This repository is public, and an address
+# in a public file is scraped. Addresses come from the environment:
+#
+#   FEED_EMAIL_TO    where the digest is sent          (required to send)
+#   FEED_EMAIL_FROM  the From: header                  (optional, defaults to FEED_EMAIL_TO)
+#   SMTP_USER        the account that logs in to send  (optional, defaults to FEED_EMAIL_FROM)
+#   SMTP_PASSWORD    that account's app password       (required to send)
+#
+# Only the server settings, which identify nobody, are here.
+# ---------------------------------------------------------------------------
+smtp_host: smtp.gmail.com
+smtp_port: 587
