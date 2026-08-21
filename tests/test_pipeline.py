@@ -5,6 +5,7 @@ Run: python -m unittest discover tests
 
 from __future__ import annotations
 
+import csv
 import json
 import random
 import tempfile
@@ -195,7 +196,7 @@ class TestCanonRows(unittest.TestCase):
             tags={"system_type": ["social network", "social networks", "made up"],
                   "focus_area": ["Simulation"], "claim_type": ["empirical study"],
                   "tags": ["Simulation and Digital Twins"]},
-            summary="A summary.", similarity=0.55, nearest_anchor_id="2502.14143",
+            summary="A summary.", similarity=0.55, similarity_rank=3, nearest_anchor_id="2502.14143",
             significance=4, novelty=3, from_random=False, first_seen="2026-08-21",
         )
         self.assertEqual(row["system_type"], "social network")
@@ -204,7 +205,7 @@ class TestCanonRows(unittest.TestCase):
         self.assertEqual(row["institutions"], "")
 
     def test_column_order_matches_the_canon(self):
-        self.assertEqual(canon.FINALIST_COLUMNS[:15], canon.CANON_COLUMNS)
+        self.assertEqual(canon.CANDIDATE_COLUMNS[:15], canon.CANON_COLUMNS)
         self.assertEqual(
             canon.CANON_COLUMNS,
             ["title", "itemType", "creators", "date", "url", "tags", "summary",
@@ -218,14 +219,66 @@ class TestCanonRows(unittest.TestCase):
 
     def test_append_skips_duplicate_urls(self):
         with tempfile.TemporaryDirectory() as d:
-            path = Path(d) / "finalists.csv"
+            path = Path(d) / "candidates.csv"
             row = canon.to_canon_row(
-                paper=paper(1), tags={}, summary="s", similarity=0.5,
+                paper=paper(1), tags={}, summary="s", similarity=0.5, similarity_rank=1,
                 nearest_anchor_id="a", significance=3, novelty=3,
                 from_random=False, first_seen="2026-08-21")
-            self.assertEqual(canon.append_finalists(path, [row]), 1)
-            self.assertEqual(canon.append_finalists(path, [row]), 0)
+            self.assertEqual(canon.append_candidates(path, [row]), 1)
+            self.assertEqual(canon.append_candidates(path, [row]), 0)
             self.assertEqual(len(path.read_text(encoding="utf-8").strip().splitlines()), 2)
+
+
+class TestCandidateRecord(unittest.TestCase):
+    """Every shortlisted paper is recorded, not just the ten that were sent."""
+
+    def _row(self, *, emailed, tags=None, rank=7):
+        return canon.to_canon_row(
+            paper=paper(1),
+            tags=tags or {},
+            summary="What it does.",
+            similarity=0.61,
+            similarity_rank=rank,
+            nearest_anchor_id="2509.10147",
+            significance=4,
+            novelty=3,
+            from_random=False,
+            first_seen="2026-08-21",
+            emailed=emailed,
+        )
+
+    def test_a_shortlisted_paper_keeps_its_filter_data_without_tags(self):
+        row = self._row(emailed=False)
+        self.assertEqual(row["similarity"], "0.6100")
+        self.assertEqual(row["similarity_rank"], 7)
+        self.assertEqual(row["nearest_anchor_id"], "2509.10147")
+        self.assertEqual(row["significance"], 4)
+        self.assertEqual(row["emailed"], "")
+        # No question call was made for it, so every dimension is blank.
+        for column in ("system_type", "focus_area", "claim_type", "threat_model"):
+            self.assertEqual(row[column], "")
+
+    def test_an_emailed_paper_is_marked_and_tagged(self):
+        row = self._row(emailed=True, tags={"focus_area": ["Simulation"],
+                                            "claim_type": ["empirical study"]})
+        self.assertEqual(row["emailed"], "yes")
+        self.assertEqual(row["focus_area"], "Simulation")
+
+    def test_one_file_holds_both(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "candidates.csv"
+            sent = self._row(emailed=True, rank=1)
+            sent["url"] = "https://arxiv.org/abs/2608.00001"
+            not_sent = self._row(emailed=False, rank=30)
+            not_sent["url"] = "https://arxiv.org/abs/2608.00002"
+
+            self.assertEqual(canon.append_candidates(path, [sent, not_sent]), 2)
+            with path.open(newline="", encoding="utf-8") as f:
+                rows = list(csv.DictReader(f))
+
+            self.assertEqual([r["emailed"] for r in rows], ["yes", ""])
+            # The canon's own columns come first, so a row lifts straight in.
+            self.assertEqual(list(rows[0])[:15], canon.CANON_COLUMNS)
 
 
 class TestSeen(unittest.TestCase):

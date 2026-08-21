@@ -74,6 +74,7 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
         },
         "counts": counts,
         "papers": [],
+        "shortlist": [],
         "problems": problems,
         # No address here: data/*.json is committed to a public repository by
         # the daily workflow.
@@ -149,7 +150,7 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
 
     # 6. one question-extraction call per kept paper
     tag_vocab = canon.known_tags()
-    finalist_rows = []
+    kept_ids = {c.paper.arxiv_id for c in kept}
     for c in kept:
         entry = c.to_dict()
         s = scores.get(c.paper.arxiv_id, {})
@@ -175,26 +176,52 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
 
         result["papers"].append(entry)
 
-        if entry["canon"]:
-            finalist_rows.append(
-                canon.to_canon_row(
-                    paper=c.paper,
-                    tags=entry["canon"],
-                    summary=entry["canon"].get("summary", "") or entry["one_sentence"],
-                    similarity=c.similarity,
-                    nearest_anchor_id=c.nearest_anchor_id,
-                    significance=entry["significance"],
-                    novelty=entry["novelty"],
-                    from_random=c.from_random,
-                    first_seen=day,
-                )
+    # 7. record the whole shortlist, not just the ten that were sent.
+    #
+    # The other 35 were already scored, in the same call. They are the pool the
+    # canon grows from, so their similarity, rank and scores are kept. The
+    # abstract is not repeated here; it is in data/raw/ for the same day.
+    kept_entries = {e["arxiv_id"]: e for e in result["papers"]}
+    candidate_rows = []
+    for c in candidates:
+        s = scores.get(c.paper.arxiv_id, {})
+        tags = (kept_entries.get(c.paper.arxiv_id) or {}).get("canon") or {}
+        emailed = c.paper.arxiv_id in kept_ids
+
+        brief = c.to_dict()
+        brief.pop("abstract", None)
+        brief.pop("categories", None)
+        result["shortlist"].append(
+            {
+                **brief,
+                "significance": s.get("significance"),
+                "novelty": s.get("novelty"),
+                "one_sentence": s.get("one_sentence", ""),
+                "kept": emailed,
+            }
+        )
+
+        candidate_rows.append(
+            canon.to_canon_row(
+                paper=c.paper,
+                tags=tags,
+                summary=tags.get("summary", "") or s.get("one_sentence", ""),
+                similarity=c.similarity,
+                similarity_rank=c.rank,
+                nearest_anchor_id=c.nearest_anchor_id,
+                significance=s.get("significance"),
+                novelty=s.get("novelty"),
+                from_random=c.from_random,
+                first_seen=day,
+                emailed=emailed,
             )
+        )
 
-    # 7. write the archive before sending: an email that fails must not cost the data
+    # 8. write the archive before sending. A failed email must not cost the data.
     write_output(cfg, result, day)
-    canon.append_finalists(cfg.finalists_csv, finalist_rows)
+    canon.append_candidates(cfg.candidates_csv, candidate_rows)
 
-    # 8. send
+    # 9. send
     if dry_run:
         log.info("dry run: no email sent, %d paper(s) written", len(result["papers"]))
         return result

@@ -180,14 +180,14 @@ class TestSinks(unittest.TestCase):
             self.assertTrue(guard.neutralize_cell(danger).startswith("'"))
         self.assertEqual(guard.neutralize_cell("Normal title"), "Normal title")
 
-    def test_finalists_csv_writes_neutralised_cells(self):
+    def test_candidates_csv_writes_neutralised_cells(self):
         with tempfile.TemporaryDirectory() as d:
-            path = Path(d) / "finalists.csv"
+            path = Path(d) / "candidates.csv"
             p = paper(1, title='=cmd|"/c calc"!A1')
-            row = canon.to_canon_row(paper=p, tags={}, summary="s", similarity=0.5,
+            row = canon.to_canon_row(paper=p, tags={}, summary="s", similarity=0.5, similarity_rank=1,
                                      nearest_anchor_id="a", significance=3, novelty=3,
                                      from_random=False, first_seen="2026-08-21")
-            canon.append_finalists(path, [row])
+            canon.append_candidates(path, [row])
             body = path.read_text(encoding="utf-8")
         self.assertIn("'=cmd", body)
 
