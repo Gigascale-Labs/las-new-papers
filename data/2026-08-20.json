@@ -1,0 +1,1692 @@
+{
+  "date": "2026-08-20",
+  "generated_at": "2026-08-22T13:01:20+00:00",
+  "config": {
+    "categories": [
+      "cs.MA",
+      "cs.AI",
+      "cs.LG",
+      "cs.DC",
+      "econ.GN",
+      "econ.TH",
+      "econ.EM"
+    ],
+    "shortlist_n": 40,
+    "explore_n": 5,
+    "top_n": 10,
+    "embed_model": "allenai/specter2_base",
+    "model": "anthropic/claude-opus-5",
+    "effort": "medium",
+    "anchor_count": 33
+  },
+  "counts": {
+    "fetched": 185,
+    "unseen": 185,
+    "shortlisted": 45,
+    "kept": 10,
+    "anchors": 33
+  },
+  "papers": [
+    {
+      "arxiv_id": "2608.20041",
+      "title": "A three-dimensional typology of agency for advanced AI systems",
+      "abstract": "Research on the agency of advanced artificial intelligence (AI) systems focuses on agency as a normative concept and on the agency of particularly agentic AI systems. While recent work also focuses on the different profiles of agentic systems, no framework exists to address the question of the type of agency instantiated by advanced AI systems, particularly when considering non-moral forms of agency. Based on established theoretical positions in philosophy, ethics, legal theory and sociology, we develop a typology of agency for frontier AI systems consisting of three dimensions: the nature of agency (moral or legal), its mode (individual or collective) and its locus (human or non-human). Combining these dimensions produces eight possible instantiations of agency, which we classify as conventional, contested or controversial. The typology separates legal from moral agency and thereby creates conceptual space for considering individual, legal, non-human agency without presupposing that advanced AI systems are moral agents. We argue that this distinction is increasingly relevant where instrumental goal pursuit complicates the attribution of AI actions to particular human actors.",
+      "authors": [
+        "Willem Fourie"
+      ],
+      "published": "2026-08-20T13:46:33Z",
+      "updated": "2026-08-20T13:46:33Z",
+      "categories": [
+        "cs.AI",
+        "cs.CY"
+      ],
+      "url": "https://arxiv.org/abs/2608.20041",
+      "similarity": 0.9603,
+      "nearest_anchor_id": "2603.23471",
+      "nearest_anchor_title": "Regulating AI Agents",
+      "similarity_rank": 1,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "open_questions": [
+        {
+          "question": "Can a conceptual typology of agency (moral/legal, individual/collective, human/non-human) be operationalised into measurable criteria that classify actual deployed AI systems rather than hypothetical categories?",
+          "label": "approachable",
+          "reason": "can be tested by coding a corpus of documented agent deployments against the typology"
+        },
+        {
+          "question": "When autonomous agents pursue instrumental goals through long action chains, how can responsibility for outcomes be traced back to particular human actors?",
+          "label": "approachable",
+          "reason": "attribution traceability can be studied in a self-written multi-agent simulation with full interaction logs"
+        },
+        {
+          "question": "Does collective agency in multi-agent AI systems produce behaviours that cannot be attributed to any individual agent, and how would such emergence be detected empirically?",
+          "label": "approachable",
+          "reason": "testable with a population-scale agent simulation and aggregate behavioural metrics"
+        },
+        {
+          "question": "How should legal personhood or liability regimes be designed for individual non-human legal agents, given the separation of legal from moral agency?",
+          "label": "not approachable",
+          "reason": "requires legal-theoretic and doctrinal expertise the profile disclaims"
+        }
+      ],
+      "canon": {
+        "summary": "Develops a three-dimensional typology of agency for frontier AI systems along the dimensions of nature (moral or legal), mode (individual or collective) and locus (human or non-human), yielding eight instantiations classified as conventional, contested or controversial. Argues for separating legal from moral agency to allow consideration of individual, legal, non-human agency in light of instrumental goal pursuit complicating attribution of AI actions to humans.",
+        "tags": [
+          "Foundations & Taxonomies",
+          "Trust, Delegation & Accountability",
+          "Policy and Governance"
+        ],
+        "system_type": [],
+        "participant_mix": [
+          "mixed human+AI"
+        ],
+        "observability": [],
+        "focus_area": [],
+        "threat_model": [],
+        "claim_type": [
+          "theoretical/conceptual framework",
+          "survey/taxonomy"
+        ]
+      },
+      "suspicious_markers": []
+    },
+    {
+      "arxiv_id": "2608.19689",
+      "title": "Rethinking the Evaluation and Optimization of LLM-Based Social Simulation",
+      "abstract": "LLM-based social simulation is a promising complement to traditional methods such as surveys and behavioral experiments. A core question is how to evaluate the fidelity of LLM-simulated human behavior and optimize LLMs toward it. Prevailing practice evaluates by accuracy, checking whether the model selects the single response observed from a human, and trains the LLM to reproduce this hard label. However, human behavior is inherently subjective: the same person in the same situation may reasonably act differently, so an observed response is only one draw from an underlying response distribution, rendering accuracy-based evaluation unreliable and hard-label training misleading. To address these problems, we first introduce the subjectivity coefficient, an entropy-based quantity distinguishing objective tasks such as coding from subjective ones such as social simulation, and use it to systematically analyze how accuracy-based evaluation and hard-label training fail as subjectivity grows. Based on the subjectivity coefficient, we propose Subjectivity-Adaptive soft-Label Training (SALT): it pools observed outputs from semantically nearby inputs into soft distributional labels, with an aggregation radius adapted to the estimated subjectivity of each input; in the near-objective limit the neighborhood shrinks, so SALT naturally falls back to standard single-label training. Moreover, since existing datasets record only single observed responses and cannot support distributional evaluation, we construct SUBJSIM, a benchmark of 19,300 contexts covering 193 annotators and 100 subjective questions. Since real-world data typically provide only a single observation per input, our experiments train models from single observed outputs while evaluating them against the full response distributions, verifying feasibility in realistic settings. Results on SUBJSIM demonstrate the advantages of our method.",
+      "authors": [
+        "Pei Wang",
+        "Xu Chen",
+        "Ji-Rong Wen"
+      ],
+      "published": "2026-08-20T06:26:03Z",
+      "updated": "2026-08-20T06:26:03Z",
+      "categories": [
+        "cs.AI"
+      ],
+      "url": "https://arxiv.org/abs/2608.19689",
+      "similarity": 0.9481,
+      "nearest_anchor_id": "2411.10109",
+      "nearest_anchor_title": "LLM Agents Grounded in Self-Reports Enable General-Purpose Simulation of Individuals",
+      "similarity_rank": 2,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "open_questions": [
+        {
+          "question": "Does distribution-matching (soft-label) training of LLM personas actually improve the fidelity of emergent aggregate outcomes in multi-agent social simulations, or only per-question response distributions?",
+          "label": "approachable",
+          "reason": "Can be tested by running an agent-based simulation with hard-label vs soft-label-tuned agents and comparing aggregate statistics"
+        },
+        {
+          "question": "How well does the entropy-based subjectivity coefficient, estimated from repeated annotations, transfer to settings where only a single observed response per input exists, e.g. survey panels or scraped behavioural logs?",
+          "label": "approachable",
+          "reason": "Public repeated-measure survey datasets (e.g. ANES, WVS) allow estimating response entropy without new data collection"
+        },
+        {
+          "question": "Does pooling outputs from semantically nearby inputs to form soft labels introduce systematic bias by smoothing over genuine individual heterogeneity, and how does the aggregation radius trade off calibration against persona distinctiveness?",
+          "label": "approachable",
+          "reason": "Ablation over pooling radius on public annotator-level datasets, modest compute"
+        },
+        {
+          "question": "Do soft-label trained agent populations avoid the monoculture and herding artefacts seen when many LLM agents share a single mode-seeking policy?",
+          "label": "approachable",
+          "reason": "Measurable via diversity metrics in a self-written multi-agent simulation"
+        },
+        {
+          "question": "How should distributional fidelity be validated against real human behaviour in interactive, multi-round social settings rather than static single-question contexts?",
+          "label": "not approachable",
+          "reason": "Requires human-subject behavioural experiments"
+        },
+        {
+          "question": "Can benchmarks of subjective response distributions be extended beyond 193 annotators to demographically representative populations, and does fidelity generalise across cultures?",
+          "label": "not approachable",
+          "reason": "Requires recruiting and paying large annotator panels"
+        }
+      ],
+      "canon": {
+        "summary": "The paper argues that accuracy-based evaluation and hard-label training are unreliable for LLM-based social simulation because human responses are draws from a distribution. It introduces an entropy-based subjectivity coefficient, a soft-label training method (SALT) that pools outputs from semantically nearby inputs with a subjectivity-adaptive radius, and SUBJSIM, a benchmark of 19,300 contexts from 193 annotators over 100 subjective questions.",
+        "tags": [
+          "Simulation and Digital Twins",
+          "Evaluations",
+          "Datasets"
+        ],
+        "system_type": [],
+        "participant_mix": [],
+        "observability": [],
+        "focus_area": [
+          "Simulation"
+        ],
+        "threat_model": [],
+        "claim_type": [
+          "proposed method/system",
+          "dataset/tool",
+          "empirical study"
+        ]
+      },
+      "suspicious_markers": []
+    },
+    {
+      "arxiv_id": "2608.19857",
+      "title": "Inadvertent Context Leakage in Language Models",
+      "abstract": "For AI agents to be useful beyond simple chat, they must hold sensitive user context such as calendars, credentials, health records, and financial data. We study whether the mere presence of such secrets in a model's context window introduces hidden correlations into the model's benign outputs, allowing reconstruction even when the model correctly refuses direct extraction. We further study whether an adversary can actively engineer prompts that amplify this effect, using the model as a covert carrier to transmit secrets through seemingly innocuous text. In both cases, this limited leakage is exploited using a novel adaptive attack that assumes black-box access to the underlying model. In controlled experiments across eight proprietary models, we find that 2-digit in-context secrets are reconstructed with near-perfect accuracy and 4-digit secrets at 82\\% exact match, all from outputs the model produces in response to ordinary, non-adversarial requests. We observe that more capable models leak more: stronger instruction-following amplifies sensitivity to in-context secrets, suggesting leakage is a byproduct of capability as opposed to a patchable bug. We show this leakage enables two practical attacks: (1) a trained classifier that infers semantic predicates about user memories (e.g., health conditions, financial events) from routine natural-language outputs, and (2) an RL-trained adversary that extracts full Social Security Numbers from a production-style agent.",
+      "authors": [
+        "Jaiden Fairoze",
+        "Neal Mangaokar",
+        "Kamalika Chaudhuri",
+        "Sanjam Garg",
+        "Saeed Mahloujifar"
+      ],
+      "published": "2026-08-20T10:05:29Z",
+      "updated": "2026-08-20T10:05:29Z",
+      "categories": [
+        "cs.LG",
+        "cs.CR"
+      ],
+      "url": "https://arxiv.org/abs/2608.19857",
+      "similarity": 0.935,
+      "nearest_anchor_id": "2410.07283",
+      "nearest_anchor_title": "Prompt Infection: LLM-to-LLM Prompt Injection within Multi-Agent Systems",
+      "similarity_rank": 5,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "open_questions": [
+        {
+          "question": "Does inadvertent context leakage compound when secrets pass through chains of communicating agents, i.e. can a downstream agent that never saw the secret reconstruct it from an upstream agent's benign outputs?",
+          "label": "approachable",
+          "reason": "Can be tested with a self-written multi-agent pipeline over public model APIs"
+        },
+        {
+          "question": "What defences reduce reconstruction of in-context secrets from benign outputs without degrading instruction-following, given the claim that leakage scales with capability?",
+          "label": "approachable",
+          "reason": "Output-side mitigations (paraphrasing, sampling noise, context partitioning) are testable via public APIs"
+        },
+        {
+          "question": "How does reconstruction accuracy scale with secret entropy and format beyond 4-digit numbers (e.g. long alphanumeric credentials, free-text records)?",
+          "label": "approachable",
+          "reason": "Only needs black-box API queries and a query-efficient adaptive attack implementation"
+        },
+        {
+          "question": "Is the reported positive relationship between model capability and context leakage robust across model families and training regimes, or an artefact of the eight models tested?",
+          "label": "approachable",
+          "reason": "Requires only broader public/open-weight model coverage and the same measurement protocol"
+        },
+        {
+          "question": "Can covert-channel leakage be detected in deployed agent traffic from interaction logs alone, without knowing the secret?",
+          "label": "not approachable",
+          "reason": "Needs logs from a deployed production agent platform"
+        },
+        {
+          "question": "At what rate does this leakage actually expose user secrets in real assistant deployments with genuine user memories?",
+          "label": "not approachable",
+          "reason": "Requires proprietary deployment telemetry or human-subject data"
+        }
+      ],
+      "canon": {
+        "summary": "An empirical study of whether sensitive information held in a language model's context window is recoverable from the model's ordinary, non-adversarial outputs. Using a black-box adaptive attack across eight proprietary models, the authors reconstruct 2- and 4-digit in-context secrets, report that more capable models leak more, and demonstrate a classifier inferring semantic attributes of user memories and an RL-trained adversary extracting full SSNs from a production-style agent.",
+        "tags": [
+          "Security & Adversarial Robustness",
+          "Emergent Harms and Capabilities",
+          "Monitoring"
+        ],
+        "system_type": [],
+        "participant_mix": [],
+        "observability": [],
+        "focus_area": [],
+        "threat_model": [],
+        "claim_type": [
+          "empirical study",
+          "proposed method/system"
+        ]
+      },
+      "suspicious_markers": []
+    },
+    {
+      "arxiv_id": "2608.19902",
+      "title": "Bringing analytic rigor to agentic AI for science: The Brain Researcher platform for neuroimaging data analysis",
+      "abstract": "AI agents can execute scientific analyses, but an analytic output becomes a defensible claim only after alternatives are weighed and the claim is limited to what the evidence supports. Agents may reproduce failures including selective analysis, premature declarations of success and optimization of imperfect criteria. We present Brain Researcher, an agentic research harness operating in a neuroimaging researcher's computational environment under rules for admissible analyses, required checks and claim scope. In benchmarks, Brain Researcher increased first-choice tool-selection accuracy across seven models by 70.2 percentage points (23.3% without it versus 93.6% with it) and verifiable grounding from 4.6% to 22.0%. In collaborator-led and self-evolving studies, multiverse analyses exposed analytic-choice sensitivity, and scientific review classified claims as accepted, qualified, revised, blocked, rejected or deferred. By linking decisions to evidence and provenance, Brain Researcher embeds methodological judgment within the workflow, not after it.",
+      "authors": [
+        "Zijiao Chen",
+        "Nicholas Lu",
+        "Xinhui Li",
+        "Jocelyn A. Ricard",
+        "Ce Ju",
+        "Huan H. Wang",
+        "Christian Kindermann",
+        "Jeanette A. Mumford",
+        "Steven Dillmann",
+        "James Kent",
+        "Alejandro de la Vega",
+        "Sanmi Koyejo",
+        "Vince D. Calhoun",
+        "Joshua W. Buckholtz",
+        "Juan Helen Zhou",
+        "Steffen Bollmann",
+        "Russell A. Poldrack"
+      ],
+      "published": "2026-08-20T11:13:27Z",
+      "updated": "2026-08-20T11:13:27Z",
+      "categories": [
+        "cs.AI",
+        "q-bio.NC"
+      ],
+      "url": "https://arxiv.org/abs/2608.19902",
+      "similarity": 0.9349,
+      "nearest_anchor_id": "2502.14143",
+      "nearest_anchor_title": "Multi-Agent Risks from Advanced AI",
+      "similarity_rank": 6,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "open_questions": [
+        {
+          "question": "Do harness-imposed rules on admissible analyses, required checks and claim scope generalize beyond neuroimaging to other data-analysis domains, and how much of the gain is domain-specific tooling versus general procedural scaffolding?",
+          "label": "approachable",
+          "reason": "can port a rule-based harness to a public tabular/econometric dataset and benchmark with public model APIs"
+        },
+        {
+          "question": "Verifiable grounding remained low (22%) even with the harness; what mechanisms would raise the fraction of agent claims that are traceable to evidence and provenance?",
+          "label": "approachable",
+          "reason": "measurable with public APIs and open datasets, no privileged access needed"
+        },
+        {
+          "question": "When many agentic analysis systems operate under the same harness rules across a research community, does this induce monoculture in analytic choices and correlated errors in the published literature?",
+          "label": "approachable",
+          "reason": "can be studied via simulation of many agents plus multiverse analysis on public datasets"
+        },
+        {
+          "question": "Does embedding methodological review inside the agent workflow shift human researchers toward deferring judgment to the agent, and how would such deskilling be detected?",
+          "label": "not approachable",
+          "reason": "requires human-subject studies with practising researchers"
+        }
+      ],
+      "canon": {
+        "summary": "Presents Brain Researcher, an agentic harness that runs neuroimaging analyses within a researcher's computational environment under rules for admissible analyses, required checks and claim scope. Reports benchmark gains in tool-selection accuracy and verifiable grounding across seven models, plus collaborator-led and self-evolving case studies using multiverse analysis and a claim-classification review step.",
+        "tags": [
+          "Control and Steering",
+          "Monitoring",
+          "Trust, Delegation & Accountability"
+        ],
+        "system_type": [],
+        "participant_mix": [
+          "mixed human+AI"
+        ],
+        "observability": [
+          "interactions observable"
+        ],
+        "focus_area": [
+          "Design",
+          "Monitoring"
+        ],
+        "threat_model": [],
+        "claim_type": [
+          "proposed method/system",
+          "empirical study"
+        ]
+      },
+      "suspicious_markers": []
+    },
+    {
+      "arxiv_id": "2608.20281",
+      "title": "Inject, Align, Recover: Staged Post-Training for Retrieval-Free Document Knowledge Internalization",
+      "abstract": "Large language models often fail to answer questions about a bounded document collection when the source documents are not retrieved at inference time. We study this setting as document knowledge internalization: converting a fixed corpus into usable parametric knowledge for retrieval-free question answering. We propose IAR (Inject, Align, and Recover), a three-stage post-training framework that separates structured document knowledge injection, QA behavior alignment, and general ability recovery. Unlike conventional continued pretraining, Inject converts source documents into continuation, rewrite, and instruction-conditioned reconstruction objectives. Align then adapts the injected model with answer-only QA supervision, while Recover merges the domain-adapted model with the base instruction model to recover general capabilities. Across Common Corpus (CC) and CCI, and across Llama, Phi, Qwen, and SmolLM model families, IAR improves the domain-primary domain-general frontier for retrieval-free document internalization. In the main comparison, IAR improves over Vanilla SFT on all four reported metrics in 7 of 8 dataset-model settings, with average gains of 3.6 percentage points in domain QA accuracy and 12.1 percentage points in mean general performance across IFEval, MMLU, and MSBench. Extended CC baselines show that LoRA and FAPM can win individual general metrics, but among methods that also reach leading or near-leading domain internalization, IAR retains one of the strongest general profiles.",
+      "authors": [
+        "Qian Kou",
+        "Xiaofeng Shi",
+        "Xiaosong Qiu",
+        "Hua Zhou"
+      ],
+      "published": "2026-08-20T17:14:24Z",
+      "updated": "2026-08-20T17:14:24Z",
+      "categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "url": "https://arxiv.org/abs/2608.20281",
+      "similarity": 0.9336,
+      "nearest_anchor_id": "2602.16136",
+      "nearest_anchor_title": "Retrieval Collapses When AI Pollutes the Web",
+      "similarity_rank": 7,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "open_questions": [
+        {
+          "question": "How does staged knowledge injection scale as the bounded corpus grows by orders of magnitude, and at what corpus size does parametric internalization stop being competitive with retrieval?",
+          "label": "approachable",
+          "reason": "can be tested by fine-tuning small open models (e.g. SmolLM/Qwen-1.5B) on increasing slices of a public corpus on modest GPUs"
+        },
+        {
+          "question": "Does merging a domain-adapted model with its base instruction model preserve safety and instruction-following behaviour, or does it reintroduce forgotten domain knowledge inconsistently across question types?",
+          "label": "approachable",
+          "reason": "public checkpoints, open merging tools and public benchmarks (IFEval, MMLU) suffice"
+        },
+        {
+          "question": "Can retrieval-free internalized knowledge be audited or attributed back to source documents, so that errors in a fixed corpus can be traced and corrected without full retraining?",
+          "label": "approachable",
+          "reason": "probing and attribution experiments on small open models with a self-built corpus are feasible, though outside the researcher's stated system-level focus"
+        }
+      ],
+      "canon": {
+        "summary": "Proposes IAR, a three-stage post-training framework (knowledge injection via continuation, rewrite and reconstruction objectives; answer-only QA alignment; model merging for general-ability recovery) for retrieval-free question answering over a fixed document collection. Evaluates on Common Corpus and CCI across Llama, Phi, Qwen and SmolLM families, comparing against vanilla SFT, LoRA and FAPM on domain QA accuracy and general benchmarks.",
+        "tags": [
+          "Control and Steering"
+        ],
+        "system_type": [],
+        "participant_mix": [],
+        "observability": [],
+        "focus_area": [],
+        "threat_model": [],
+        "claim_type": [
+          "proposed method/system",
+          "empirical study"
+        ]
+      },
+      "suspicious_markers": []
+    },
+    {
+      "arxiv_id": "2608.20320",
+      "title": "An Agentic Approach for Active Data Collection, Travel Behavior Modeling, and Weather-Sensitive Demand Prediction",
+      "abstract": "Travel behavior research increasingly combines digital data collection with predictive modeling, yet these stages are often developed and evaluated separately. This study proposes a three-agent workflow integrating conversational data collection, structured data processing, and behavioral prediction. A chatbot-administered, image-augmented stated-preference survey collected mode choices from student commuters across five predefined weather scenarios, yielding 454 respondent-scenario observations. Weather-related associations were analyzed using a multinomial logit model, while logistic regression and random forest provided machine-learning benchmarks. Nine locally deployed large language models (LLMs), ranging from 2 to 35 billion parameters, were evaluated across four zero-shot prompt-and-context conditions and extended through persona, few-shot, and vision-based configurations. Random forest achieved 69.6% five-class accuracy, while the best text-only zero-shot LLM reached 69.9% without task-specific fitting. Habitual travel information produced the most consistent gains, Expert framing generally outperformed Role-Play, and persona information was most useful when habitual travel information was unavailable. Few-shot prompting improved prediction for several models, with gains stabilizing after a small number of examples. Using the same weather images shown to respondents, the best vision-based configuration reached 71.5% five-class accuracy, indicating that visual context may provide additional predictive information for selected models. Overall, the study shows how conversational surveys, structured data processing, conventional behavioral modeling, machine learning, and multimodal LLM prediction can be coordinated within an auditable multi-agent workflow.",
+      "authors": [
+        "Narges Ahmadi",
+        "Yubo Jiao",
+        "Jônatas Augusto Manzolli",
+        "Jiangbo Yu",
+        "Luis Miranda-Moreno"
+      ],
+      "published": "2026-08-20T17:57:42Z",
+      "updated": "2026-08-20T17:57:42Z",
+      "categories": [
+        "cs.AI",
+        "cs.CL"
+      ],
+      "url": "https://arxiv.org/abs/2608.20320",
+      "similarity": 0.9333,
+      "nearest_anchor_id": "2411.10109",
+      "nearest_anchor_title": "LLM Agents Grounded in Self-Reports Enable General-Purpose Simulation of Individuals",
+      "similarity_rank": 8,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "open_questions": [
+        {
+          "question": "Do LLM-based predictions of travel mode choice generalize beyond student commuters to broader, more heterogeneous populations and to non-weather choice contexts?",
+          "label": "approachable",
+          "reason": "Public stated-preference and travel-survey datasets can be re-used to test the same prompting pipeline on other populations"
+        },
+        {
+          "question": "Can LLM respondents substitute for human respondents in stated-preference surveys, i.e. do synthetic populations of prompted agents reproduce aggregate mode-share distributions and elasticities estimated from real data?",
+          "label": "approachable",
+          "reason": "Requires only local/API LLMs and published survey aggregates for comparison"
+        },
+        {
+          "question": "How does predictive accuracy scale with model size and with fine-tuning beyond the 2-35B locally deployed range used here?",
+          "label": "not approachable",
+          "reason": "Fine-tuning or evaluating frontier-scale models exceeds available compute"
+        },
+        {
+          "question": "Does a chatbot-administered, image-augmented survey instrument change respondents' elicited preferences relative to a conventional questionnaire (mode effects of conversational elicitation)?",
+          "label": "not approachable",
+          "reason": "Requires recruiting and randomising human respondents"
+        },
+        {
+          "question": "Which prompt components (habitual travel information, expert framing, persona, few-shot examples) drive gains, and are these effects stable across model families and random seeds?",
+          "label": "approachable",
+          "reason": "Ablation over prompt conditions is runnable with small open-weight models on public choice data"
+        },
+        {
+          "question": "Can weather-sensitive demand predictions from such an agentic pipeline be embedded in a population-scale agent-based transport model to forecast aggregate demand shifts under weather or policy shocks?",
+          "label": "approachable",
+          "reason": "Simulation the researcher can write, seeded with open transport and weather data"
+        }
+      ],
+      "canon": {
+        "summary": "Proposes a three-agent workflow that combines a chatbot-administered, image-augmented stated-preference survey of student commuters (454 respondent-scenario observations across five weather scenarios), structured data processing, and behavioral prediction. Compares a multinomial logit model, logistic regression and random forest against nine locally deployed LLMs (2-35B parameters) under zero-shot, persona, few-shot and vision-based prompting conditions for five-class mode-choice prediction.",
+        "tags": [
+          "Simulation and Digital Twins",
+          "Evaluations"
+        ],
+        "system_type": [],
+        "participant_mix": [
+          "mixed human+AI"
+        ],
+        "observability": [],
+        "focus_area": [
+          "Simulation"
+        ],
+        "threat_model": [],
+        "claim_type": [
+          "proposed method/system",
+          "empirical study"
+        ]
+      },
+      "suspicious_markers": []
+    },
+    {
+      "arxiv_id": "2608.19737",
+      "title": "TempJail: Temporal Jailbreak Attack against Large Vision-Language Models via Subtitle Scheduling",
+      "abstract": "Large vision-language models (LVLMs) have achieved remarkable progress in video understanding and reasoning. Despite extensive studies on text- and image-based jailbreaks, video jailbreaks against LVLMs remain largely unexplored. Existing video jailbreak methods mainly manipulate textual content embedded in videos, while overlooking how such information is organized over time. Our analysis reveals that jailbreak effectiveness depends not only on the semantics of textual information but also on its temporal presentation, including duration and timing-slot allocation. Motivated by this finding, we use subtitles, which are common in real-world videos and allow semantic content to be presented under precise temporal control without appearing visually intrusive, as a natural attack medium. Based on this insight, we propose TempJail, a black-box video-based jailbreak framework that constructs query-aligned dialogue-style subtitle sequences and optimizes their temporal scheduling to exploit temporal vulnerabilities in LVLMs and elicit responses that satisfy the harmful intent of the source query. Extensive experiments on four representative LVLMs and two datasets demonstrate that TempJail achieves the highest attack success rate across all evaluated model--dataset settings, outperforming the strongest baseline by 53 and 18 percentage points in dataset-averaged ASR on GPT-5 and Gemini 3.5-Flash, respectively.",
+      "authors": [
+        "Ling Zhou",
+        "Yihao Huang",
+        "Jingling Sun",
+        "Zhiwen Tian",
+        "Yi Zeng",
+        "Qihe Liu",
+        "Shijie Zhou"
+      ],
+      "published": "2026-08-20T07:37:10Z",
+      "updated": "2026-08-20T07:37:10Z",
+      "categories": [
+        "cs.CV",
+        "cs.AI",
+        "cs.CL"
+      ],
+      "url": "https://arxiv.org/abs/2608.19737",
+      "similarity": 0.9328,
+      "nearest_anchor_id": "2402.08567",
+      "nearest_anchor_title": "Agent Smith: A Single Image Can Jailbreak One Million Multimodal LLM Agents Exponentially Fast",
+      "similarity_rank": 9,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "open_questions": [
+        {
+          "question": "What defences can detect or neutralise harmful content that is distributed across the temporal schedule of video subtitles rather than present in any single frame or utterance?",
+          "label": "approachable",
+          "reason": "Can be prototyped as a subtitle-aggregation filter and tested against public LVLM APIs"
+        },
+        {
+          "question": "Does the temporal-scheduling vulnerability extend to other time-structured modalities such as audio narration, streamed text, or long multi-turn conversations?",
+          "label": "approachable",
+          "reason": "Requires only prompt/stimulus construction and black-box API queries"
+        },
+        {
+          "question": "How well do temporally scheduled jailbreak subtitles transfer across model families and across model versions over time?",
+          "label": "approachable",
+          "reason": "Public commercial APIs suffice for a transfer-and-drift evaluation"
+        },
+        {
+          "question": "Do multi-agent pipelines that ingest video (e.g. agents summarising or acting on user-uploaded media) amplify or contain such attacks when outputs are passed between agents?",
+          "label": "approachable",
+          "reason": "Can be built as a small agent pipeline over public APIs and self-generated videos"
+        },
+        {
+          "question": "How prevalent are temporally structured subtitle attacks in real deployed video platforms and what user harm results?",
+          "label": "not approachable",
+          "reason": "Requires proprietary platform moderation logs and user data"
+        }
+      ],
+      "canon": {
+        "summary": "Proposes TempJail, a black-box jailbreak framework against large vision-language models that embeds query-aligned dialogue-style subtitles in videos and optimises their duration and timing allocation to exploit temporal processing vulnerabilities. Evaluates attack success rates on four LVLMs across two datasets against prior video jailbreak baselines.",
+        "tags": [
+          "Security & Adversarial Robustness",
+          "Threat Models"
+        ],
+        "system_type": [],
+        "participant_mix": [],
+        "observability": [],
+        "focus_area": [],
+        "threat_model": [],
+        "claim_type": [
+          "proposed method/system",
+          "empirical study"
+        ]
+      },
+      "suspicious_markers": []
+    },
+    {
+      "arxiv_id": "2608.19535",
+      "title": "From Retrieved Context to Runtime Control: Adaptive Compression for Edge-based RAG",
+      "abstract": "Retrieval-augmented generation (RAG) improves language-model responses by grounding generation in external passages, which comes with overhead: retrieved context lengthens the prompt, increasing prefill work, KV-cache footprint, memory traffic, latency, and energy. Context compression offers a natural remedy by pruning retrieved text before generation. However, state-of-the-art context-compression methods are typically used with a fixed compression budget, or with the rate selected offline and then applied at inference time. This static view ignores both workload variation and the live state of the edge device. On an edge SoC, compression is not free: the compressor itself runs on the same SoC and consumes latency and energy that can offset any generation savings. This paper proposes a vision for telemetry-informed adaptive compression in edge RAG, grounded in experimental evidence. We characterize the compression tradeoff on the NVIDIA Jetson AGX Thor using Llama and Qwen generators, Natural Questions and HotpotQA datasets, and LLMLingua-2 compression. Our measurements show that generation dominates the RAG budget for larger models, reaching roughly 90% of per-query latency and 91% of GPU energy for 7B-8B generators. Exploring the impact of the compression rate reveals an adaptive operating region: mild compression can miss energy opportunities, and overly aggressive compression can hurt inference quality. Intermediate compression can reduce GPU energy by up to 53.2%, and SoC energy by up to 48.2%, with negligible quality loss. We argue for runtime policies that dynamically manage compression, guided by workload features and edge telemetry.",
+      "authors": [
+        "Zlatan Feric",
+        "Amir Taherin",
+        "Yanzhi Wang",
+        "David Kaeli"
+      ],
+      "published": "2026-08-20T01:13:29Z",
+      "updated": "2026-08-20T01:13:29Z",
+      "categories": [
+        "cs.AI",
+        "cs.CL",
+        "cs.DC",
+        "cs.IR",
+        "cs.PF"
+      ],
+      "url": "https://arxiv.org/abs/2608.19535",
+      "similarity": 0.9326,
+      "nearest_anchor_id": "2602.16136",
+      "nearest_anchor_title": "Retrieval Collapses When AI Pollutes the Web",
+      "similarity_rank": 10,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "open_questions": [
+        {
+          "question": "Can a runtime policy that selects context-compression rates from workload features and device telemetry actually beat a fixed compression budget in end-to-end latency, energy, and answer quality?",
+          "label": "not approachable",
+          "reason": "Requires an edge SoC testbed (e.g. Jetson) with power/energy instrumentation, not public data or simulation"
+        },
+        {
+          "question": "Do the reported compression sweet spots transfer across generator scales, compressors other than LLMLingua-2, and retrieval workloads beyond single-hop and multi-hop QA?",
+          "label": "not approachable",
+          "reason": "Needs repeated on-device energy measurement across hardware and model configurations"
+        },
+        {
+          "question": "How should the quality-versus-energy tradeoff of context compression be scored when downstream answer quality is only measurable after generation?",
+          "label": "approachable",
+          "reason": "Quality-vs-compression-rate curves can be measured with public QA datasets and open models on modest GPU access, though it is far from the researcher's system-level focus"
+        }
+      ],
+      "canon": {
+        "summary": "Measures the latency and energy costs of retrieval-augmented generation with prompt-context compression on an NVIDIA Jetson AGX Thor edge SoC, using Llama and Qwen generators, Natural Questions and HotpotQA, and LLMLingua-2. Reports that generation dominates per-query latency and GPU energy for 7B-8B models and that intermediate compression rates cut GPU energy by up to 53.2% with little quality loss, and argues for runtime telemetry-driven compression policies.",
+        "tags": [
+          "Control and Steering"
+        ],
+        "system_type": [],
+        "participant_mix": [],
+        "observability": [],
+        "focus_area": [],
+        "threat_model": [],
+        "claim_type": [
+          "empirical study",
+          "position/opinion"
+        ]
+      },
+      "suspicious_markers": []
+    },
+    {
+      "arxiv_id": "2608.19579",
+      "title": "Enforcing LLM Safety through DMD-based Classification of Prompt-Response Embedding Dynamics",
+      "abstract": "Large Language Models (LLMs) are increasingly deployed in high-stakes applications, yet their tendency to generate toxic, harmful, or policy-violating content poses significant risks. Detecting these unsafe outputs efficiently in a black-box manner remains an open challenge. In this paper, we extend a recently proposed dynamical systems framework designed for hallucination detection to LLM safety classification. By projecting both prompts and responses into high-dimensional embedding spaces and fitting separate Koopman-based predictive models for safe and unsafe regimes, we classify new outputs using a new differential residual score that compares prediction errors of the safe and unsafe regimes. A key contribution is the incorporation of the prompt and response embedding dynamics, yielding fitted Koopman operators that capture crucial interaction patterns. We evaluate our black-box method across three safety benchmarks using three embedding models. Our results show that incorporating prompt embeddings yields consistent improvements, particularly for interaction-dependent violations when paired with causal decoders (e.g., in Llama-3), while response-only violations benefit more from dense semantic embedding representations. These findings opens the door for using dynamical systems to analyze AI systems rather than the dominant paradigm of using AI to model dynamical systems.",
+      "authors": [
+        "Mohamed Akrout",
+        "Olivera Kotevska",
+        "Dan Wilson"
+      ],
+      "published": "2026-08-20T02:50:44Z",
+      "updated": "2026-08-20T02:50:44Z",
+      "categories": [
+        "cs.AI",
+        "math.DS"
+      ],
+      "url": "https://arxiv.org/abs/2608.19579",
+      "similarity": 0.9316,
+      "nearest_anchor_id": "2410.07283",
+      "nearest_anchor_title": "Prompt Infection: LLM-to-LLM Prompt Injection within Multi-Agent Systems",
+      "similarity_rank": 11,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "open_questions": [
+        {
+          "question": "Does a Koopman/DMD-based residual classifier trained on single-turn prompt-response pairs still separate safe from unsafe content in multi-turn conversations, where violations accumulate across turns?",
+          "label": "approachable",
+          "reason": "public embedding APIs and open safety benchmarks suffice to build multi-turn variants and refit the operators"
+        },
+        {
+          "question": "How robust is embedding-dynamics-based safety classification to adversarial or jailbreak-style prompts designed to shift outputs into the safe regime's residual basin?",
+          "label": "approachable",
+          "reason": "public jailbreak prompt datasets plus open embedding models allow direct evaluation"
+        },
+        {
+          "question": "Do the fitted safe/unsafe Koopman operators transfer across safety benchmarks and policy definitions, or must they be refit per dataset?",
+          "label": "approachable",
+          "reason": "cross-dataset train/test swaps over three public benchmarks is a few-weeks compute-light experiment"
+        },
+        {
+          "question": "Can dynamical-systems residual monitoring detect unsafe behaviour in streams of agent-to-agent messages rather than single human-model exchanges?",
+          "label": "approachable",
+          "reason": "researcher can generate multi-agent interaction logs in a self-written simulation and apply the same embedding pipeline"
+        },
+        {
+          "question": "What false-positive rate and latency does such a black-box detector incur when deployed as an inline filter on live production traffic?",
+          "label": "not approachable",
+          "reason": "requires deployment access and real user traffic from a hosted platform"
+        }
+      ],
+      "canon": {
+        "summary": "The paper adapts a Koopman/DMD dynamical-systems framework, previously used for hallucination detection, to black-box LLM safety classification by fitting separate predictive models for safe and unsafe regimes over prompt and response embedding trajectories and scoring new outputs via a differential residual. It evaluates the method on three safety benchmarks with three embedding models, reporting that including prompt embeddings improves detection of interaction-dependent violations.",
+        "tags": [
+          "Monitoring",
+          "Evaluations"
+        ],
+        "system_type": [],
+        "participant_mix": [],
+        "observability": [],
+        "focus_area": [
+          "Monitoring"
+        ],
+        "threat_model": [],
+        "claim_type": [
+          "proposed method/system",
+          "empirical study"
+        ]
+      },
+      "suspicious_markers": []
+    },
+    {
+      "arxiv_id": "2608.20314",
+      "title": "MidTool: Mid-training Data Synthesis for Agentic Tool Use",
+      "abstract": "Mid-training is increasingly recognized as a critical stage for shaping the capabilities of large language models. Recent work has shown that targeted mid-training can strengthen reasoning-intensive abilities such as math and science, and can also improve agentic capabilities in software-engineering settings. In this work, we study the parallel but less explored agentic capability: general tool use. We present MidTool, an open corpus construction pipeline for agentic tool-use mid-training that combines large-scale web, PDF, and code data with synthesized supervision from real-world tool APIs, MCP skills, and document-grounded workflows. MidTool is designed to teach models how to recognize tool affordances, ground arguments from context, compose tool call workflow, and recover from incomplete information. We mid-train Qwen3-4B-Base and Qwen3-8B-Base on MidTool-Mix, and then apply follow-up post-training with both supervised fine-tuning and reinforcement learning. Compared with baselines, MidTool-Mix consistently improves downstream performance under both SFT and RL on BFCL, tau2-Bench, and MCP Universe. These results suggest that general tool use, like other important LLM capabilities, benefits from dedicated mid-training rather than being left entirely to post-training.",
+      "authors": [
+        "Fengqing Jiang",
+        "Yite Wang",
+        "Boyi Liu",
+        "Zhaoyang Wang",
+        "Canwen Xu",
+        "Zhewei Yao",
+        "Radha Poovendran",
+        "Yuxiong He"
+      ],
+      "published": "2026-08-20T17:53:59Z",
+      "updated": "2026-08-20T17:53:59Z",
+      "categories": [
+        "cs.AI"
+      ],
+      "url": "https://arxiv.org/abs/2608.20314",
+      "similarity": 0.9304,
+      "nearest_anchor_id": "2508.16279",
+      "nearest_anchor_title": "AgentScope 1.0: A Developer-Centric Framework for Building Agentic Applications",
+      "similarity_rank": 12,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "open_questions": [
+        {
+          "question": "Does mid-training on tool-use corpora scale to larger base models, and how does the benefit change with model size?",
+          "label": "not approachable",
+          "reason": "requires frontier-scale pretraining/mid-training compute"
+        },
+        {
+          "question": "Which components of a synthesized tool-use corpus (web, PDF, code, API traces, MCP skills) actually drive downstream gains, and what is the optimal mixture?",
+          "label": "not approachable",
+          "reason": "needs repeated mid-training runs at multi-billion-parameter scale"
+        },
+        {
+          "question": "Do tool-use benchmark gains from mid-training transfer to multi-agent settings where many tool-using agents interact, or do they induce homogeneous, correlated tool-calling behaviour across agents?",
+          "label": "approachable",
+          "reason": "can be tested by running released open-weight checkpoints in a self-written multi-agent tool environment"
+        },
+        {
+          "question": "How does improved tool-use capability affect an agent's susceptibility to adversarial or injected content arriving through tool outputs?",
+          "label": "approachable",
+          "reason": "public models plus a locally built mock-API/prompt-injection harness suffice"
+        }
+      ],
+      "canon": {
+        "summary": "The paper introduces MidTool, a pipeline for constructing an open mid-training corpus for agentic tool use by combining web, PDF and code data with supervision synthesized from real tool APIs, MCP skills and document-grounded workflows. Qwen3-4B-Base and Qwen3-8B-Base are mid-trained on the resulting mixture and then post-trained with SFT and RL, with evaluation on BFCL, tau2-Bench and MCP Universe.",
+        "tags": [
+          "Datasets",
+          "Evaluations"
+        ],
+        "system_type": [],
+        "participant_mix": [],
+        "observability": [],
+        "focus_area": [],
+        "threat_model": [],
+        "claim_type": [
+          "proposed method/system",
+          "dataset/tool",
+          "empirical study"
+        ]
+      },
+      "suspicious_markers": []
+    }
+  ],
+  "shortlist": [
+    {
+      "arxiv_id": "2608.20041",
+      "title": "A three-dimensional typology of agency for advanced AI systems",
+      "authors": [
+        "Willem Fourie"
+      ],
+      "published": "2026-08-20T13:46:33Z",
+      "updated": "2026-08-20T13:46:33Z",
+      "url": "https://arxiv.org/abs/2608.20041",
+      "similarity": 0.9603,
+      "nearest_anchor_id": "2603.23471",
+      "nearest_anchor_title": "Regulating AI Agents",
+      "similarity_rank": 1,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": true
+    },
+    {
+      "arxiv_id": "2608.19689",
+      "title": "Rethinking the Evaluation and Optimization of LLM-Based Social Simulation",
+      "authors": [
+        "Pei Wang",
+        "Xu Chen",
+        "Ji-Rong Wen"
+      ],
+      "published": "2026-08-20T06:26:03Z",
+      "updated": "2026-08-20T06:26:03Z",
+      "url": "https://arxiv.org/abs/2608.19689",
+      "similarity": 0.9481,
+      "nearest_anchor_id": "2411.10109",
+      "nearest_anchor_title": "LLM Agents Grounded in Self-Reports Enable General-Purpose Simulation of Individuals",
+      "similarity_rank": 2,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": true
+    },
+    {
+      "arxiv_id": "2608.19857",
+      "title": "Inadvertent Context Leakage in Language Models",
+      "authors": [
+        "Jaiden Fairoze",
+        "Neal Mangaokar",
+        "Kamalika Chaudhuri",
+        "Sanjam Garg",
+        "Saeed Mahloujifar"
+      ],
+      "published": "2026-08-20T10:05:29Z",
+      "updated": "2026-08-20T10:05:29Z",
+      "url": "https://arxiv.org/abs/2608.19857",
+      "similarity": 0.935,
+      "nearest_anchor_id": "2410.07283",
+      "nearest_anchor_title": "Prompt Infection: LLM-to-LLM Prompt Injection within Multi-Agent Systems",
+      "similarity_rank": 5,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": true
+    },
+    {
+      "arxiv_id": "2608.19902",
+      "title": "Bringing analytic rigor to agentic AI for science: The Brain Researcher platform for neuroimaging data analysis",
+      "authors": [
+        "Zijiao Chen",
+        "Nicholas Lu",
+        "Xinhui Li",
+        "Jocelyn A. Ricard",
+        "Ce Ju",
+        "Huan H. Wang",
+        "Christian Kindermann",
+        "Jeanette A. Mumford",
+        "Steven Dillmann",
+        "James Kent",
+        "Alejandro de la Vega",
+        "Sanmi Koyejo",
+        "Vince D. Calhoun",
+        "Joshua W. Buckholtz",
+        "Juan Helen Zhou",
+        "Steffen Bollmann",
+        "Russell A. Poldrack"
+      ],
+      "published": "2026-08-20T11:13:27Z",
+      "updated": "2026-08-20T11:13:27Z",
+      "url": "https://arxiv.org/abs/2608.19902",
+      "similarity": 0.9349,
+      "nearest_anchor_id": "2502.14143",
+      "nearest_anchor_title": "Multi-Agent Risks from Advanced AI",
+      "similarity_rank": 6,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": true
+    },
+    {
+      "arxiv_id": "2608.20281",
+      "title": "Inject, Align, Recover: Staged Post-Training for Retrieval-Free Document Knowledge Internalization",
+      "authors": [
+        "Qian Kou",
+        "Xiaofeng Shi",
+        "Xiaosong Qiu",
+        "Hua Zhou"
+      ],
+      "published": "2026-08-20T17:14:24Z",
+      "updated": "2026-08-20T17:14:24Z",
+      "url": "https://arxiv.org/abs/2608.20281",
+      "similarity": 0.9336,
+      "nearest_anchor_id": "2602.16136",
+      "nearest_anchor_title": "Retrieval Collapses When AI Pollutes the Web",
+      "similarity_rank": 7,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": true
+    },
+    {
+      "arxiv_id": "2608.20320",
+      "title": "An Agentic Approach for Active Data Collection, Travel Behavior Modeling, and Weather-Sensitive Demand Prediction",
+      "authors": [
+        "Narges Ahmadi",
+        "Yubo Jiao",
+        "Jônatas Augusto Manzolli",
+        "Jiangbo Yu",
+        "Luis Miranda-Moreno"
+      ],
+      "published": "2026-08-20T17:57:42Z",
+      "updated": "2026-08-20T17:57:42Z",
+      "url": "https://arxiv.org/abs/2608.20320",
+      "similarity": 0.9333,
+      "nearest_anchor_id": "2411.10109",
+      "nearest_anchor_title": "LLM Agents Grounded in Self-Reports Enable General-Purpose Simulation of Individuals",
+      "similarity_rank": 8,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": true
+    },
+    {
+      "arxiv_id": "2608.19737",
+      "title": "TempJail: Temporal Jailbreak Attack against Large Vision-Language Models via Subtitle Scheduling",
+      "authors": [
+        "Ling Zhou",
+        "Yihao Huang",
+        "Jingling Sun",
+        "Zhiwen Tian",
+        "Yi Zeng",
+        "Qihe Liu",
+        "Shijie Zhou"
+      ],
+      "published": "2026-08-20T07:37:10Z",
+      "updated": "2026-08-20T07:37:10Z",
+      "url": "https://arxiv.org/abs/2608.19737",
+      "similarity": 0.9328,
+      "nearest_anchor_id": "2402.08567",
+      "nearest_anchor_title": "Agent Smith: A Single Image Can Jailbreak One Million Multimodal LLM Agents Exponentially Fast",
+      "similarity_rank": 9,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": true
+    },
+    {
+      "arxiv_id": "2608.19535",
+      "title": "From Retrieved Context to Runtime Control: Adaptive Compression for Edge-based RAG",
+      "authors": [
+        "Zlatan Feric",
+        "Amir Taherin",
+        "Yanzhi Wang",
+        "David Kaeli"
+      ],
+      "published": "2026-08-20T01:13:29Z",
+      "updated": "2026-08-20T01:13:29Z",
+      "url": "https://arxiv.org/abs/2608.19535",
+      "similarity": 0.9326,
+      "nearest_anchor_id": "2602.16136",
+      "nearest_anchor_title": "Retrieval Collapses When AI Pollutes the Web",
+      "similarity_rank": 10,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": true
+    },
+    {
+      "arxiv_id": "2608.19579",
+      "title": "Enforcing LLM Safety through DMD-based Classification of Prompt-Response Embedding Dynamics",
+      "authors": [
+        "Mohamed Akrout",
+        "Olivera Kotevska",
+        "Dan Wilson"
+      ],
+      "published": "2026-08-20T02:50:44Z",
+      "updated": "2026-08-20T02:50:44Z",
+      "url": "https://arxiv.org/abs/2608.19579",
+      "similarity": 0.9316,
+      "nearest_anchor_id": "2410.07283",
+      "nearest_anchor_title": "Prompt Infection: LLM-to-LLM Prompt Injection within Multi-Agent Systems",
+      "similarity_rank": 11,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": true
+    },
+    {
+      "arxiv_id": "2608.20314",
+      "title": "MidTool: Mid-training Data Synthesis for Agentic Tool Use",
+      "authors": [
+        "Fengqing Jiang",
+        "Yite Wang",
+        "Boyi Liu",
+        "Zhaoyang Wang",
+        "Canwen Xu",
+        "Zhewei Yao",
+        "Radha Poovendran",
+        "Yuxiong He"
+      ],
+      "published": "2026-08-20T17:53:59Z",
+      "updated": "2026-08-20T17:53:59Z",
+      "url": "https://arxiv.org/abs/2608.20314",
+      "similarity": 0.9304,
+      "nearest_anchor_id": "2508.16279",
+      "nearest_anchor_title": "AgentScope 1.0: A Developer-Centric Framework for Building Agentic Applications",
+      "similarity_rank": 12,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": true
+    },
+    {
+      "arxiv_id": "2608.19831",
+      "title": "Causal Reasoning with Bipartite Graphical Causal Models",
+      "authors": [
+        "Joris M. Mooij"
+      ],
+      "published": "2026-08-20T09:33:20Z",
+      "updated": "2026-08-20T09:33:20Z",
+      "url": "https://arxiv.org/abs/2608.19831",
+      "similarity": 0.9297,
+      "nearest_anchor_id": "2503.13395",
+      "nearest_anchor_title": "Causal Emergence 2.0: Quantifying emergent complexity",
+      "similarity_rank": 13,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": false
+    },
+    {
+      "arxiv_id": "2608.19511",
+      "title": "Symposium: Trust via Auditable Records for Communities of AI Scientist Agents",
+      "authors": [
+        "Dexter Pratt"
+      ],
+      "published": "2026-08-20T00:08:40Z",
+      "updated": "2026-08-20T00:08:40Z",
+      "url": "https://arxiv.org/abs/2608.19511",
+      "similarity": 0.9275,
+      "nearest_anchor_id": "2502.14143",
+      "nearest_anchor_title": "Multi-Agent Risks from Advanced AI",
+      "similarity_rank": 14,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": false
+    },
+    {
+      "arxiv_id": "2608.20195",
+      "title": "From Agent Behaviour to Agent-Friendly Documentation: An Empirical Study of How Coding Agents Discover, Read, and Write Technical Documentation",
+      "authors": [
+        "Zhijun Gao",
+        "Jing Chen"
+      ],
+      "published": "2026-08-20T15:51:54Z",
+      "updated": "2026-08-20T15:51:54Z",
+      "url": "https://arxiv.org/abs/2608.20195",
+      "similarity": 0.9273,
+      "nearest_anchor_id": "2508.16279",
+      "nearest_anchor_title": "AgentScope 1.0: A Developer-Centric Framework for Building Agentic Applications",
+      "similarity_rank": 15,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": false
+    },
+    {
+      "arxiv_id": "2608.19568",
+      "title": "DraftFM: A FoundationModel for Day-Zero Drafting in Magic: The Gathering",
+      "authors": [
+        "Brian Ward"
+      ],
+      "published": "2026-08-20T02:13:23Z",
+      "updated": "2026-08-20T02:13:23Z",
+      "url": "https://arxiv.org/abs/2608.19568",
+      "similarity": 0.9256,
+      "nearest_anchor_id": "2606.04592",
+      "nearest_anchor_title": "Synthetic Personalities: How Well Can LLMs Mimic Individual Respondents Using Socio-Economic Microdata?",
+      "similarity_rank": 16,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": false
+    },
+    {
+      "arxiv_id": "2608.19529",
+      "title": "When Machines Speak: A Unified Generative Framework for Integrating Machine-Native Symbols into Pretrained Large Language Models",
+      "authors": [
+        "Su Yan",
+        "Rakesh Iyer"
+      ],
+      "published": "2026-08-20T00:54:36Z",
+      "updated": "2026-08-20T00:54:36Z",
+      "url": "https://arxiv.org/abs/2608.19529",
+      "similarity": 0.9248,
+      "nearest_anchor_id": "2411.10109",
+      "nearest_anchor_title": "LLM Agents Grounded in Self-Reports Enable General-Purpose Simulation of Individuals",
+      "similarity_rank": 17,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": false
+    },
+    {
+      "arxiv_id": "2608.19880",
+      "title": "EnvHarness: Awakening Static Worlds for Agent Learning",
+      "authors": [
+        "Chengsong Huang",
+        "Zifeng Wang",
+        "Rujun Han",
+        "Jun Yan",
+        "Yanfei Chen",
+        "Zoey CuiZhu",
+        "Ke Jiang",
+        "Peng Xia",
+        "Han Yu",
+        "Yufan Zhuang",
+        "Yifei Ming",
+        "Jiaqi Pan",
+        "Bhavana Dalvi Mishra",
+        "Jiaxin Huang",
+        "Burak Gokturk",
+        "Tomas Pfister",
+        "Chen-Yu Lee"
+      ],
+      "published": "2026-08-20T10:42:06Z",
+      "updated": "2026-08-20T10:42:06Z",
+      "url": "https://arxiv.org/abs/2608.19880",
+      "similarity": 0.9238,
+      "nearest_anchor_id": "2410.07283",
+      "nearest_anchor_title": "Prompt Infection: LLM-to-LLM Prompt Injection within Multi-Agent Systems",
+      "similarity_rank": 19,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": false
+    },
+    {
+      "arxiv_id": "2608.19974",
+      "title": "ReguSim: Evaluating LLM Agent Rule Grounding in Financial Compliance",
+      "authors": [
+        "Yiyang Luo",
+        "Yihang Jiang",
+        "Qijun Xie",
+        "Liang Lan",
+        "Lin Willian Cong",
+        "Anyi Rao",
+        "Yunya Song"
+      ],
+      "published": "2026-08-20T12:49:05Z",
+      "updated": "2026-08-20T12:49:05Z",
+      "url": "https://arxiv.org/abs/2608.19974",
+      "similarity": 0.923,
+      "nearest_anchor_id": "2604.04604",
+      "nearest_anchor_title": "AI Agents Under EU Law",
+      "similarity_rank": 20,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": false
+    },
+    {
+      "arxiv_id": "2608.19889",
+      "title": "Write Once, Run Everywhere: The Axon DSL for Shape-Safe and Framework-Agnostic LLM Architectures",
+      "authors": [
+        "Jacob Nielsen",
+        "Danial Namazifard",
+        "Lukas Galke Poech",
+        "Peter Schneider-Kamp"
+      ],
+      "published": "2026-08-20T10:56:34Z",
+      "updated": "2026-08-20T10:56:34Z",
+      "url": "https://arxiv.org/abs/2608.19889",
+      "similarity": 0.9228,
+      "nearest_anchor_id": "2404.16109",
+      "nearest_anchor_title": "zkLLM: Zero Knowledge Proofs for Large Language Models",
+      "similarity_rank": 21,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": false
+    },
+    {
+      "arxiv_id": "2608.19611",
+      "title": "Forking Fast: Efficiently Estimating Uncertainty Dynamics in Text Generation",
+      "authors": [
+        "Eric Bigelow",
+        "Amir Zur",
+        "Satchel Grant",
+        "Tal Haklay",
+        "Can Rager",
+        "Owen Lewis",
+        "Thomas McGrath",
+        "Jack Merullo",
+        "Ekdeep Singh Lubana",
+        "Atticus Geiger"
+      ],
+      "published": "2026-08-20T03:52:29Z",
+      "updated": "2026-08-20T03:52:29Z",
+      "url": "https://arxiv.org/abs/2608.19611",
+      "similarity": 0.9222,
+      "nearest_anchor_id": "2602.16136",
+      "nearest_anchor_title": "Retrieval Collapses When AI Pollutes the Web",
+      "similarity_rank": 22,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": false
+    },
+    {
+      "arxiv_id": "2608.20210",
+      "title": "Daedalus-150M: A Convolution-Attention Hybrid Designed for CPU Inference",
+      "authors": [
+        "Christos Koutsiaris"
+      ],
+      "published": "2026-08-20T16:09:43Z",
+      "updated": "2026-08-20T16:09:43Z",
+      "url": "https://arxiv.org/abs/2608.20210",
+      "similarity": 0.9217,
+      "nearest_anchor_id": "2404.16109",
+      "nearest_anchor_title": "zkLLM: Zero Knowledge Proofs for Large Language Models",
+      "similarity_rank": 24,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": false
+    },
+    {
+      "arxiv_id": "2608.19526",
+      "title": "Automated Summarization of Financial News Using Large Language Models and Retrieval-Augmented Generation: An Early Empirical Study (Fall 2023)",
+      "authors": [
+        "Pranav Chandaliya"
+      ],
+      "published": "2026-08-20T00:50:37Z",
+      "updated": "2026-08-20T00:50:37Z",
+      "url": "https://arxiv.org/abs/2608.19526",
+      "similarity": 0.9214,
+      "nearest_anchor_id": "2602.16136",
+      "nearest_anchor_title": "Retrieval Collapses When AI Pollutes the Web",
+      "similarity_rank": 25,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": false
+    },
+    {
+      "arxiv_id": "2608.19854",
+      "title": "Repo0: Design-Driven Zero-to-All Code Generation",
+      "authors": [
+        "Silin Chen",
+        "Haoyi Teng",
+        "Xiaodong Gu",
+        "Yuling Shi",
+        "Jiale Huang",
+        "Yongpan Wang",
+        "Hongyu Zhang",
+        "Haibing Guan"
+      ],
+      "published": "2026-08-20T10:03:14Z",
+      "updated": "2026-08-20T10:03:14Z",
+      "url": "https://arxiv.org/abs/2608.19854",
+      "similarity": 0.9211,
+      "nearest_anchor_id": "2508.16279",
+      "nearest_anchor_title": "AgentScope 1.0: A Developer-Centric Framework for Building Agentic Applications",
+      "similarity_rank": 26,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": false
+    },
+    {
+      "arxiv_id": "2608.19680",
+      "title": "Frequency-Aware Continual Learning for Smart Contract Vulnerability Detection with Large Language Models",
+      "authors": [
+        "Tenghui Huang",
+        "Jiawen Kang",
+        "Dongning Liu",
+        "Changyan Yi",
+        "Chengjun Cai",
+        "Anjia Yang",
+        "Li Li",
+        "Dong In Kim"
+      ],
+      "published": "2026-08-20T06:14:31Z",
+      "updated": "2026-08-20T06:14:31Z",
+      "url": "https://arxiv.org/abs/2608.19680",
+      "similarity": 0.921,
+      "nearest_anchor_id": "2604.01151",
+      "nearest_anchor_title": "Detecting Multi-Agent Collusion Through Multi-Agent Interpretability",
+      "similarity_rank": 27,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": false
+    },
+    {
+      "arxiv_id": "2608.20187",
+      "title": "Multi-Method Causal Evidence Synthesis: Ranking Candidate Drivers by Convergent Cross-Method Evidence from Observational Data",
+      "authors": [
+        "Manish Gupta",
+        "Dipanjan De"
+      ],
+      "published": "2026-08-20T15:41:18Z",
+      "updated": "2026-08-20T15:41:18Z",
+      "url": "https://arxiv.org/abs/2608.20187",
+      "similarity": 0.921,
+      "nearest_anchor_id": "2503.13395",
+      "nearest_anchor_title": "Causal Emergence 2.0: Quantifying emergent complexity",
+      "similarity_rank": 28,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": false
+    },
+    {
+      "arxiv_id": "2608.20097",
+      "title": "TrustRAG: Blockchain-Enhanced RAG via Committee-Based Credibility Scoring",
+      "authors": [
+        "Baixiang Liu",
+        "Haotian Che",
+        "Yuan Li"
+      ],
+      "published": "2026-08-20T14:31:10Z",
+      "updated": "2026-08-20T14:31:10Z",
+      "url": "https://arxiv.org/abs/2608.20097",
+      "similarity": 0.9197,
+      "nearest_anchor_id": "2404.16109",
+      "nearest_anchor_title": "zkLLM: Zero Knowledge Proofs for Large Language Models",
+      "similarity_rank": 30,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": false
+    },
+    {
+      "arxiv_id": "2608.20290",
+      "title": "Phantom Gains: Auditing Self-Improvement Against a Measured Null",
+      "authors": [
+        "Cheng Xu",
+        "Nan Yan",
+        "Liming Chen",
+        "M-Tahar Kechadi"
+      ],
+      "published": "2026-08-20T17:30:14Z",
+      "updated": "2026-08-20T17:30:14Z",
+      "url": "https://arxiv.org/abs/2608.20290",
+      "similarity": 0.9194,
+      "nearest_anchor_id": "2602.16136",
+      "nearest_anchor_title": "Retrieval Collapses When AI Pollutes the Web",
+      "similarity_rank": 31,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": false
+    },
+    {
+      "arxiv_id": "2608.19790",
+      "title": "LLMs as Acquisition Policies for Finite-Pool Materials Optimization: A Controlled Study",
+      "authors": [
+        "Dino-Rober Demir",
+        "Florian Le Bronnec",
+        "Rio Yokota"
+      ],
+      "published": "2026-08-20T08:37:02Z",
+      "updated": "2026-08-20T08:37:02Z",
+      "url": "https://arxiv.org/abs/2608.19790",
+      "similarity": 0.9193,
+      "nearest_anchor_id": "2602.16136",
+      "nearest_anchor_title": "Retrieval Collapses When AI Pollutes the Web",
+      "similarity_rank": 33,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": false
+    },
+    {
+      "arxiv_id": "2608.19653",
+      "title": "DeltaML-Bench: Evaluating Machine Learning Agents on Real-World Research Repositories",
+      "authors": [
+        "Josias Moukpe",
+        "Priyanka Aryal",
+        "Matthew Kenney"
+      ],
+      "published": "2026-08-20T05:42:39Z",
+      "updated": "2026-08-20T05:42:39Z",
+      "url": "https://arxiv.org/abs/2608.19653",
+      "similarity": 0.919,
+      "nearest_anchor_id": "2508.16279",
+      "nearest_anchor_title": "AgentScope 1.0: A Developer-Centric Framework for Building Agentic Applications",
+      "similarity_rank": 34,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": false
+    },
+    {
+      "arxiv_id": "2608.20172",
+      "title": "Ask Self, Ask Others: Relation Is All You Need",
+      "authors": [
+        "Yuting Ge",
+        "Pengju Yang",
+        "Mingkai Nie"
+      ],
+      "published": "2026-08-20T15:27:25Z",
+      "updated": "2026-08-20T15:27:25Z",
+      "url": "https://arxiv.org/abs/2608.20172",
+      "similarity": 0.9189,
+      "nearest_anchor_id": "2602.16136",
+      "nearest_anchor_title": "Retrieval Collapses When AI Pollutes the Web",
+      "similarity_rank": 35,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": false
+    },
+    {
+      "arxiv_id": "2608.19993",
+      "title": "Optimal Skill Selection for LLM Agents with Provable Bicriteria Guarantees",
+      "authors": [
+        "Yu Chen",
+        "Ruishuo Chen",
+        "Xun Wang",
+        "Zhuoran Li",
+        "Longbo Huang"
+      ],
+      "published": "2026-08-20T13:08:17Z",
+      "updated": "2026-08-20T13:08:17Z",
+      "url": "https://arxiv.org/abs/2608.19993",
+      "similarity": 0.9182,
+      "nearest_anchor_id": "2602.16136",
+      "nearest_anchor_title": "Retrieval Collapses When AI Pollutes the Web",
+      "similarity_rank": 36,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": false
+    },
+    {
+      "arxiv_id": "2608.19838",
+      "title": "Specification-delta-driven data governance: an empirical study of the «spec-delta» as the unit of change in lakehouse data platforms",
+      "authors": [
+        "Pablo Ramirez Amador"
+      ],
+      "published": "2026-08-20T09:38:48Z",
+      "updated": "2026-08-20T09:38:48Z",
+      "url": "https://arxiv.org/abs/2608.19838",
+      "similarity": 0.9178,
+      "nearest_anchor_id": "2604.04604",
+      "nearest_anchor_title": "AI Agents Under EU Law",
+      "similarity_rank": 37,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": false
+    },
+    {
+      "arxiv_id": "2608.20274",
+      "title": "Break It Down, Pass It On: Cross-Task Skill Transfer in LLM Agents",
+      "authors": [
+        "Yiyang Feng",
+        "Biddut Sarker Bijoy",
+        "Niranjan Balasubramanian",
+        "Jiawei Zhou"
+      ],
+      "published": "2026-08-20T17:12:08Z",
+      "updated": "2026-08-20T17:12:08Z",
+      "url": "https://arxiv.org/abs/2608.20274",
+      "similarity": 0.9178,
+      "nearest_anchor_id": "2508.16279",
+      "nearest_anchor_title": "AgentScope 1.0: A Developer-Centric Framework for Building Agentic Applications",
+      "similarity_rank": 38,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": false
+    },
+    {
+      "arxiv_id": "2608.20316",
+      "title": "Pandora's AI Model Routing Box: Efficient Allocation with Costly Value Estimation",
+      "authors": [
+        "Adam Fisch",
+        "Shubhendu Trivedi",
+        "Fantine Huot",
+        "William W. Cohen",
+        "Michael Kaisers",
+        "Mirella Lapata",
+        "Kate Larson",
+        "Jacob Eisenstein"
+      ],
+      "published": "2026-08-20T17:54:37Z",
+      "updated": "2026-08-20T17:54:37Z",
+      "url": "https://arxiv.org/abs/2608.20316",
+      "similarity": 0.9176,
+      "nearest_anchor_id": "2605.24413",
+      "nearest_anchor_title": "Habermolt: Delegating Deliberation to AI Representatives",
+      "similarity_rank": 40,
+      "from_random": false,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": false
+    },
+    {
+      "arxiv_id": "2608.20169",
+      "title": "Task-CoEvolve: Efficient Harness Optimization via Adaptive Validation Task Selection",
+      "authors": [
+        "Atsuyuki Miyai",
+        "Kiyoharu Aizawa",
+        "Toshihiko Yamasaki"
+      ],
+      "published": "2026-08-20T15:24:54Z",
+      "updated": "2026-08-20T15:24:54Z",
+      "url": "https://arxiv.org/abs/2608.20169",
+      "similarity": 0.9155,
+      "nearest_anchor_id": "2602.16136",
+      "nearest_anchor_title": "Retrieval Collapses When AI Pollutes the Web",
+      "similarity_rank": 45,
+      "from_random": true,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": false
+    },
+    {
+      "arxiv_id": "2608.19907",
+      "title": "Spike-based Belief Propagation in Nonlinear Dynamical Systems",
+      "authors": [
+        "Sepideh Adamiat",
+        "Hongye Wang",
+        "Wouter M. Kouw",
+        "Bert de Vries"
+      ],
+      "published": "2026-08-20T11:20:22Z",
+      "updated": "2026-08-20T11:20:22Z",
+      "url": "https://arxiv.org/abs/2608.19907",
+      "similarity": 0.8903,
+      "nearest_anchor_id": "2502.14143",
+      "nearest_anchor_title": "Multi-Agent Risks from Advanced AI",
+      "similarity_rank": 98,
+      "from_random": true,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": false
+    },
+    {
+      "arxiv_id": "2608.20026",
+      "title": "From Street View Imagery to Street Quality Indicators: Vision Language Inference for the Suburban 15-minute City",
+      "authors": [
+        "Joan Perez",
+        "Giovanni Fusco"
+      ],
+      "published": "2026-08-20T13:34:48Z",
+      "updated": "2026-08-20T13:34:48Z",
+      "url": "https://arxiv.org/abs/2608.20026",
+      "similarity": 0.8823,
+      "nearest_anchor_id": "2502.08691",
+      "nearest_anchor_title": "AgentSociety: Large-Scale Simulation of LLM-Driven Generative Agents Advances Understanding of Human Behaviors and Society",
+      "similarity_rank": 114,
+      "from_random": true,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": false
+    },
+    {
+      "arxiv_id": "2608.19688",
+      "title": "Learning Deterministic and Stochastic Forced Hamiltonian Systems",
+      "authors": [
+        "Benedikt Brantner",
+        "Tomasz Tyranowski"
+      ],
+      "published": "2026-08-20T06:25:02Z",
+      "updated": "2026-08-20T06:25:02Z",
+      "url": "https://arxiv.org/abs/2608.19688",
+      "similarity": 0.8822,
+      "nearest_anchor_id": "2503.13395",
+      "nearest_anchor_title": "Causal Emergence 2.0: Quantifying emergent complexity",
+      "similarity_rank": 115,
+      "from_random": true,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": false
+    },
+    {
+      "arxiv_id": "2608.20255",
+      "title": "Transfer Learning in Nonparametric Regression with Deep ReLU Networks",
+      "authors": [
+        "Junpeng Ren",
+        "Carlos Misael Madrid Padilla",
+        "Yanzhen Chen",
+        "Oscar Hernan Madrid Padilla"
+      ],
+      "published": "2026-08-20T16:53:00Z",
+      "updated": "2026-08-20T16:53:00Z",
+      "url": "https://arxiv.org/abs/2608.20255",
+      "similarity": 0.8793,
+      "nearest_anchor_id": "2411.10109",
+      "nearest_anchor_title": "LLM Agents Grounded in Self-Reports Enable General-Purpose Simulation of Individuals",
+      "similarity_rank": 125,
+      "from_random": true,
+      "significance": null,
+      "novelty": null,
+      "one_sentence": "",
+      "kept": false
+    }
+  ],
+  "problems": [
+    "2608.19861: withheld from the model calls -- flagged by Lakera Guard (pii/name)",
+    "2608.19901: withheld from the model calls -- flagged by Lakera Guard (prompt_attack)",
+    "2608.20055: withheld from the model calls -- flagged by Lakera Guard (prompt_attack)",
+    "2608.20231: withheld from the model calls -- flagged by Lakera Guard (prompt_attack)",
+    "2608.19938: withheld from the model calls -- flagged by Lakera Guard (prompt_attack)",
+    "2608.20202: withheld from the model calls -- flagged by Lakera Guard (prompt_attack)",
+    "2608.19729: withheld from the model calls -- flagged by Lakera Guard (prompt_attack)",
+    "scoring call returned no score for 38 paper(s): 2608.19511, 2608.19526, 2608.19529, 2608.19535, 2608.19568, 2608.19579, 2608.19611, 2608.19653, 2608.19680, 2608.19688, 2608.19689, 2608.19737, 2608.19790, 2608.19831, 2608.19838, 2608.19854, 2608.19857, 2608.19880, 2608.19889, 2608.19902, 2608.19907, 2608.19974, 2608.19993, 2608.20026, 2608.20041, 2608.20097, 2608.20169, 2608.20172, 2608.20187, 2608.20195, 2608.20210, 2608.20255, 2608.20274, 2608.20281, 2608.20290, 2608.20314, 2608.20316, 2608.20320",
+    "no scores returned; falling back to the similarity ranking"
+  ],
+  "email": {
+    "sent": false,
+    "error": null,
+    "dry_run": false
+  },
+  "guard": {
+    "lakera_enabled": true,
+    "lakera_available": true,
+    "on_error": "allow",
+    "screened": 45,
+    "blocked": [
+      {
+        "arxiv_id": "2608.19861",
+        "title": "PolicyGuide: From Guarding One Action to Guiding the Whole Workflow for Policy-Compliant LLM Agents",
+        "reason": "flagged by Lakera Guard",
+        "detectors": [
+          "pii/name"
+        ]
+      },
+      {
+        "arxiv_id": "2608.19901",
+        "title": "MaliciousSkillBench: A Comprehensive Benchmark for Malicious Agent Skill Detection",
+        "reason": "flagged by Lakera Guard",
+        "detectors": [
+          "prompt_attack"
+        ]
+      },
+      {
+        "arxiv_id": "2608.20055",
+        "title": "EchoCoT: Extracting Hidden Chain-of-Thought from Large Reasoning Models",
+        "reason": "flagged by Lakera Guard",
+        "detectors": [
+          "prompt_attack"
+        ]
+      },
+      {
+        "arxiv_id": "2608.20231",
+        "title": "Growth Without Us: Machine Consumers, Corporate Circularity, and the Decoupling of GDP from Humanity after AGI",
+        "reason": "flagged by Lakera Guard",
+        "detectors": [
+          "prompt_attack"
+        ]
+      },
+      {
+        "arxiv_id": "2608.19938",
+        "title": "From Noise to Signal: Improving Security Log Anomaly Detection Using LLMs with Endpoint-Specific Logs",
+        "reason": "flagged by Lakera Guard",
+        "detectors": [
+          "prompt_attack"
+        ]
+      },
+      {
+        "arxiv_id": "2608.20202",
+        "title": "MemTrapBench: Benchmarking Cognitive Traps in LLM Memory Use",
+        "reason": "flagged by Lakera Guard",
+        "detectors": [
+          "prompt_attack"
+        ]
+      },
+      {
+        "arxiv_id": "2608.19729",
+        "title": "SafeBranch: Branch-Pair Safety Alignment for Embodied Agents",
+        "reason": "flagged by Lakera Guard",
+        "detectors": [
+          "prompt_attack"
+        ]
+      }
+    ]
+  },
+  "feed": {
+    "entries": 1,
+    "path": "data/feed.xml"
+  }
+}
