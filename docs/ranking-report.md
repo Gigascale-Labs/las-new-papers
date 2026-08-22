@@ -131,7 +131,13 @@ the screen, not noise.
 - **The top-10 path has never run live.** Two papers is the most that has
   passed the screen. Ranking more candidates than `top_n` runs in unit tests
   only.
-- **Lakera never ran.** No `LAKERA_GUARD_API_KEY` was set on the machine.
+- **Lakera has now run, and is off.** CI ran it on 2026-08-22. It blocked 19
+  of 155 screened papers. One was `2608.20231` (*Growth Without Us*), the
+  control case named above, flagged `prompt_attack`. The two papers that
+  reached the digest instead were ride-hailing dispatch and a lead
+  service-line audit. `guard.enabled` is now `false`. The measurement is
+  n = 1 day; the false-positive rate is not established, only that it is not
+  zero on the paper that matters most.
 - **No email was sent.** Every run so far used `--dry-run`.
 - **The on-theme measure is a keyword proxy.** It counts 18 theme words in
   title and abstract. It is not the model's judgment. It misses on-theme papers
