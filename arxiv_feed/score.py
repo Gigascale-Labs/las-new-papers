@@ -119,7 +119,15 @@ def score_candidates(
 
     scores: dict[str, dict] = {}
     wanted = {c.paper.arxiv_id for c in candidates}
-    for row in data.get("scores", []):
+    raw_scores = data.get("scores", [])
+    returned_ids = [str(row.get("arxiv_id", "")).strip() for row in raw_scores]
+    log.info(
+        "call 1 (scoring): got %d score row(s) for %d wanted paper(s); "
+        "sample returned ids=%s, sample wanted ids=%s",
+        len(raw_scores), len(wanted),
+        returned_ids[:5], sorted(wanted)[:5],
+    )
+    for row in raw_scores:
         aid = str(row.get("arxiv_id", "")).strip()
         if aid in wanted:
             scores[aid] = {
