@@ -175,15 +175,25 @@ screen_effort: low
 # ---------------------------------------------------------------------------
 # Defences for untrusted text (arXiv titles and abstracts).
 #
-# The structural defences always run and need no key: invisible characters
-# removed, length capped, each abstract fenced under a "this is data" prompt.
+# The structural defences always run. They need no key and no network:
+# invisible characters removed, length capped, each abstract fenced under a
+# "this is data" prompt. Keyword annotation also always runs. Neither one is
+# configured here.
+#
 # This block configures only the Lakera screening layer above them.
 #
-# The key comes from $LAKERA_GUARD_API_KEY. With no key the run warns, says so
-# in the email, and continues.
+# Lakera is off. arXiv is a trusted source. Every paper is a moderated
+# submission with named authors and a public record. The false-positive cost
+# is higher than the attack risk: on 2026-08-22 Lakera blocked 19 of 155
+# papers, and one of them was `2608.20231` (Growth Without Us), the day's
+# strongest on-theme paper. It was flagged `prompt_attack`. It is an abstract
+# about machine consumers.
+#
+# Set `enabled: true` and supply $LAKERA_GUARD_API_KEY to turn it back on.
+# With no key the run warns, says so in the email, and continues.
 # ---------------------------------------------------------------------------
 guard:
-  enabled: true
+  enabled: false
   # project_id: project-xxxxxxxx   # optional: screen under a specific Lakera policy
   endpoint: https://api.lakera.ai/v2/guard
   timeout_seconds: 20

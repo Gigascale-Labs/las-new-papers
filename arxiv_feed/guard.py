@@ -11,8 +11,11 @@ Three layers:
    nonce. The system prompt states that fenced text is data. Text inside cannot
    close the fence, because it cannot know the nonce. This layer works without
    recognising the attack, so it is the one that holds.
-2. Lakera Guard. Optional, needs a key. Screens papers before any model call
-   and withholds what it flags.
+2. Lakera Guard. Off by default, needs a key. Screens papers before any model
+   call and withholds what it flags. It is off because arXiv is a trusted
+   source: every paper is a moderated submission with named authors. Measured
+   on 2026-08-22, it blocked 19 of 155 papers, including the day's strongest
+   on-theme paper, as a prompt attack. See README, "Why Lakera is off".
 3. Keyword patterns. Always on. They annotate. They never block.
 
 Layer 3 never blocks because this corpus can include papers about prompt
