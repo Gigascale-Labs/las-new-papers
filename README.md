@@ -1,7 +1,9 @@
 # las-new-papers
 
-One email a day. It lists new arXiv papers close to papers you already value,
-the open questions each one leaves, and whether you could work on them.
+A daily digest of new arXiv papers close to papers you already value, the
+open questions each one leaves, and whether you could work on them. Delivered
+as an RSS/Atom feed — no account, no password — and, if you set it up, an
+email too.
 
 The repository is standalone, like
 [`las-usage-stats`](https://github.com/Gigascale-Labs/las-usage-stats): it
@@ -22,8 +24,9 @@ arXiv, 7 lists, ~200-500 new papers
   ONE model call scores those 45      significance 1-5, novelty 1-5
   keep the top 10
   ONE model call per paper            open questions, marked approachable or not
-  send the email
+  write data/feed.xml                 always -- the no-password channel
   write data/YYYY-MM-DD.json
+  send an email                       only if FEED_EMAIL_TO is set
 ```
 
 About US$0.10 a day in token cost, unchanged by the move to OpenRouter: OpenRouter passes through the provider's per-token price. OpenRouter adds a separate fee on credit purchases, reported at 5.5% by third-party sources as of this writing. Not verified against OpenRouter's own pricing page.
@@ -48,9 +51,14 @@ The average of those directions points at no real paper.
 pip install -r requirements.txt          # 2.5GB, mostly PyTorch
 
 export OPENROUTER_API_KEY=sk-or-v1-...      # model calls, any provider OpenRouter lists
+export LAKERA_GUARD_API_KEY=...          # optional
+
+# Email is optional. Every run writes data/feed.xml, an RSS/Atom feed you can
+# read with no account and no password. Set these three only if you also want
+# a daily email:
 export SMTP_PASSWORD=...                 # Gmail app password, not your login password
 export FEED_EMAIL_TO=you@example.com     # where the email goes
-export LAKERA_GUARD_API_KEY=...          # optional
+export SMTP_USER=you@example.com         # the account that sends it
 
 python main.py --dry-run                 # full run, writes the JSON, sends nothing
 python main.py                           # and send the email
@@ -72,14 +80,47 @@ in a public file is scraped. `FEED_EMAIL_TO`, `FEED_EMAIL_FROM` and `SMTP_USER`
 come from the environment. `config.yaml` refuses to load if it finds an
 address, and the committed data files do not record the recipient.
 
+### Reading it without a password
+
+Every run writes `data/feed.xml`, an Atom feed of the last 60 days. No SMTP
+account, no app password, no 2FA to work around — a feed reader polls the URL.
+
+```
+https://raw.githubusercontent.com/<owner>/<repo>/main/data/feed.xml
+```
+
+That URL works with no setup. It comes with one known defect: measured
+against a real file on `raw.githubusercontent.com`, it serves `.xml` as
+`text/plain`, not an XML content type. Most feed readers accept it anyway,
+because they read the file's content, not only the header — this is not
+guaranteed for every reader.
+
+For the correct content type, enable GitHub Pages once: repo Settings → Pages
+→ Deploy from a branch → `main` → `/ (root)`. Then set `feed.base_url` in
+`config.yaml` to `https://<owner>.github.io/<repo>` and use:
+
+```
+https://<owner>.github.io/<repo>/data/feed.xml
+```
+
+I could not get a clean HTTP measurement of GitHub Pages' `.xml` content type
+in the environment this was built in. Check it yourself once Pages is on:
+`curl -I <pages-url>/data/feed.xml`, and look at the `content-type` header.
+
+Email is now fully optional. Set `FEED_EMAIL_TO` (and `SMTP_USER`,
+`SMTP_PASSWORD`) only if you want a daily email in addition to the feed;
+leave them all unset for feed-only, and the run never attempts to send.
+
 ### Daily, without a machine of your own
 
 `.github/workflows/daily_feed.yml` runs at 07:23 UTC and commits that day's
-data. It needs four repository secrets: `OPENROUTER_API_KEY`, `SMTP_PASSWORD`,
-`FEED_EMAIL_TO` and `SMTP_USER`, plus `LAKERA_GUARD_API_KEY` if you use it.
+data, including the rebuilt feed. It needs one repository secret,
+`OPENROUTER_API_KEY`. Add `FEED_EMAIL_TO`, `SMTP_USER` and `SMTP_PASSWORD`
+only for email too, and `LAKERA_GUARD_API_KEY` if you use Lakera.
 
 The commit step runs even when the run failed. A run that wrote its JSON but
-could not send the email exits non-zero, and that day's data is still kept.
+delivered nothing on any enabled channel exits non-zero; a run with email
+unconfigured and a feed that wrote successfully is not a failure.
 
 ## What it writes
 
@@ -87,6 +128,7 @@ could not send the email exits non-zero, and that day's data is still kept.
 |---|---|
 | `data/YYYY-MM-DD.json` | The day's ten papers with questions, the full 45-paper shortlist with scores, and any problems. |
 | `data/latest.json` | The newest day, at a fixed URL the site can read. |
+| `data/feed.xml` | An Atom feed of the last 60 days. No password needed to read it. |
 | `data/raw/YYYY-MM-DD.jsonl.gz` | Every paper scraped that day. ~120KB. |
 | `data/canon/candidates.csv` | Every shortlisted paper ever seen, in the canon's schema. |
 | `data/seen.json` | IDs already sent. Nothing is sent twice. |
@@ -177,14 +219,15 @@ get the email) or `block` (withhold everything it could not screen).
 - arXiv does not answer: 3 tries, 60 seconds apart.
 - The scoring call fails: fall back to the similarity ranking.
 - One paper's question call fails twice: drop that paper, keep the rest, name
-  it in the email.
-- The email fails: keep the file, do not mark those papers as sent, exit
-  non-zero.
+  it in the email and the feed.
+- The email fails (if configured at all): report it as a problem, but the
+  feed has already delivered the day, so the papers are still marked seen and
+  the run still exits 0.
 
 ## Tests
 
 ```bash
-python -m unittest discover tests     # 53 tests, no network, no keys
+python -m unittest discover tests     # 70 tests, no network, no keys
 python -m tests.leave_one_out         # the filter evaluation, real arXiv, free
 ```
 
@@ -213,6 +256,12 @@ Volume is lower than the spec's 300-600 a day. These seven lists gave 185
 papers on 2026-08-20. To widen the net, add categories (`cs.CY`, `cs.GT`,
 `q-fin.*`) rather than loosening the filter.
 
+`data/feed.xml` is checked as well-formed XML (parsed with
+`xml.etree.ElementTree`, 6 unit tests) and validated in a dry run to contain
+the expected entries. It has not been opened in a real feed reader, and
+GitHub Pages' `.xml` content type has not been measured — see "Reading it
+without a password" above for what to check once Pages is on.
+
 ## Layout
 
 ```
@@ -230,6 +279,7 @@ arxiv_feed/
   llm.py                    structured output, one retry
   seen.py                   never send the same paper twice
   emailer.py                part 1 (questions), part 2 (papers)
+  feed.py                   rebuilds data/feed.xml from the day files on disk
   run.py                    the day, in order
 scrapers/
   arxiv_scraper.py          standalone: one day of papers -> data/raw/

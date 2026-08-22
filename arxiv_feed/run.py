@@ -15,8 +15,8 @@ import random
 from datetime import datetime, timezone
 
 from . import anchors as anchors_mod
-from . import arxiv, canon, emailer, guard, questions, score
-from .config import Config, anchor_count_warning
+from . import arxiv, canon, emailer, feed as feed_mod, guard, questions, score
+from .config import DATA_DIR, Config, anchor_count_warning
 from .embed import Embedder
 from .llm import ModelClient, ModelError
 from .seen import SeenStore
@@ -217,28 +217,46 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
             )
         )
 
-    # 8. write the archive before sending. A failed email must not cost the data.
+    # 8. write the archive. A failed delivery must not cost the data.
     write_output(cfg, result, day)
     canon.append_candidates(cfg.candidates_csv, candidate_rows)
 
-    # 9. send
+    # 9. rebuild the feed from every day file on disk, including today's. No
+    # password, no account: this is the channel that needs neither. Rebuilt on
+    # a dry run too, so --dry-run lets you inspect data/feed.xml locally.
+    n_entries = feed_mod.rebuild(
+        DATA_DIR, cfg.feed_path, cfg.feed_url, cfg.feed_url, result["generated_at"],
+        max_entries=cfg.feed_max_entries,
+    )
+    result["feed"] = {"entries": n_entries, "path": str(cfg.feed_path.relative_to(DATA_DIR.parent))}
+
     if dry_run:
-        log.info("dry run: no email sent, %d paper(s) written", len(result["papers"]))
+        log.info("dry run: no email sent, %d paper(s) written, %d feed entries",
+                 len(result["papers"]), n_entries)
+        write_output(cfg, result, day)
         return result
 
-    try:
-        emailer.send(result, cfg)
-        result["email"]["sent"] = True
-        seen.mark([p["arxiv_id"] for p in result["papers"]], day)
-        seen.save()
-    except emailer.EmailError as exc:
-        # The JSON is already on disk. Log loudly, keep the file, do not mark the
-        # papers as sent -- they were not.
-        result["email"]["error"] = str(exc)
-        problems.append(f"email not sent: {exc}")
-        log.error("email not sent: %s", exc)
+    # 10. email, if a recipient is configured. Optional: the feed above has
+    # already delivered the day, so a missing or failing email is not fatal to
+    # anything but the email itself.
+    if cfg.email_to():
+        try:
+            emailer.send(result, cfg)
+            result["email"]["sent"] = True
+        except emailer.EmailError as exc:
+            result["email"]["error"] = str(exc)
+            problems.append(f"email not sent: {exc}")
+            log.error("email not sent: %s", exc)
+    else:
+        log.info("no FEED_EMAIL_TO configured; delivered via the feed only")
 
-    write_output(cfg, result, day)          # rewrite with the email outcome
+    # Seen-marking follows the feed, not the email: by this point every paper
+    # is already in data/feed.xml, so it must not be shown again regardless of
+    # whether the optional email succeeded.
+    seen.mark([p["arxiv_id"] for p in result["papers"]], day)
+    seen.save()
+
+    write_output(cfg, result, day)          # rewrite with the delivery outcome
     return result
 
 

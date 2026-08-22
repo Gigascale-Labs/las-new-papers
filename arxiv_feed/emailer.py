@@ -104,11 +104,20 @@ def render_text(result: dict) -> str:
 
 
 def render_html(result: dict) -> str:
+    """Full page: the styled shell plus the body. Used for the email."""
+    body = render_body_html(result)
+    return (
+        "<html><body style=\"font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;"
+        "line-height:1.45;color:#111;max-width:46em\">" + body + "</body></html>"
+    )
+
+
+def render_body_html(result: dict) -> str:
+    """The content only, no <html>/<body> tags. Shared by the email and the
+    RSS feed, so the two never drift into describing a run differently."""
     e = html.escape
     papers = result["papers"]
     out: list[str] = [
-        "<html><body style=\"font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;"
-        "line-height:1.45;color:#111;max-width:46em\">",
         f"<h1 style=\"font-size:1.3em\">arXiv open questions — {e(result['date'])}</h1>",
     ]
     c = result["counts"]
@@ -182,7 +191,6 @@ def render_html(result: dict) -> str:
             out.append(f"<li style=\"color:#a33\">{e(str(prob))}</li>")
         out.append("</ul>")
 
-    out.append("</body></html>")
     return "".join(out)
 
 

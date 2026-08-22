@@ -47,15 +47,30 @@ def main(argv: list[str] | None = None) -> int:
                  seed=args.seed, rebuild_anchors=args.rebuild_anchors)
 
     n_q = sum(len(p["open_questions"]) for p in result["papers"])
+    n_feed = result.get("feed", {}).get("entries", 0)
+    email_status = (
+        "skipped (dry run)" if args.dry_run
+        else "sent" if result["email"]["sent"]
+        else "not configured" if not result["email"]["error"] and not cfg.email_to()
+        else "NOT SENT"
+    )
     print(f"{result['date']}: {result['counts']['fetched']} fetched, "
           f"{result['counts']['kept']} kept, {n_q} questions, "
-          f"email {'skipped (dry run)' if args.dry_run else ('sent' if result['email']['sent'] else 'NOT SENT')}")
+          f"feed {n_feed} entries, email {email_status}")
     for problem in result["problems"]:
         print(f"  problem: {problem}")
 
-    # A run that wrote its JSON but could not send is still a failure. CI must
-    # show it, even though the data was saved.
-    if not args.dry_run and not result["email"]["sent"]:
+    # A run that wrote its JSON but delivered nothing is still a failure. CI
+    # must show it, even though the data was saved. Delivery means either
+    # channel: the feed (rebuilt every non-dry-run) or a configured email that
+    # actually sent. A run with email unconfigured is not a failure -- that is
+    # the normal RSS-only case.
+    #
+    # "feed" is only set once the run reaches delivery; a day with nothing new
+    # returns before that point and must not count as a failed delivery.
+    attempted_delivery = "feed" in result
+    delivered = bool(n_feed) or result["email"]["sent"]
+    if not args.dry_run and attempted_delivery and not delivered:
         return 1
     return 0
 
