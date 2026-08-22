@@ -9,12 +9,16 @@ it worked.
 Go to https://openrouter.ai/keys. Make an API key. Copy it.
 The key starts with `sk-or-v1-`.
 
-**Step 2. Get an email password.**
-The system sends email through Gmail. Your normal Gmail password will not work.
-Go to https://myaccount.google.com/apppasswords. Make an app password.
-Copy the 16 letters.
-If you use a different email provider, change `smtp_host`, `smtp_port` and
-`smtp_user` in `config.yaml` instead.
+**Step 2. Skip this step unless you want email too.**
+Every run writes an RSS/Atom feed. Reading it needs no password and no
+account. If a feed reader is enough for you, skip to Step 3.
+
+To also get a daily email, go to https://myaccount.google.com/apppasswords.
+Make an app password. Copy the 16 letters. Your normal Gmail password will not
+work here, even with two-factor authentication on -- an app password is a
+separate credential Google issues for exactly this. If you use a different
+email provider, change `smtp_host`, `smtp_port` and `smtp_user` in
+`config.yaml` instead.
 
 **Step 3. Get a Lakera key.**
 Go to https://platform.lakera.ai. Make an account. Make a project.
@@ -53,9 +57,10 @@ This downloads about 2.5GB. Most of it is PyTorch. It takes a few minutes.
 
 ```bash
 export OPENROUTER_API_KEY=sk-or-v1-...
-export SMTP_PASSWORD=your-16-letter-app-password
-export LAKERA_GUARD_API_KEY=lakera-...
+export LAKERA_GUARD_API_KEY=lakera-...        # optional
 
+# Only if you did Step 2 and want email too:
+export SMTP_PASSWORD=your-16-letter-app-password
 export FEED_EMAIL_TO=you@example.com          # where the email goes
 export SMTP_USER=you@example.com              # the account that sends it
 ```
@@ -102,16 +107,23 @@ python -c "import json;d=json.load(open('data/latest.json'));[print(p['title']) 
 If you see ten paper titles, the system works.
 If you see lines starting with `problem:`, read them. They say what failed.
 
-**Step 11. Send one real email.**
+**Step 11. Run it for real.**
 
 ```bash
 python main.py
 ```
 
-Check your inbox. Part 1 of the email is all the questions. Part 2 is the
-papers.
-If the email does not arrive, the data file is still saved. The error is in the
-terminal output.
+This writes `data/feed.xml`. Point a feed reader at the file's path on your
+computer to check it now, before it is anywhere public:
+
+```
+file:///absolute/path/to/las-new-papers/data/feed.xml
+```
+
+If you did Step 2, check your inbox too. Part 1 of the email is all the
+questions. Part 2 is the papers. If the email does not arrive, the feed and
+the data file are still saved -- the error is in the terminal output, and it
+does not stop the run.
 
 ## Part 4. Check the filter works
 
@@ -133,7 +145,7 @@ If it fails: add more anchors first, then change the embedding model.
 python -m unittest discover tests
 ```
 
-53 tests. One second. No network, no keys.
+70 tests. One second. No network, no keys.
 
 ## Part 5. Make it daily
 
@@ -143,10 +155,13 @@ Open Settings, then Secrets and variables, then Actions.
 Add these secrets, with these exact names:
 
 - `OPENROUTER_API_KEY`
+- `LAKERA_GUARD_API_KEY` (optional)
+
+Add these three only for email too:
+
 - `FEED_EMAIL_TO` -- where the email goes
 - `SMTP_USER` -- the account that sends it
 - `SMTP_PASSWORD`
-- `LAKERA_GUARD_API_KEY` (optional)
 
 The two addresses are secrets, not config. They never appear in the repository
 or in the data the workflow commits.
@@ -160,30 +175,52 @@ day.
 In the Actions tab, open the workflow. Press "Run workflow".
 Set `dry_run` to true for the first test. Press the green button.
 Watch it run. It takes a few minutes.
-If it is green, do it again with `dry_run` false. Check your inbox.
+If it is green, do it again with `dry_run` false. Check `data/feed.xml` in the
+repository -- it should show today's date. If you did Step 2, check your
+inbox too.
 
 After this, the system runs by itself. It commits each day's data back to the
 repository.
 
+**Step 17. Subscribe to the feed.**
+The feed's URL, with no setup:
+
+```
+https://raw.githubusercontent.com/<your-username>/las-new-papers/main/data/feed.xml
+```
+
+Paste that into a feed reader (NetNewsWire, Feedly, Inoreader, or your
+browser's own reader). This URL is measured to send the wrong content type
+for XML (`text/plain`) -- most readers accept it anyway, since they read the
+content, not only the header.
+
+For the correct content type: repo Settings -> Pages -> Deploy from a branch
+-> `main` -> `/ (root)`. Then edit `config.yaml`, set `feed.base_url` to
+`https://<your-username>.github.io/las-new-papers`, and the feed URL becomes:
+
+```
+https://<your-username>.github.io/las-new-papers/data/feed.xml
+```
+
 ## Part 6. Normal use
 
-**Step 17. Read the email each morning.**
+**Step 18. Read the feed, or the email, each morning.**
 Part 1 is the list of questions. Read that first. `approachable` means you
 could start on it within a few weeks, with public data or a simulation you
 write yourself.
 
-**Step 18. Judge it after seven days.**
+**Step 19. Judge it after seven days.**
 The whole system has one test: at least one question a week worth working on.
 If it fails, change `profile` in `config.yaml` first. Change the prompts
 second.
 
-**Step 19. Grow the corpus from the shortlist.**
+**Step 20. Grow the corpus from the shortlist.**
 `data/canon/candidates.csv` holds every paper the filter shortlisted, not just
 the ten that were emailed. Sort it by `significance` and `novelty`. The first
 15 columns are the canon's own columns, in its order, so a paper you want to
 keep is a copy across, not a re-tagging job.
 
-**Step 20. Change the anchors when your interests change.**
+**Step 21. Change the anchors when your interests change.**
 Edit the `anchors` list in `config.yaml`. Add or remove arXiv IDs.
 Nothing else to do. The system rebuilds the vectors on the next run.
 
@@ -221,7 +258,7 @@ python main.py --dry-run --seed 1
 |---|---|---|
 | `config error: ...` | `config.yaml` is wrong | The message names the key. Fix that key. |
 | `Could not resolve authentication method` | No model API key | Do step 7 again in this terminal. |
-| `SMTP_PASSWORD is not set` | No email password | Do step 7 again. Use an app password, not your login password. |
+| `SMTP_PASSWORD is not set` | No email configured, or an incomplete one | Normal if you skipped Step 2 -- the feed still delivers. If you want email, do Step 7 again with an app password, not your login password. |
 | `Lakera screening did not run` | No Lakera key | Optional. Add the key, or ignore it. The other defences still run. |
 | `arXiv did not answer after 3 attempts` | arXiv is down | Wait. Run it again later with `--date` set to that day. |
 | `no unseen papers found` | You already ran that day | Normal. Nothing was lost. |

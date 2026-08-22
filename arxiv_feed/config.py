@@ -34,6 +34,7 @@ class Config:
     model: str = "anthropic/claude-opus-5"
     effort: str = "medium"
     guard: dict = field(default_factory=dict)
+    feed: dict = field(default_factory=dict)
     path: Path | None = field(default=None, compare=False)
 
     # ---- derived paths -----------------------------------------------------
@@ -52,6 +53,29 @@ class Config:
     @property
     def candidates_csv(self) -> Path:
         return DATA_DIR / "canon" / "candidates.csv"
+
+    @property
+    def feed_path(self) -> Path:
+        return DATA_DIR / "feed.xml"
+
+    @property
+    def feed_max_entries(self) -> int:
+        return int(self.feed.get("max_entries", 60))
+
+    @property
+    def feed_url(self) -> str:
+        """Where data/feed.xml is fetchable, once this repository serves it.
+
+        Defaults to raw.githubusercontent.com, which needs no setup but sends
+        the wrong Content-Type for a feed (measured: text/plain, not xml). Set
+        feed.base_url in config.yaml to a GitHub Pages URL once Pages is
+        enabled, for the correct type -- see README.
+        """
+        base = str(
+            self.feed.get("base_url")
+            or "https://raw.githubusercontent.com/one-2/las-new-papers/main"
+        ).rstrip("/")
+        return f"{base}/data/feed.xml"
 
     def output_path(self, day: str) -> Path:
         return DATA_DIR / f"{day}.json"
@@ -149,6 +173,7 @@ def load_config(path: str | Path = REPO_ROOT / "config.yaml") -> Config:
         model=str(raw.get("model", "claude-opus-5")).strip(),
         effort=str(raw.get("effort", "medium")).strip(),
         guard=dict(raw.get("guard") or {}),
+        feed=dict(raw.get("feed") or {}),
         path=path,
     )
 

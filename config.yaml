@@ -155,7 +155,33 @@ guard:
   max_abstract_chars: 6000
 
 # ---------------------------------------------------------------------------
-# Email delivery.
+# RSS/Atom feed. On every run, this repository writes data/feed.xml from
+# every day file on disk. No password, no account: a feed reader polls a URL.
+#
+# base_url must point at where this repository is served as plain files.
+# Two options:
+#
+#   GitHub Pages (correct Content-Type for a feed; needs a one-time setting)
+#     Enable it: repo Settings -> Pages -> Deploy from a branch -> main -> /
+#     Then: https://<owner>.github.io/<repo>
+#
+#   raw.githubusercontent.com (works with no setup; wrong Content-Type)
+#     Measured: served as text/plain, not an XML type. Most feed readers
+#     still accept it, because they read the file's content, not just the
+#     header, but this is not guaranteed for every reader.
+#     https://raw.githubusercontent.com/<owner>/<repo>/main
+#
+# The default below is the second option, so the feed works with zero setup.
+# Switch to the first once Pages is on.
+# ---------------------------------------------------------------------------
+feed:
+  base_url: https://raw.githubusercontent.com/one-2/las-new-papers/main
+  max_entries: 60    # about two months of daily runs
+
+# ---------------------------------------------------------------------------
+# Email delivery. Optional: the feed above delivers every run on its own.
+# Set FEED_EMAIL_TO to also get a daily email; leave it unset for feed-only,
+# no SMTP account or app password needed.
 #
 # No address is stored in this file. This repository is public, and an address
 # in a public file is scraped. Addresses come from the environment:
