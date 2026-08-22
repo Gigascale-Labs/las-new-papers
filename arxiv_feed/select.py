@@ -1,15 +1,19 @@
-"""The similarity filter: the 40 nearest papers, plus 5 from the tail.
+"""The similarity pre-sort: which papers reach the screening model.
 
-This step makes the run affordable. About 500 papers go in and 45 come out, for
-the cost of a numpy dot product.
+This is no longer the filter. It is a cap.
 
-It filters. It does not judge. The model calls decide significance and novelty.
+The screening call reads up to `screen_n` papers a day for about ten cents, so
+similarity no longer decides what gets judged -- it only decides what gets
+dropped on a day too large to screen whole. Most days are smaller than the cap
+and nothing is dropped at all.
+
+It orders. It does not judge. The screening and judging calls decide relevance,
+significance and novelty.
 """
 
 from __future__ import annotations
 
 import logging
-import random
 from dataclasses import dataclass
 
 import numpy as np
@@ -27,7 +31,6 @@ class Candidate:
     nearest_anchor_id: str
     nearest_anchor_title: str
     rank: int                  # 1-based rank by similarity across all papers that day
-    from_random: bool = False  # picked by the explore slice, not by similarity
 
     def to_dict(self) -> dict:
         return {
@@ -36,59 +39,51 @@ class Candidate:
             "nearest_anchor_id": self.nearest_anchor_id,
             "nearest_anchor_title": self.nearest_anchor_title,
             "similarity_rank": self.rank,
-            "from_random": self.from_random,
         }
 
 
-def shortlist(
+def preselect(
     papers: list[Paper],
     vectors: np.ndarray,
     store: AnchorStore,
-    shortlist_n: int = 40,
-    explore_n: int = 5,
-    explore_pool: int = 100,
-    rng: random.Random | None = None,
+    screen_n: int = 200,
 ) -> list[Candidate]:
-    """Rank by similarity, keep the top `shortlist_n`, add `explore_n` at random.
+    """Rank by similarity to the nearest anchor and keep at most `screen_n`.
 
-    The random papers come from the `explore_pool` ranks immediately below the
-    cut (41-140 by default). They exist because similarity can only find more of
-    what the anchors already describe: a genuinely new subfield has no anchor to
-    be close to, and would never surface without this slice. They are marked in
-    the output so a good paper from the tail is visible as evidence the slice is
-    earning its place.
+    Returns every paper when the day is smaller than the cap, which is the
+    common case. The similarity and rank travel with each candidate because the
+    archive records them, not because anything downstream filters on them.
     """
     if not papers:
         return []
-    rng = rng or random.Random()
 
     best_sim, best_idx = store.best_match(vectors)
     order = np.argsort(-best_sim)          # descending similarity
 
-    def make(pos: int, rank: int, from_random: bool) -> Candidate:
+    kept = []
+    for rank, pos in enumerate(order[:screen_n], start=1):
+        pos = int(pos)
         anchor_i = int(best_idx[pos])
-        return Candidate(
-            paper=papers[pos],
-            similarity=float(best_sim[pos]),
-            nearest_anchor_id=store.ids[anchor_i],
-            nearest_anchor_title=store.titles[anchor_i],
-            rank=rank,
-            from_random=from_random,
+        kept.append(
+            Candidate(
+                paper=papers[pos],
+                similarity=float(best_sim[pos]),
+                nearest_anchor_id=store.ids[anchor_i],
+                nearest_anchor_title=store.titles[anchor_i],
+                rank=rank,
+            )
         )
 
-    top = [make(int(p), i + 1, False) for i, p in enumerate(order[:shortlist_n])]
-
-    tail = order[shortlist_n : shortlist_n + explore_pool]
-    picks = rng.sample(list(range(len(tail))), min(explore_n, len(tail)))
-    explore = [make(int(tail[i]), shortlist_n + i + 1, True) for i in sorted(picks)]
-
-    log.info(
-        "shortlisted %d by similarity (%.3f-%.3f) + %d random from ranks %d-%d",
-        len(top),
-        top[-1].similarity if top else float("nan"),
-        top[0].similarity if top else float("nan"),
-        len(explore),
-        shortlist_n + 1,
-        shortlist_n + len(tail),
-    )
-    return top + explore
+    dropped = len(papers) - len(kept)
+    if dropped:
+        log.info(
+            "pre-sort: %d of %d papers kept for screening (%.3f-%.3f); "
+            "%d dropped below the cap of %d",
+            len(kept), len(papers), kept[-1].similarity, kept[0].similarity,
+            dropped, screen_n,
+        )
+    else:
+        log.info("pre-sort: all %d papers kept for screening (%.3f-%.3f); "
+                 "day is under the cap of %d",
+                 len(kept), kept[-1].similarity, kept[0].similarity, screen_n)
+    return kept

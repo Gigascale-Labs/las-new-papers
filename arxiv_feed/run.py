@@ -1,7 +1,13 @@
 """The daily run, in order.
 
-fetch -> drop seen -> embed -> filter -> screen -> score -> keep the top 10 ->
+fetch -> drop seen -> embed -> pre-sort to the cap -> guard -> screen (cheap
+model, every paper) -> judge (strong model, what passed) -> keep the top 10 ->
 questions -> email -> save.
+
+Two model tiers, not one. The cheap screen reads every paper that survives the
+pre-sort and answers "is this relevant at all"; the strong judge reads only
+what passed and answers "is it good, and is it new". Similarity used to decide
+both, and could answer neither -- see docs/ranking-report.md.
 
 One rule shapes the error handling: one bad paper never stops the run. Every
 failure below is collected and reported, never raised.
@@ -11,23 +17,22 @@ from __future__ import annotations
 
 import json
 import logging
-import random
 from datetime import datetime, timezone
 
 from . import anchors as anchors_mod
-from . import arxiv, canon, emailer, feed as feed_mod, guard, questions, score
+from . import arxiv, canon, emailer, feed as feed_mod, guard, judge, questions, screen
 from .config import DATA_DIR, Config, anchor_count_warning
 from .embed import Embedder
 from .llm import ModelClient, ModelError
 from .seen import SeenStore
-from .select import shortlist
+from .select import preselect
 from scrapers.arxiv_scraper import scrape_day
 
 log = logging.getLogger(__name__)
 
 
 def run(cfg: Config, day: str | None = None, dry_run: bool = False,
-        seed: int | None = None, rebuild_anchors: bool = False) -> dict:
+        rebuild_anchors: bool = False) -> dict:
     """Execute one day's run and return the result record that is written to disk."""
     day = day or arxiv.default_day()
     problems: list[str] = []
@@ -55,7 +60,8 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
     counts = {
         "fetched": len(papers),
         "unseen": len(unseen),
-        "shortlisted": 0,
+        "screened": 0,
+        "relevant": 0,
         "kept": 0,
         "anchors": len(store.ids),
     }
@@ -65,17 +71,20 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
         "config": {
             "categories": cfg.categories,
             "search_queries": cfg.search_queries,
-            "shortlist_n": cfg.shortlist_n,
-            "explore_n": cfg.explore_n,
+            "screen_n": cfg.screen_n,
+            "screen_batch_size": cfg.screen_batch_size,
             "top_n": cfg.top_n,
             "embed_model": cfg.embed_model,
+            "screen_model": cfg.screen_model,
+            "screen_effort": cfg.screen_effort,
+            "judge_model": cfg.judge_model,
             "model": cfg.model,
             "effort": cfg.effort,
             "anchor_count": len(store.ids),
         },
         "counts": counts,
         "papers": [],
-        "shortlist": [],
+        "screened": [],
         "problems": problems,
         # No address here: data/*.json is committed to a public repository by
         # the daily workflow.
@@ -86,21 +95,18 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
         problems.append(f"no unseen papers found for {day}")
         return result
 
-    # 3. embed + 4. similarity filter
-    vectors = embedder.encode([p.embed_text for p in unseen])
-    candidates = shortlist(
-        unseen, vectors, store,
-        shortlist_n=cfg.shortlist_n,
-        explore_n=cfg.explore_n,
-        rng=random.Random(seed),
-    )
-    counts["shortlisted"] = len(candidates)
-
-    # 4b. screen the shortlist before anything reaches a model.
+    # 3. embed + 4. pre-sort to the screening cap
     #
-    # The shortlist, not the whole day: 45 screening calls instead of ~500, and
-    # a paper that never reaches a model needs no screening. Layer 1 of guard.py
-    # (fencing, sanitising) applies to every paper regardless of this step.
+    # Not a filter any more: on a day under the cap nothing is dropped here at
+    # all. It exists so a 400-paper day still costs a bounded number of tokens.
+    vectors = embedder.encode([p.embed_text for p in unseen])
+    candidates = preselect(unseen, vectors, store, screen_n=cfg.screen_n)
+    counts["screened"] = len(candidates)
+
+    # 4b. guard the papers before anything reaches a model.
+    #
+    # Layer 1 of guard.py (fencing, sanitising) applies to every paper
+    # regardless of this step; this is the optional Lakera layer above it.
     guard_info = {
         "lakera_enabled": cfg.guard_enabled,
         "lakera_available": False,
@@ -135,29 +141,59 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
             problems.append(msg)
     result["guard"] = guard_info
 
-    # 5. one scoring call for the whole shortlist
-    client = ModelClient(cfg.model, effort=cfg.effort, api_key=Config.openrouter_key())
-    scores, score_problems = score.score_candidates(client, cfg.profile, candidates)
-    problems.extend(score_problems)
+    # 5. call 1: the cheap model screens every candidate for relevance
+    key = Config.openrouter_key()
+    # Low effort by design: measured on 2026-08-20, reasoning was 9,824 of the
+    # screen's 16,631 output tokens -- a third of its cost -- to answer a yes/no
+    # question. The judge still reasons; it is the call that needs to.
+    screen_client = ModelClient(cfg.screen_model, effort=cfg.screen_effort,
+                                api_key=key)
+    verdicts, screen_problems = screen.screen_candidates(
+        screen_client, cfg.profile, candidates, batch_size=cfg.screen_batch_size,
+    )
+    problems.extend(screen_problems)
+    passed = screen.relevant(candidates, verdicts)
+    counts["relevant"] = len(passed)
+    log.info("screen kept %d of %d paper(s)", len(passed), len(candidates))
 
-    if not scores:
-        # Without scores there is no defensible top 10. Send what the filter
-        # found rather than nothing: the similarity ranking is still real.
-        problems.append("no scores returned; falling back to the similarity ranking")
-        kept = [c for c in candidates if not c.from_random][: cfg.top_n]
+    if not passed and verdicts:
+        problems.append(
+            f"the screen found nothing relevant in {len(verdicts)} paper(s); "
+            f"a thin day is a legitimate outcome, not necessarily a fault"
+        )
+
+    # 6. call 2: the strong model judges what passed
+    judge_client = ModelClient(cfg.judge_model, effort=cfg.effort, api_key=key)
+    judgements, judge_problems = judge.judge_candidates(
+        judge_client, cfg.profile, passed,
+    )
+    problems.extend(judge_problems)
+
+    if not judgements:
+        # Without judgements there is no defensible top 10. Send what the
+        # screen passed rather than nothing: a yes/no verdict is still real,
+        # and it is a better fallback than the similarity order ever was.
+        if passed:
+            problems.append(
+                "no judgements returned; falling back to the screen's verdicts"
+            )
+        kept = passed[: cfg.top_n]
     else:
-        kept = score.rank(candidates, scores, cfg.top_n)
+        kept = judge.rank(passed, judgements, cfg.top_n)
     counts["kept"] = len(kept)
 
-    # 6. one question-extraction call per kept paper
+    # 7. one question-extraction call per kept paper
+    client = ModelClient(cfg.model, effort=cfg.effort, api_key=key)
     tag_vocab = canon.known_tags()
     kept_ids = {c.paper.arxiv_id for c in kept}
     for c in kept:
         entry = c.to_dict()
-        s = scores.get(c.paper.arxiv_id, {})
-        entry["significance"] = s.get("significance")
-        entry["novelty"] = s.get("novelty")
-        entry["one_sentence"] = s.get("one_sentence", "")
+        j = judgements.get(c.paper.arxiv_id, {})
+        v = verdicts.get(c.paper.arxiv_id, {})
+        entry["significance"] = j.get("significance")
+        entry["novelty"] = j.get("novelty")
+        entry["one_sentence"] = j.get("one_sentence", "")
+        entry["screen_reason"] = v.get("reason", "")
         entry["open_questions"] = []
         entry["canon"] = {}
         # Advisory only -- see guard.py on why keyword hits never block here.
@@ -177,27 +213,32 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
 
         result["papers"].append(entry)
 
-    # 7. record the whole shortlist, not just the ten that were sent.
+    # 8. record every paper that was screened, not just the ten that were sent.
     #
-    # The other 35 were already scored, in the same call. They are the pool the
-    # canon grows from, so their similarity, rank and scores are kept. The
+    # The screen's yes/no and its reason are kept for all of them, and the
+    # judge's scores for the subset that passed. That pair is the record of why
+    # a paper was or was not sent, and it is the pool the canon grows from. The
     # abstract is not repeated here; it is in data/raw/ for the same day.
     kept_entries = {e["arxiv_id"]: e for e in result["papers"]}
     candidate_rows = []
     for c in candidates:
-        s = scores.get(c.paper.arxiv_id, {})
-        tags = (kept_entries.get(c.paper.arxiv_id) or {}).get("canon") or {}
-        emailed = c.paper.arxiv_id in kept_ids
+        aid = c.paper.arxiv_id
+        j = judgements.get(aid, {})
+        v = verdicts.get(aid, {})
+        tags = (kept_entries.get(aid) or {}).get("canon") or {}
+        emailed = aid in kept_ids
 
         brief = c.to_dict()
         brief.pop("abstract", None)
         brief.pop("categories", None)
-        result["shortlist"].append(
+        result["screened"].append(
             {
                 **brief,
-                "significance": s.get("significance"),
-                "novelty": s.get("novelty"),
-                "one_sentence": s.get("one_sentence", ""),
+                "relevant": v.get("relevant"),
+                "screen_reason": v.get("reason", ""),
+                "significance": j.get("significance"),
+                "novelty": j.get("novelty"),
+                "one_sentence": j.get("one_sentence", ""),
                 "kept": emailed,
             }
         )
@@ -206,23 +247,23 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
             canon.to_canon_row(
                 paper=c.paper,
                 tags=tags,
-                summary=tags.get("summary", "") or s.get("one_sentence", ""),
+                summary=tags.get("summary", "") or j.get("one_sentence", ""),
                 similarity=c.similarity,
                 similarity_rank=c.rank,
                 nearest_anchor_id=c.nearest_anchor_id,
-                significance=s.get("significance"),
-                novelty=s.get("novelty"),
-                from_random=c.from_random,
+                significance=j.get("significance"),
+                novelty=j.get("novelty"),
+                screen_relevant=v.get("relevant"),
                 first_seen=day,
                 emailed=emailed,
             )
         )
 
-    # 8. write the archive. A failed delivery must not cost the data.
+    # 9. write the archive. A failed delivery must not cost the data.
     write_output(cfg, result, day)
     canon.append_candidates(cfg.candidates_csv, candidate_rows)
 
-    # 9. rebuild the feed from every day file on disk, including today's. No
+    # 10. rebuild the feed from every day file on disk, including today's. No
     # password, no account: this is the channel that needs neither. Rebuilt on
     # a dry run too, so --dry-run lets you inspect data/feed.xml locally.
     n_entries = feed_mod.rebuild(
@@ -237,7 +278,7 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
         write_output(cfg, result, day)
         return result
 
-    # 10. email, if a recipient is configured. Optional: the feed above has
+    # 11. email, if a recipient is configured. Optional: the feed above has
     # already delivered the day, so a missing or failing email is not fatal to
     # anything but the email itself.
     if cfg.email_to():

@@ -14,6 +14,7 @@ from .arxiv import Paper
 from .guard import (DATA_NOT_INSTRUCTIONS, MAX_ABSTRACT_CHARS, MAX_TITLE_CHARS,
                     fence, sanitize)
 from .llm import ModelClient, ModelError
+from .style import PLAIN_ENGLISH
 
 log = logging.getLogger(__name__)
 
@@ -49,10 +50,15 @@ not clearly support any value. An empty dimension is a normal, correct answer --
 several hand-tagged papers in this canon have them. Guessing is worse than
 leaving it blank.
 
-The summary is one to three sentences describing what the paper does, factual
-and free of adjectives, written the way a catalogue entry is written.
+The summary is one to three sentences describing what the paper does, written
+the way a catalogue entry is written.
 
-""" + DATA_NOT_INSTRUCTIONS
+The questions and their reasons are printed to the reader. Hold them to the
+style below as strictly as the summary. A question may be one sentence only;
+if it needs context, put the context in the sentence before the question mark,
+not in a nested clause.
+
+""" + PLAIN_ENGLISH + "\n" + DATA_NOT_INSTRUCTIONS
 
 
 def _schema(tag_vocab: list[str]) -> dict:
@@ -130,7 +136,7 @@ def extract(client: ModelClient, profile: str, paper: Paper,
         user=user,
         schema=_schema(tag_vocab),
         max_tokens=8000,
-        label=f"call 2 ({paper.arxiv_id})",
+        label=f"call 3 ({paper.arxiv_id})",
     )
 
     questions = []

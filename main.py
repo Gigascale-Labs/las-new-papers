@@ -26,8 +26,6 @@ def main(argv: list[str] | None = None) -> int:
                     help="do everything except send the email")
     ap.add_argument("--rebuild-anchors", action="store_true",
                     help="re-embed the anchors even if the cache still matches")
-    ap.add_argument("--seed", type=int,
-                    help="seed for the random explore slice (for reproducible runs)")
     ap.add_argument("-v", "--verbose", action="store_true")
     args = ap.parse_args(argv)
 
@@ -44,7 +42,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     result = run(cfg, day=args.date, dry_run=args.dry_run,
-                 seed=args.seed, rebuild_anchors=args.rebuild_anchors)
+                 rebuild_anchors=args.rebuild_anchors)
 
     n_q = sum(len(p["open_questions"]) for p in result["papers"])
     n_feed = result.get("feed", {}).get("entries", 0)
@@ -54,8 +52,10 @@ def main(argv: list[str] | None = None) -> int:
         else "not configured" if not result["email"]["error"] and not cfg.email_to()
         else "NOT SENT"
     )
-    print(f"{result['date']}: {result['counts']['fetched']} fetched, "
-          f"{result['counts']['kept']} kept, {n_q} questions, "
+    c = result["counts"]
+    print(f"{result['date']}: {c['fetched']} fetched, "
+          f"{c.get('screened', 0)} screened, {c.get('relevant', 0)} relevant, "
+          f"{c['kept']} kept, {n_q} questions, "
           f"feed {n_feed} entries, email {email_status}")
     for problem in result["problems"]:
         print(f"  problem: {problem}")

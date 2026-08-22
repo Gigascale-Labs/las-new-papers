@@ -28,12 +28,15 @@ class Config:
     search_queries: list[str] = field(default_factory=list)
     smtp_host: str = "smtp.gmail.com"
     smtp_port: int = 587
-    shortlist_n: int = 40
-    explore_n: int = 5
+    screen_n: int = 200
+    screen_batch_size: int = 25
     top_n: int = 10
     embed_model: str = "allenai/specter2_base"
+    screen_model: str = "anthropic/claude-haiku-4.5"
+    judge_model: str = "anthropic/claude-sonnet-5"
     model: str = "anthropic/claude-opus-5"
     effort: str = "medium"
+    screen_effort: str = "low"
     guard: dict = field(default_factory=dict)
     feed: dict = field(default_factory=dict)
     path: Path | None = field(default=None, compare=False)
@@ -168,12 +171,15 @@ def load_config(path: str | Path = REPO_ROOT / "config.yaml") -> Config:
         search_queries=[str(q).strip() for q in raw.get("search_queries") or []],
         smtp_host=str(raw.get("smtp_host", "smtp.gmail.com")).strip(),
         smtp_port=int(raw.get("smtp_port", 587)),
-        shortlist_n=int(raw.get("shortlist_n", 40)),
-        explore_n=int(raw.get("explore_n", 5)),
+        screen_n=int(raw.get("screen_n", 200)),
+        screen_batch_size=int(raw.get("screen_batch_size", 25)),
         top_n=int(raw.get("top_n", 10)),
         embed_model=str(raw.get("embed_model", "allenai/specter2_base")).strip(),
+        screen_model=str(raw.get("screen_model", "anthropic/claude-haiku-4.5")).strip(),
+        judge_model=str(raw.get("judge_model", "anthropic/claude-sonnet-5")).strip(),
         model=str(raw.get("model", "claude-opus-5")).strip(),
         effort=str(raw.get("effort", "medium")).strip(),
+        screen_effort=str(raw.get("screen_effort", "low")).strip(),
         guard=dict(raw.get("guard") or {}),
         feed=dict(raw.get("feed") or {}),
         path=path,
@@ -195,15 +201,20 @@ def load_config(path: str | Path = REPO_ROOT / "config.yaml") -> Config:
                 f"Use the FEED_EMAIL_TO / FEED_EMAIL_FROM / SMTP_USER environment "
                 f"variables instead."
             )
-    if cfg.effort not in _EFFORTS:
-        raise ConfigError(f"effort must be one of {sorted(_EFFORTS)}, got {cfg.effort!r}")
-    for n in ("shortlist_n", "explore_n", "top_n"):
+    for name in ("effort", "screen_effort"):
+        value = getattr(cfg, name)
+        if value not in _EFFORTS:
+            raise ConfigError(
+                f"{name} must be one of {sorted(_EFFORTS)}, got {value!r}")
+    for n in ("screen_n", "top_n"):
         if getattr(cfg, n) < 0:
             raise ConfigError(f"{n} must be >= 0")
-    if cfg.top_n > cfg.shortlist_n + cfg.explore_n:
+    if cfg.screen_batch_size < 1:
+        raise ConfigError("screen_batch_size must be >= 1")
+    if cfg.top_n > cfg.screen_n:
         raise ConfigError(
-            f"top_n ({cfg.top_n}) exceeds the shortlist it selects from "
-            f"({cfg.shortlist_n} + {cfg.explore_n})"
+            f"top_n ({cfg.top_n}) exceeds the number of papers screened "
+            f"({cfg.screen_n})"
         )
     return cfg
 

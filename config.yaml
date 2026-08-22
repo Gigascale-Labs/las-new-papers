@@ -37,6 +37,10 @@ search_queries:
 # ---------------------------------------------------------------------------
 # Anchor papers: work already known to be in the field.
 #
+# These no longer decide what gets read. They only order the day so that a
+# listing larger than screen_n can be cut to screen_n. On a day under the cap
+# the anchors change nothing at all -- every paper is screened regardless.
+#
 # 20 of the 42-paper LAS canon's 33 arXiv entries, kept for two themes:
 # gradual disempowerment, and dynamics that only appear in very large agent
 # populations. Papers whose contribution is a framework, protocol, dataset or
@@ -114,11 +118,17 @@ profile: |
   approachable.
 
 # ---------------------------------------------------------------------------
-# Filter and scoring sizes.
+# Pipeline sizes.
+#
+# Every paper up to screen_n reaches the screening model. The old similarity
+# shortlist (40 by similarity + 5 at random) is gone: it decided relevance on a
+# signal that could not carry that decision -- on a measured day the papers at
+# ranks 10 to 40 were separated by 0.0004 cosine, which is noise. See
+# docs/ranking-report.md.
 # ---------------------------------------------------------------------------
-shortlist_n: 40      # papers kept by similarity
-explore_n: 5         # random papers added from the next 100 (anti-tunnel-vision)
-top_n: 10            # papers kept after the scoring call
+screen_n: 200          # max papers sent to the screening model in a day
+screen_batch_size: 25  # papers per screening call; batch-mates calibrate each other
+top_n: 10              # papers kept after the judging call
 
 # ---------------------------------------------------------------------------
 # Models.
@@ -128,15 +138,31 @@ top_n: 10            # papers kept after the scoring call
 # adapter notes.
 embed_model: allenai/specter2_base
 
-# Model for the two calls (scoring, question extraction), as an OpenRouter
-# model id. Change this to any id OpenRouter lists; the code makes no
-# provider assumption. List: https://openrouter.ai/models
+# Three calls, three models, all OpenRouter model ids. The code makes no
+# provider assumption -- any id OpenRouter lists works.
+# List: https://openrouter.ai/models
+#
+# screen_model  call 1: reads every paper, answers "relevant?" yes/no.
+#               Cheap, because it reads up to screen_n papers a day.
+# judge_model   call 2: reads what passed, scores significance and novelty.
+# model         call 3: one question-extraction call per kept paper.
+#
+# Measured cost at 150 papers/day: about $0.10 screening + $0.11 judging,
+# roughly what the single Opus scoring call cost when it read only 45 papers.
+screen_model: anthropic/claude-haiku-4.5
+judge_model: anthropic/claude-sonnet-5
 model: anthropic/claude-opus-5
 
-# Reasoning effort for the two calls. OpenRouter passes this to the provider
-# as reasoning_effort. Not every model supports it; unsupported models ignore
-# it. Values: low | medium | high | xhigh | max.
+# Reasoning effort. OpenRouter passes this to the provider as reasoning_effort.
+# Not every model supports it; unsupported models ignore it.
+# Values: low | medium | high | xhigh | max.
+#
+# The screen runs lower than the rest. Measured on 2026-08-20 at effort medium,
+# reasoning was 9,824 of the screen's 16,631 output tokens -- a third of its
+# cost -- to answer one yes/no question per paper. The judge and the question
+# call keep the higher setting: those are the calls that need to reason.
 effort: medium
+screen_effort: low
 
 # ---------------------------------------------------------------------------
 # Defences for untrusted text (arXiv titles and abstracts).
