@@ -20,7 +20,7 @@ Built to [`docs/spec.md`](docs/spec.md). To run it, follow
 arXiv, 7 lists, ~200-500 new papers
   drop papers already sent
   embed title + abstract locally      free, on your CPU
-  rank against 33 anchor papers       top 40, plus 5 at random from ranks 41-140
+  rank against 20 anchor papers       top 40, plus 5 at random from ranks 41-140
   ONE model call scores those 45      significance 1-5, novelty 1-5
   keep the top 10
   ONE model call per paper            open questions, marked approachable or not
@@ -71,9 +71,9 @@ python scrapers/arxiv_scraper.py         # scrape and archive one day, no models
 The first run downloads the embedding model (440MB) and builds the anchor
 vectors. Both are cached.
 
-`config.yaml` holds the rest: categories, anchors, your profile, the filter
-sizes, and the two model names. The anchor vectors rebuild themselves when the
-anchor list or the embedding model changes.
+`config.yaml` holds the rest: categories, search queries, anchors, your
+profile, the filter sizes, and the two model names. The anchor vectors rebuild
+themselves when the anchor list or the embedding model changes.
 
 **No email address is stored in this repository.** It is public, and an address
 in a public file is scraped. `FEED_EMAIL_TO`, `FEED_EMAIL_FROM` and `SMTP_USER`
@@ -153,8 +153,10 @@ The copy is frozen. It is the test set for the filter, and a test set that
 follows the canon makes older results incomparable. Refresh it as its own
 commit when you want to measure against a newer canon.
 
-The 33 anchors are the arXiv entries of that corpus. The other 9 are not on
-arXiv.
+33 of the 42 canon entries are on arXiv. 20 of those 33 are anchors, kept for
+two themes: gradual disempowerment, and dynamics that only appear in very
+large agent populations. The other 13 arXiv entries, and the 9 not on arXiv,
+stay in the canon but are not anchors.
 
 Every shortlisted paper is appended to `data/canon/candidates.csv`, in the
 canon's column order. One file, not two: the ten that were emailed carry their
@@ -196,10 +198,10 @@ the site reads. Three layers, in `arxiv_feed/guard.py`:
    paper stays in the archive and is named in the email.
 3. **Keyword patterns. Always on, never blocking.**
 
-Layer 3 never blocks because this corpus includes papers about prompt
-injection. One of the 33 anchors is "Prompt Infection: LLM-to-LLM Prompt
-Injection within Multi-Agent Systems". A keyword rule strong enough to catch a
-real attack would hide exactly those papers.
+Layer 3 never blocks because this corpus can include papers about prompt
+injection and other attack techniques -- that is what the field studies. A
+keyword rule strong enough to catch a real attack would hide exactly those
+papers.
 
 Each output is protected where it lands:
 
@@ -231,11 +233,15 @@ python -m unittest discover tests     # 70 tests, no network, no keys
 python -m tests.leave_one_out         # the filter evaluation, real arXiv, free
 ```
 
-**Leave-one-out: 10 of 10 passed.** The threshold is 8 of 10. Each round
-removes one anchor, fetches every paper from the day that anchor appeared, and
-ranks against the remaining anchors. The removed paper must come back in the
-top 40. Seven came back at rank 1 in pools of 63-311 papers. The worst was rank
-28. The report is in `data/eval/leave-one-out.json`.
+**Leave-one-out: 10 of 10 passed**, measured against the previous 33-anchor
+set. The threshold is 8 of 10. Each round removes one anchor, fetches every
+paper from the day that anchor appeared, and ranks against the remaining
+anchors. The removed paper must come back in the top 40. Seven came back at
+rank 1 in pools of 63-311 papers. The worst was rank 28. The report is in
+`data/eval/leave-one-out.json`.
+
+Not yet re-run against the narrowed 20-anchor set -- `python -m
+tests.leave_one_out --anchors all` is the command that would settle it.
 
 The unit tests cover the shortlist bounds, highest-against-anchors rather than
 average, the ranking tie-break, an omitted score being reported rather than
@@ -266,7 +272,7 @@ without a password" above for what to check once Pages is on.
 
 ```
 main.py                     CLI: --dry-run, --date, --rebuild-anchors, --seed
-config.yaml                 categories, anchors, profile, sizes, models
+config.yaml                 categories, search queries, anchors, profile, sizes, models
 arxiv_feed/
   arxiv.py                  the day's papers; 3 tries, 60s apart
   embed.py                  local SPECTER2, CLS pooling, unit vectors

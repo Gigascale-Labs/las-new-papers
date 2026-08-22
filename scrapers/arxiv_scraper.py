@@ -42,11 +42,11 @@ def archive_path(day: str) -> Path:
     return RAW_DIR / f"{day}.jsonl.gz"
 
 
-def scrape_day(categories: list[str], day: str | None = None,
-               store: bool = True) -> list[arxiv.Paper]:
+def scrape_day(categories: list[str], day: str | None = None, store: bool = True,
+               search_queries: list[str] | None = None) -> list[arxiv.Paper]:
     """Fetch one UTC day of new papers and (optionally) archive them."""
     day = day or arxiv.default_day()
-    papers = arxiv.fetch_new_papers(categories, day)
+    papers = arxiv.fetch_new_papers(categories, day, search_queries)
     log.info("%s: %d papers across %s", day, len(papers), ", ".join(categories))
     if store:
         write_archive(day, papers)
@@ -92,15 +92,19 @@ def main(argv=None) -> int:
     ap.add_argument("--date", help="UTC day, YYYY-MM-DD (default: yesterday)")
     ap.add_argument("--categories", nargs="+",
                     help="override the categories in the config file")
+    ap.add_argument("--search-queries", nargs="+",
+                    help="override the search queries in the config file")
     ap.add_argument("--no-store", action="store_true", help="fetch but do not write")
     args = ap.parse_args(argv)
 
     logging.basicConfig(level=logging.INFO,
                         format="%(levelname)-7s %(name)s: %(message)s")
 
-    categories = args.categories or load_config(args.config).categories
+    cfg = load_config(args.config)
+    categories = args.categories or cfg.categories
+    search_queries = args.search_queries if args.search_queries is not None else cfg.search_queries
     day = args.date or arxiv.default_day()
-    papers = scrape_day(categories, day, store=not args.no_store)
+    papers = scrape_day(categories, day, store=not args.no_store, search_queries=search_queries)
 
     primary = Counter(p.categories[0] for p in papers if p.categories)
     flagged = sum(1 for p in papers
