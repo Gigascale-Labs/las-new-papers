@@ -138,6 +138,14 @@ top_n: 10              # papers kept after the judging call
 # adapter notes.
 embed_model: allenai/specter2_base
 
+# Where the embedding model runs. CPU by default and on purpose: the work is a
+# few hundred abstracts through a BERT-base encoder, and the daily job runs in
+# GitHub Actions, which has no GPU. Taking a GPU here only makes the run
+# compete with other work on the machine, and a process holding GPU memory for
+# its whole length is one something else can reap. Set to cuda if the GPUs are
+# yours alone.
+embed_device: cpu
+
 # Three calls, three models, all OpenRouter model ids. The code makes no
 # provider assumption -- any id OpenRouter lists works.
 # List: https://openrouter.ai/models

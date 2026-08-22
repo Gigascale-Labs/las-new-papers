@@ -43,7 +43,7 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
         problems.append(warning)
 
     # 1. anchors (cached unless the list or the model changed)
-    embedder = Embedder(cfg.embed_model)
+    embedder = Embedder(cfg.embed_model, device=cfg.embed_device)
     store = anchors_mod.load_or_build(cfg, embedder, force=rebuild_anchors)
 
     # 2. the day's papers, minus anything already sent.

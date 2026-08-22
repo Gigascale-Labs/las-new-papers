@@ -32,6 +32,7 @@ class Config:
     screen_batch_size: int = 25
     top_n: int = 10
     embed_model: str = "allenai/specter2_base"
+    embed_device: str = "cpu"
     screen_model: str = "anthropic/claude-haiku-4.5"
     judge_model: str = "anthropic/claude-sonnet-5"
     model: str = "anthropic/claude-opus-5"
@@ -175,6 +176,7 @@ def load_config(path: str | Path = REPO_ROOT / "config.yaml") -> Config:
         screen_batch_size=int(raw.get("screen_batch_size", 25)),
         top_n=int(raw.get("top_n", 10)),
         embed_model=str(raw.get("embed_model", "allenai/specter2_base")).strip(),
+        embed_device=str(raw.get("embed_device", "cpu")).strip(),
         screen_model=str(raw.get("screen_model", "anthropic/claude-haiku-4.5")).strip(),
         judge_model=str(raw.get("judge_model", "anthropic/claude-sonnet-5")).strip(),
         model=str(raw.get("model", "claude-opus-5")).strip(),

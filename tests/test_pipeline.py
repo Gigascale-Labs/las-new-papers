@@ -804,3 +804,15 @@ class TestSummaryDoesNotArgue(unittest.TestCase):
 
     def test_the_summary_is_capped(self):
         self.assertIn("At most three\nsentences, each under 20 words", judge.SYSTEM)
+
+
+class TestEmbeddingStaysOffTheGPU(unittest.TestCase):
+    def test_cpu_is_the_default(self):
+        """Production is GitHub Actions, which has no GPU."""
+        from arxiv_feed.config import load_config
+        self.assertEqual(load_config("config.yaml").embed_device, "cpu")
+
+    def test_the_device_reaches_the_embedder(self):
+        from arxiv_feed.embed import Embedder
+        self.assertEqual(Embedder("m").device, "cpu")
+        self.assertEqual(Embedder("m", device="cuda").device, "cuda")

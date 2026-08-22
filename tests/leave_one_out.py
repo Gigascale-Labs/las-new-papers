@@ -71,7 +71,7 @@ def day_pool(categories: list[str], day: str) -> list[arxiv.Paper]:
 
 def run(anchors_to_test: list[str], config_path: str) -> dict:
     cfg = load_config(config_path)
-    embedder = Embedder(cfg.embed_model)
+    embedder = Embedder(cfg.embed_model, device=cfg.embed_device)
     full_store = anchors_mod.load_or_build(cfg, embedder)
     meta = arxiv.fetch_by_ids(anchors_to_test)
 
