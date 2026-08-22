@@ -1,7 +1,16 @@
 """Local embeddings.
 
-Runs on your own CPU and costs nothing. This is what keeps the model calls down
-to 45 papers a day instead of 500.
+Runs on your own CPU and costs nothing. It orders the day so a listing larger
+than screen_n can be cut to screen_n.
+
+CPU by default, and on purpose. The work is small: a few hundred abstracts
+through a BERT-base encoder. Measured at 67 ms per paper, 12.4 s for 185.
+
+The daily job runs in GitHub Actions, which has no GPU. So CPU is what
+production uses. Taking a GPU here only makes the run compete with other work
+on the machine. A run that holds GPU memory for its whole length is a run
+something else can reap. Two runs on system-1 died that way, by SIGKILL, with
+no OOM record. Set embed_device to cuda if the GPUs are yours alone.
 """
 
 from __future__ import annotations
@@ -20,9 +29,10 @@ class Embedder:
     product -- there is no second place where a cosine could be computed wrongly.
     """
 
-    def __init__(self, model_name: str, batch_size: int = 32):
+    def __init__(self, model_name: str, batch_size: int = 32, device: str = "cpu"):
         self.model_name = model_name
         self.batch_size = batch_size
+        self.device = device
         self._model = None                      # loaded lazily: import costs ~5s
 
     def _load(self):
@@ -51,12 +61,13 @@ class Embedder:
             # so the module stack is built explicitly here.
             word = models.Transformer(self.model_name, max_seq_length=512)
             pool = models.Pooling(dim_of(word), pooling_mode="cls")
-            self._model = SentenceTransformer(modules=[word, pool])
+            self._model = SentenceTransformer(modules=[word, pool],
+                                              device=self.device)
         else:
-            self._model = SentenceTransformer(self.model_name)
+            self._model = SentenceTransformer(self.model_name, device=self.device)
 
-        log.info("loaded embedding model %s (dim=%d)",
-                 self.model_name, dim_of(self._model))
+        log.info("loaded embedding model %s on %s (dim=%d)",
+                 self.model_name, self.device, dim_of(self._model))
         return self._model
 
     @property

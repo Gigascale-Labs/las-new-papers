@@ -70,7 +70,7 @@ DIMENSION_CHOICES: dict[str, list[str]] = {
 # Extra columns this repo adds beyond the canon's. They come after the canon
 # columns, so the first 15 columns lift straight into the canon.
 EXTRA_COLUMNS = ["arxiv_id", "first_seen", "similarity", "similarity_rank",
-                 "nearest_anchor_id", "from_random", "significance", "novelty",
+                 "nearest_anchor_id", "screen_relevant", "significance", "novelty",
                  "emailed"]
 
 CANDIDATE_COLUMNS = CANON_COLUMNS + EXTRA_COLUMNS
@@ -103,15 +103,19 @@ def to_canon_row(
     nearest_anchor_id: str,
     significance,
     novelty,
-    from_random: bool,
+    screen_relevant,
     first_seen: str,
     emailed: bool = False,
 ) -> dict:
     """One shortlisted paper, in canon column order plus the extra columns.
 
-    `tags` is empty for a paper that was shortlisted but not emailed. It never
-    got the question-extraction call, so it has no dimension values, and the
+    `tags` is empty for a paper that was screened but not emailed. It never got
+    the question-extraction call, so it has no dimension values, and the
     dimension columns stay blank.
+
+    `screen_relevant` is the cheap model's yes/no, or None for a paper the
+    screen never returned a verdict on. A "no" row is kept deliberately: the
+    record of what was rejected is what makes the screen auditable.
     """
     date = (paper.published or "")[:4]
     return {
@@ -140,7 +144,7 @@ def to_canon_row(
         "similarity": f"{similarity:.4f}",
         "similarity_rank": similarity_rank,
         "nearest_anchor_id": nearest_anchor_id,
-        "from_random": "yes" if from_random else "",
+        "screen_relevant": "" if screen_relevant is None else ("yes" if screen_relevant else "no"),
         "significance": significance if significance is not None else "",
         "novelty": novelty if novelty is not None else "",
         "emailed": "yes" if emailed else "",
@@ -156,7 +160,19 @@ def append_candidates(path: Path, rows: list[dict]) -> int:
     existing: set[str] = set()
     if path.exists():
         with path.open(newline="", encoding="utf-8") as f:
-            existing = {r.get("url", "") for r in csv.DictReader(f)}
+            reader = csv.DictReader(f)
+            header = reader.fieldnames or []
+            existing = {r.get("url", "") for r in reader}
+        # Appending rows in a column order the file's header does not use would
+        # write every value under the wrong name, silently and forever. Refuse
+        # instead: a stale header means the file predates a schema change and
+        # needs migrating, which is a one-off job for a person.
+        if header and header != CANDIDATE_COLUMNS:
+            raise ValueError(
+                f"{path} has a stale header and would be corrupted by an append. "
+                f"Missing: {sorted(set(CANDIDATE_COLUMNS) - set(header))}; "
+                f"unexpected: {sorted(set(header) - set(CANDIDATE_COLUMNS))}."
+            )
 
     fresh = [r for r in rows if r["url"] not in existing]
     write_header = not path.exists()

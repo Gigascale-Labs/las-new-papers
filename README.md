@@ -20,8 +20,9 @@ Built to [`docs/spec.md`](docs/spec.md). To run it, follow
 arXiv, 7 lists, ~200-500 new papers
   drop papers already sent
   embed title + abstract locally      free, on your CPU
-  rank against 20 anchor papers       top 40, plus 5 at random from ranks 41-140
-  ONE model call scores those 45      significance 1-5, novelty 1-5
+  rank against 20 anchor papers       ONLY to cut a big day to 200
+  SCREEN all of them, cheap model     relevant? yes/no, in batches of 25
+  JUDGE what passed, strong model     significance 1-5, novelty 1-5
   keep the top 10
   ONE model call per paper            open questions, marked approachable or not
   write data/feed.xml                 always -- the no-password channel
@@ -29,19 +30,33 @@ arXiv, 7 lists, ~200-500 new papers
   send an email                       only if FEED_EMAIL_TO is set
 ```
 
-About US$0.10 a day in token cost, unchanged by the move to OpenRouter: OpenRouter passes through the provider's per-token price. OpenRouter adds a separate fee on credit purchases, reported at 5.5% by third-party sources as of this writing. Not verified against OpenRouter's own pricing page.
+US$0.24 a day in token cost. Measured on a live run over 155 papers: $0.15 to
+screen, $0.01 to judge, $0.08 to extract questions. The single Opus scoring
+call cost about the same to read 45 papers. The cascade reads 3.4x as many
+papers for the same money.
 
-**Similarity filters. It does not judge.** It says a paper is about what your
-anchors are about. It cannot say whether the paper is good or new. The model
-calls do that, and they only ever see 45 papers instead of 500. That is what
-makes the run cheap.
+OpenRouter passes through the provider's per-token price. It adds a separate
+fee on credit purchases, reported at 5.5% by third-party sources. Not verified
+against OpenRouter's own pricing page.
 
-**The 5 random papers matter.** Similarity only finds more of what the anchors
-already describe, so a new subfield has no anchor to be near. The random papers
-are marked `[random]` in the email, so you can see whether they earn their
-place.
+**A model reads every paper now.** Screening 200 papers with a cheap model
+costs about ten cents. So similarity no longer decides what gets read. The
+screen reads every paper and answers one question each: is this relevant at
+all. Only what passes reaches the expensive call.
 
-**Similarity is the highest score against any single anchor, never the
+**Similarity no longer filters. It caps.** The anchors order a day larger than
+`screen_n` so it can be cut to `screen_n`. On a day under the cap they change
+nothing. This is a deliberate demotion. The old ranking produced crap. Measured
+on 2026-08-20: ranks 10 to 40 are separated by 0.0004 cosine, which is noise.
+Nine of the top 10 papers are off-profile. See
+[docs/ranking-report.md](docs/ranking-report.md).
+
+**The explore slice is gone.** Similarity finds more of what the anchors
+already describe. A new subfield has no anchor to sit near, so the slice
+covered that blind spot. A screening model reads the whole day and has no such
+blind spot. Five random papers now buy nothing.
+
+**Similarity is still the highest score against any single anchor, never the
 average.** The anchors span simulation, market design, governance and safety.
 The average of those directions points at no real paper.
 
@@ -126,11 +141,11 @@ unconfigured and a feed that wrote successfully is not a failure.
 
 | Path | What it is |
 |---|---|
-| `data/YYYY-MM-DD.json` | The day's ten papers with questions, the full 45-paper shortlist with scores, and any problems. |
+| `data/YYYY-MM-DD.json` | The day's ten papers with questions, every screened paper with its verdict and scores, and any problems. |
 | `data/latest.json` | The newest day, at a fixed URL the site can read. |
 | `data/feed.xml` | An Atom feed of the last 60 days. No password needed to read it. |
 | `data/raw/YYYY-MM-DD.jsonl.gz` | Every paper scraped that day. ~120KB. |
-| `data/canon/candidates.csv` | Every shortlisted paper ever seen, in the canon's schema. |
+| `data/canon/candidates.csv` | Every screened paper ever seen, in the canon's schema, with the screen's yes/no. |
 | `data/seen.json` | IDs already sent. Nothing is sent twice. |
 | `data/eval/leave-one-out.json` | The most recent filter evaluation. |
 | `data/ground-truth/` | A frozen copy of the human canon. |
@@ -138,9 +153,13 @@ unconfigured and a feed that wrote successfully is not a failure.
 `data/raw/` is what makes this an archive. You can re-rank an old day with
 different anchors, or a different embedding model, without fetching again.
 
-Nothing the filter learns is thrown away. The scoring call rates all 45
-shortlisted papers, so the 35 that miss the top ten keep their scores in both
-`data/YYYY-MM-DD.json` and `candidates.csv`, at no extra cost.
+Nothing either model call learns is thrown away. Every screened paper keeps its
+yes/no verdict and its one-line reason. Everything that passed the screen also
+keeps its significance and novelty. Both land in `data/YYYY-MM-DD.json` and
+`candidates.csv`, at no extra cost.
+
+The rejects stay on purpose. The record of what the screen threw away is what
+makes the screen auditable.
 
 ## The canon
 
@@ -158,9 +177,9 @@ two themes: gradual disempowerment, and dynamics that only appear in very
 large agent populations. The other 13 arXiv entries, and the 9 not on arXiv,
 stay in the canon but are not anchors.
 
-Every shortlisted paper is appended to `data/canon/candidates.csv`, in the
-canon's column order. One file, not two: the ten that were emailed carry their
-six dimension tags and an `emailed` mark, and the other 35 carry their
+Every screened paper is appended to `data/canon/candidates.csv`, in the
+canon's column order. One file, not two. The ten that were emailed carry their
+six dimension tags and an `emailed` mark. The rest carry their
 similarity, rank and scores with the dimensions blank. Blank dimensions are
 normal in the canon.
 
@@ -193,8 +212,8 @@ the site reads. Three layers, in `arxiv_feed/guard.py`:
    text is data. Text inside cannot close the fence, because it cannot know the
    id. This layer works without recognising the attack, so it is the one that
    holds.
-2. **Lakera Guard. Optional.** Screens the 45 shortlisted papers before any
-   model call and withholds what it flags. 45 calls a day, not 500. A withheld
+2. **Lakera Guard. Optional.** Screens the papers before any
+   model call and withholds what it flags. Up to `screen_n` a day. A withheld
    paper stays in the archive and is named in the email.
 3. **Keyword patterns. Always on, never blocking.**
 
@@ -211,7 +230,7 @@ Each output is protected where it lands:
 | `candidates.csv` | `=HYPERLINK(...)` in a title runs when Excel opens it | cells starting `= + - @` prefixed with `'` |
 | Email headers | a newline adding a header | CR/LF stripped, and rejected at config load |
 | Links | a forged ID becoming a `javascript:` href | IDs checked against arXiv's two real formats |
-| Model output | invented values or wrong shape | JSON schema, closed lists, IDs checked against the shortlist |
+| Model output | invented values or wrong shape | JSON schema, closed lists, IDs checked against the batch |
 
 `guard.on_error` sets what a Lakera outage means: `allow` (default, you still
 get the email) or `block` (withhold everything it could not screen).
@@ -243,8 +262,9 @@ rank 1 in pools of 63-311 papers. The worst was rank 28. The report is in
 Not yet re-run against the narrowed 20-anchor set -- `python -m
 tests.leave_one_out --anchors all` is the command that would settle it.
 
-The unit tests cover the shortlist bounds, highest-against-anchors rather than
-average, the ranking tie-break, an omitted score being reported rather than
+The unit tests cover the pre-sort cap, highest-against-anchors rather than
+average, the screen batching and its yes/no split, one failed batch not costing
+the others, the ranking tie-break, an omitted score being reported rather than
 invented, hallucinated arXiv IDs being dropped, bad JSON retried exactly once,
 and every guard layer.
 
@@ -271,7 +291,7 @@ without a password" above for what to check once Pages is on.
 ## Layout
 
 ```
-main.py                     CLI: --dry-run, --date, --rebuild-anchors, --seed
+main.py                     CLI: --dry-run, --date, --rebuild-anchors
 config.yaml                 categories, search queries, anchors, profile, sizes, models
 arxiv_feed/
   arxiv.py                  the day's papers; 3 tries, 60s apart

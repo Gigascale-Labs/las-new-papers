@@ -1,10 +1,21 @@
-# Model calls (scoring + question extraction), through OpenRouter
+# Torch, CPU build.
+#
+# The GPU wheels add 3.4 GB of CUDA libraries. This project never uses them.
+# The embedding model runs on the CPU: see embed_device in config.yaml. The
+# daily job runs on GitHub Actions, which has no GPU.
+#
+# The +cpu suffix exists only on the PyTorch index, so pip must take the wheel
+# from there. Bump both the version and the index together.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.13.0+cpu
+
+# Model calls, through OpenRouter
 openrouter>=1.1.74
 
-# Local embeddings. Pulls in torch + transformers; ~2.5GB installed.
+# Local embeddings
 sentence-transformers>=3.0
 numpy>=1.26
 
-# arXiv API + config
+# arXiv API and config
 requests>=2.31
 PyYAML>=6.0
