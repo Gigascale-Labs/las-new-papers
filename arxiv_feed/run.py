@@ -135,7 +135,7 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
     result["guard"] = guard_info
 
     # 5. one scoring call for the whole shortlist
-    client = ModelClient(cfg.model, effort=cfg.effort)
+    client = ModelClient(cfg.model, effort=cfg.effort, api_key=Config.openrouter_key())
     scores, score_problems = score.score_candidates(client, cfg.profile, candidates)
     problems.extend(score_problems)
 

@@ -1,5 +1,5 @@
-# Model calls (scoring + question extraction)
-anthropic>=0.69
+# Model calls (scoring + question extraction), through OpenRouter
+openrouter>=1.1.74
 
 # Local embeddings. Pulls in torch + transformers; ~2.5GB installed.
 sentence-transformers>=3.0

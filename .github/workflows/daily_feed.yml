@@ -60,7 +60,7 @@ jobs:
 
       - name: Run the feed
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           # Addresses are secrets here, not config: this repository is public.
           FEED_EMAIL_TO: ${{ secrets.FEED_EMAIL_TO }}
           SMTP_USER: ${{ secrets.SMTP_USER }}

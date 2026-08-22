@@ -31,7 +31,7 @@ class Config:
     explore_n: int = 5
     top_n: int = 10
     embed_model: str = "allenai/specter2_base"
-    model: str = "claude-opus-5"
+    model: str = "anthropic/claude-opus-5"
     effort: str = "medium"
     guard: dict = field(default_factory=dict)
     path: Path | None = field(default=None, compare=False)
@@ -58,8 +58,8 @@ class Config:
 
     # ---- secrets -----------------------------------------------------------
     @staticmethod
-    def anthropic_key() -> str | None:
-        return os.environ.get("ANTHROPIC_API_KEY")
+    def openrouter_key() -> str | None:
+        return os.environ.get("OPENROUTER_API_KEY")
 
     @staticmethod
     def smtp_password() -> str | None:
