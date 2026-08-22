@@ -20,12 +20,13 @@ separate credential Google issues for exactly this. If you use a different
 email provider, change `smtp_host`, `smtp_port` and `smtp_user` in
 `config.yaml` instead.
 
-**Step 3. Get a Lakera key.**
-Go to https://platform.lakera.ai. Make an account. Make a project.
-Copy the API key. Copy the project ID if you made one.
-This key is optional. Without it the system still runs and still defends
-itself. It just does not screen papers with Lakera, and it says so in the
-email.
+**Step 3. Skip Lakera.**
+Lakera is off. `config.yaml` sets `guard.enabled: false`. You need no Lakera
+account and no Lakera key. The structural defences still run on every paper.
+They need no key and no network. See README, "Why Lakera is off".
+
+To turn it on: get a key at https://platform.lakera.ai, set
+`guard.enabled: true`, and export `LAKERA_GUARD_API_KEY`.
 
 ## Part 2. Set it up on your computer
 
@@ -57,7 +58,6 @@ This downloads about 2.5GB. Most of it is PyTorch. It takes a few minutes.
 
 ```bash
 export OPENROUTER_API_KEY=sk-or-v1-...
-export LAKERA_GUARD_API_KEY=lakera-...        # optional
 
 # Only if you did Step 2 and want email too:
 export SMTP_PASSWORD=your-16-letter-app-password
@@ -155,7 +155,6 @@ Open Settings, then Secrets and variables, then Actions.
 Add these secrets, with these exact names:
 
 - `OPENROUTER_API_KEY`
-- `LAKERA_GUARD_API_KEY` (optional)
 
 Add these three only for email too:
 
@@ -259,8 +258,8 @@ python main.py --dry-run
 | `config error: ...` | `config.yaml` is wrong | The message names the key. Fix that key. |
 | `Could not resolve authentication method` | No model API key | Do step 7 again in this terminal. |
 | `SMTP_PASSWORD is not set` | No email configured, or an incomplete one | Normal if you skipped Step 2 -- the feed still delivers. If you want email, do Step 7 again with an app password, not your login password. |
-| `Lakera screening did not run` | No Lakera key | Optional. Add the key, or ignore it. The other defences still run. |
+| `Lakera screening did not run` | `guard.enabled: true` with no key | Set `guard.enabled: false`, or add the key. The other defences run either way. |
 | `arXiv did not answer after 3 attempts` | arXiv is down | Wait. Run it again later with `--date` set to that day. |
 | `no unseen papers found` | You already ran that day | Normal. Nothing was lost. |
 | `question extraction failed` for one paper | One model call failed twice | Normal. The other papers are still sent. |
-| Every paper says `withheld from the model calls` | Lakera is flagging everything | Check the Lakera project policy. Or set `guard.enabled: false` to test. |
+| Every paper says `withheld from the model calls` | Lakera is flagging everything | Set `guard.enabled: false`. That is the default. |

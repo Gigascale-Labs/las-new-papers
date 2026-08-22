@@ -66,7 +66,7 @@ The average of those directions points at no real paper.
 pip install -r requirements.txt          # 2.5GB, mostly PyTorch
 
 export OPENROUTER_API_KEY=sk-or-v1-...      # model calls, any provider OpenRouter lists
-export LAKERA_GUARD_API_KEY=...          # optional
+# LAKERA_GUARD_API_KEY is not needed. Lakera is off by default.
 
 # Email is optional. Every run writes data/feed.xml, an RSS/Atom feed you can
 # read with no account and no password. Set these three only if you also want
@@ -131,7 +131,8 @@ leave them all unset for feed-only, and the run never attempts to send.
 `.github/workflows/daily_feed.yml` runs at 07:23 UTC and commits that day's
 data, including the rebuilt feed. It needs one repository secret,
 `OPENROUTER_API_KEY`. Add `FEED_EMAIL_TO`, `SMTP_USER` and `SMTP_PASSWORD`
-only for email too, and `LAKERA_GUARD_API_KEY` if you use Lakera.
+only for email too. `LAKERA_GUARD_API_KEY` is read only if you set
+`guard.enabled: true`.
 
 The commit step runs even when the run failed. A run that wrote its JSON but
 delivered nothing on any enabled channel exits non-zero; a run with email
@@ -212,9 +213,11 @@ the site reads. Three layers, in `arxiv_feed/guard.py`:
    text is data. Text inside cannot close the fence, because it cannot know the
    id. This layer works without recognising the attack, so it is the one that
    holds.
-2. **Lakera Guard. Optional.** Screens the papers before any
-   model call and withholds what it flags. Up to `screen_n` a day. A withheld
-   paper stays in the archive and is named in the email.
+2. **Lakera Guard. Off.** Screens the papers before any model call and
+   withholds what it flags. Up to `screen_n` a day. A withheld paper stays in
+   the archive and is named in the email. It is off because arXiv is a trusted
+   source and the false-positive cost is higher than the attack risk. See
+   *Why Lakera is off* below.
 3. **Keyword patterns. Always on, never blocking.**
 
 Layer 3 never blocks because this corpus can include papers about prompt
@@ -233,7 +236,26 @@ Each output is protected where it lands:
 | Model output | invented values or wrong shape | JSON schema, closed lists, IDs checked against the batch |
 
 `guard.on_error` sets what a Lakera outage means: `allow` (default, you still
-get the email) or `block` (withhold everything it could not screen).
+get the email) or `block` (withhold everything it could not screen). It applies
+only when `guard.enabled` is true.
+
+### Why Lakera is off
+
+arXiv is a trusted source. Every paper is a moderated submission with named
+authors and a public record. An attacker who plants an instruction in an
+abstract signs it.
+
+Measured against that low risk, the layer costs papers. On 2026-08-22 it
+blocked 19 of 155 screened papers. One of them was `2608.20231`, *Growth
+Without Us: Machine Consumers, Corporate Circularity*, flagged `prompt_attack`.
+That paper is the strongest on-theme paper in the archive and the control case
+in `docs/ranking-report.md`. The two papers that reached the digest instead
+were about ride-hailing dispatch and a lead service-line audit.
+
+Layers 1 and 3 still run on every paper. They need no key and no network. They
+are the layers that hold.
+
+Set `guard.enabled: true` in `config.yaml` to turn Lakera back on.
 
 ## Failures never stop a run
 
@@ -270,10 +292,10 @@ and every guard layer.
 
 ## Current state
 
-Three things have never run against a live service, because this environment
-has no credentials for them: the model calls, the email send, and the Lakera
-call. Each is written against the current API and tested with a stub. One real
-run confirms all three.
+The model calls and the Lakera call have both run live. Lakera is now off; see
+*Why Lakera is off*. The email send has never run against a live SMTP server,
+because this environment has no password for one. It is written against the
+current API and tested with a stub.
 
 Everything else has run against live data: arXiv, embedding, the anchor store,
 the filter, and the leave-one-out evaluation.
