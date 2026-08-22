@@ -7,11 +7,17 @@ For each anchor tested:
   2. fetch every paper submitted to the configured categories on the day that
      anchor appeared;
   3. rank them against the remaining anchors;
-  4. the removed paper must come back in the top `shortlist_n`.
+  4. the removed paper must come back in the top `screen_n`.
 
 At least 8 of 10 must pass. A failure means the anchor set does not cover that
 part of the field, or the embedding model cannot see the resemblance. Add more
 anchors first. Change the embedding model second.
+
+Since the two-stage model cascade replaced the similarity filter, this test
+measures a narrower thing than it used to. The anchors no longer decide what is
+read -- they only order a day too large to screen whole. A failure here now
+means a paper could be pushed past `screen_n` on a heavy day, not that it would
+be dropped outright.
 
 This calls arXiv and runs the embedding model. It makes no model API calls and
 costs nothing. Day pools are cached under data/.loo_cache/, so a re-run is
@@ -100,7 +106,7 @@ def run(anchors_to_test: list[str], config_path: str) -> dict:
         order = np.argsort(-best)
         position = int(np.where(np.array([pool[i].arxiv_id for i in order]) == aid)[0][0]) + 1
 
-        passed = position <= cfg.shortlist_n
+        passed = position <= cfg.screen_n
         anchor_i = int(idx[[i for i, p in enumerate(pool) if p.arxiv_id == aid][0]])
         results.append({
             "anchor_id": aid,
@@ -108,7 +114,7 @@ def run(anchors_to_test: list[str], config_path: str) -> dict:
             "day": day,
             "pool_size": len(pool),
             "rank": position,
-            "shortlist_n": cfg.shortlist_n,
+            "screen_n": cfg.screen_n,
             "similarity": round(float(best[[i for i, p in enumerate(pool)
                                             if p.arxiv_id == aid][0]]), 4),
             "nearest_remaining_anchor": store.ids[anchor_i],
@@ -124,7 +130,7 @@ def run(anchors_to_test: list[str], config_path: str) -> dict:
     report = {
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "embed_model": cfg.embed_model,
-        "shortlist_n": cfg.shortlist_n,
+        "screen_n": cfg.screen_n,
         "anchors_in_store": len(full_store.ids),
         "tested": len(tested),
         "passed": passes,
