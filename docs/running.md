@@ -215,7 +215,7 @@ If it fails, change `profile` in `config.yaml` first. Change the prompts
 second.
 
 **Step 20. Grow the corpus from the shortlist.**
-`data/canon/candidates.csv` holds every paper the filter shortlisted, not just
+`data/canon/candidates.csv` holds every paper the screen read, not just
 the ten that were emailed. Sort it by `significance` and `novelty`. The first
 15 columns are the canon's own columns, in its order, so a paper you want to
 keep is a copy across, not a re-tagging job.
@@ -249,7 +249,7 @@ python main.py --rebuild-anchors
 **Get the same random papers every time (for testing):**
 
 ```bash
-python main.py --dry-run --seed 1
+python main.py --dry-run
 ```
 
 ## If something goes wrong

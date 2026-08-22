@@ -46,8 +46,8 @@ The system reads one config file:
 | categories | arXiv lists to read | econ, cs.DC, cs.MA, cs.LG, cs.AI |
 | anchors | arXiv IDs of known in-field papers | 20 to 40 IDs |
 | profile | your background, skills, and projects | free text, about 300 words |
-| shortlist_n | papers kept by similarity | 40 |
-| explore_n | random papers added | 5 |
+| screen_n | max papers sent to the screening model | 200 |
+| screen_batch_size | papers per screening call | 25 |
 | top_n | papers kept after scoring | 10 |
 | embed_model | embedding model | allenai/specter2 |
 | model | model for scoring and questions | claude-opus-5 |
