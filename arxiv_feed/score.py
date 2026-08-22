@@ -46,7 +46,11 @@ Some papers were drawn at random rather than by topical similarity, and will be
 unrelated to the profile. Score them honestly on the same scales: an unrelated
 paper is simply low significance for this researcher.
 
-Return a score for every paper you are given, keyed by its exact arxiv_id.
+Return a score for every paper you are given, keyed by its exact arxiv_id. The
+arxiv_id is the value stated on the line directly above each fenced document,
+in the form "arxiv_id: <value>". It is not the fence's nonce attribute; that
+nonce is a security marker, not a paper identifier, and must never appear in
+your output.
 
 """ + DATA_NOT_INSTRUCTIONS
 
