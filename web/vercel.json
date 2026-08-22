@@ -1,0 +1,25 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/data/:path*",
+      "destination": "https://raw.githubusercontent.com/one-2/las-new-papers/main/data/:path*"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/data/feed.xml",
+      "headers": [
+        { "key": "Content-Type", "value": "application/atom+xml; charset=utf-8" },
+        { "key": "Cache-Control", "value": "public, max-age=300" }
+      ]
+    },
+    {
+      "source": "/data/:path*.json",
+      "headers": [
+        { "key": "Content-Type", "value": "application/json; charset=utf-8" },
+        { "key": "Cache-Control", "value": "public, max-age=300" }
+      ]
+    }
+  ]
+}

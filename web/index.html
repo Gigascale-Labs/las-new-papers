@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>arXiv open questions</title>
+<meta name="description" content="A daily read of new arXiv papers on large agent systems, and the open questions they leave.">
+<link rel="alternate" type="application/atom+xml" title="arXiv open questions" href="/data/feed.xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --ground:#F4F6F5; --surface:#FFFFFF; --sunk:#EAEEEC;
+    --ink:#171C1F; --muted:#5C676C; --faint:#838E92; --rule:#DCE2E1;
+    --accent:#1C5F5A; --accent-w:#E2EDEB;
+    --yes:#2F6B46; --no:#8A8F92;
+    --sans:"IBM Plex Sans",ui-sans-serif,system-ui,-apple-system,sans-serif;
+    --serif:"IBM Plex Serif",ui-serif,Georgia,serif;
+    --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+    --measure:70ch;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:#111618; --surface:#171D1F; --sunk:#1D2426;
+      --ink:#E4E9E8; --muted:#99A5A7; --faint:#768285; --rule:#2A3436;
+      --accent:#63B5AE; --accent-w:#1B2E2D;
+      --yes:#6FB98A; --no:#7C8688;
+    }
+  }
+  * { box-sizing:border-box }
+  html { -webkit-text-size-adjust:100% }
+  body {
+    background:var(--ground); color:var(--ink); font-family:var(--sans);
+    font-size:16.5px; line-height:1.62; margin:0;
+    -webkit-font-smoothing:antialiased;
+    padding:clamp(1.5rem,1rem+3vw,4rem) clamp(1.1rem,.6rem+3vw,3rem) 6rem;
+  }
+  .wrap { max-width:82ch; margin:0 auto; display:flex; flex-direction:column; gap:2rem }
+
+  header { display:flex; flex-direction:column; gap:.85rem;
+           padding-bottom:1.4rem; border-bottom:2px solid var(--ink) }
+  .kicker { font-family:var(--mono); font-size:.72rem; font-weight:500;
+            letter-spacing:.13em; text-transform:uppercase; color:var(--accent);
+            display:flex; flex-wrap:wrap; gap:.5rem .9rem; align-items:baseline }
+  .kicker .sep { color:var(--faint) }
+  h1 { font-family:var(--serif); font-weight:600; margin:0;
+       font-size:clamp(1.9rem,1.4rem+2.4vw,2.9rem); line-height:1.08;
+       letter-spacing:-.021em; text-wrap:balance }
+  .standfirst { font-family:var(--serif); color:var(--muted); margin:0;
+                font-size:clamp(1rem,.95rem+.3vw,1.15rem); max-width:var(--measure) }
+
+  .bar { display:flex; flex-wrap:wrap; gap:.6rem 1rem; align-items:center;
+         justify-content:space-between }
+  .counts { font-family:var(--mono); font-size:.78rem; color:var(--muted) }
+  .counts b { color:var(--ink); font-weight:600 }
+  select { font-family:var(--mono); font-size:.8rem; padding:.35rem .5rem;
+           background:var(--surface); color:var(--ink);
+           border:1px solid var(--rule); border-radius:2px }
+
+  h2.part { font-family:var(--mono); font-size:.72rem; font-weight:600;
+            letter-spacing:.14em; text-transform:uppercase; color:var(--faint);
+            margin:0 0 .9rem; display:flex; align-items:center; gap:.7rem }
+  h2.part::after { content:""; flex:1; height:1px; background:var(--rule) }
+
+  ol.questions { list-style:none; counter-reset:q; margin:0; padding:0;
+                 display:flex; flex-direction:column; gap:1.15rem }
+  ol.questions li { counter-increment:q; display:grid;
+                    grid-template-columns:2.4rem 1fr; gap:.2rem .6rem }
+  ol.questions li::before { content:counter(q); font-family:var(--mono);
+    font-size:.8rem; color:var(--faint); padding-top:.2rem;
+    font-variant-numeric:tabular-nums }
+  .q { max-width:var(--measure); grid-column:2 }
+  .qmeta { grid-column:2; font-size:.87rem; color:var(--muted);
+           max-width:var(--measure) }
+  .tag { font-family:var(--mono); font-size:.68rem; font-weight:600;
+         letter-spacing:.06em; text-transform:uppercase; padding:.1em .45em;
+         border:1px solid currentColor; border-radius:2px; margin-right:.45rem }
+  .tag.yes { color:var(--yes) } .tag.no { color:var(--no) }
+  .from { grid-column:2; font-size:.83rem; color:var(--faint) }
+
+  .paper { background:var(--surface); border:1px solid var(--rule);
+           padding:1.15rem 1.3rem; display:flex; flex-direction:column; gap:.5rem }
+  .papers { display:flex; flex-direction:column; gap:1rem }
+  .paper .t { font-weight:600; line-height:1.35; text-wrap:balance;
+              font-size:1.03rem }
+  .paper .authors { font-size:.88rem; color:var(--muted) }
+  .paper .ids { font-family:var(--mono); font-size:.75rem; color:var(--faint) }
+  .paper .summary { max-width:var(--measure) }
+  .paper ul { margin:.2rem 0 0; padding-left:1.1rem; display:flex;
+              flex-direction:column; gap:.45rem; font-size:.93rem;
+              max-width:var(--measure) }
+  .paper li::marker { color:var(--faint) }
+  .why { color:var(--muted); font-size:.87rem }
+
+  a { color:var(--accent); text-decoration-thickness:1px; text-underline-offset:2px }
+  a:focus-visible, select:focus-visible { outline:2px solid var(--accent);
+    outline-offset:2px }
+
+  .empty, .err { background:var(--sunk); border:1px solid var(--rule);
+                 padding:1.1rem 1.25rem; color:var(--muted);
+                 max-width:var(--measure) }
+  footer { border-top:1px solid var(--rule); padding-top:1.1rem;
+           font-size:.82rem; color:var(--faint); display:flex;
+           flex-direction:column; gap:.35rem; max-width:var(--measure) }
+  .skeleton { color:var(--faint); font-family:var(--mono); font-size:.85rem }
+  @media (prefers-reduced-motion:reduce){ *{animation:none!important;transition:none!important} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="kicker">
+      <span>Daily</span><span class="sep">/</span>
+      <span>large agent systems</span><span class="sep">/</span>
+      <span id="day-label">loading</span>
+    </div>
+    <h1>arXiv open questions</h1>
+    <p class="standfirst">
+      A model reads every new paper in seven arXiv lists each day. It keeps the
+      few that matter for one research profile, and writes down the questions
+      they leave open.
+    </p>
+  </header>
+
+  <div class="bar">
+    <div class="counts" id="counts"></div>
+    <label>
+      <span class="visually-hidden"></span>
+      <select id="day-select" aria-label="Choose a day"></select>
+    </label>
+  </div>
+
+  <main id="main"><p class="skeleton">Loading the latest day…</p></main>
+
+  <footer>
+    <div>Papers come from arXiv. Questions and summaries are written by a model
+      and are not checked by a person.</div>
+    <div>
+      <a href="/data/feed.xml">RSS/Atom feed</a> ·
+      <a href="https://github.com/one-2/las-new-papers">Source and data</a> ·
+      <a href="https://www.stelliott.online/demos/">More demos</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+const DATA = "/data";
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c =>
+  ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+async function getJSON(u) {
+  const r = await fetch(u, {cache: "no-cache"});
+  if (!r.ok) throw new Error(`${r.status} for ${u}`);
+  return r.json();
+}
+
+// The feed is the pipeline's own index of published days. No API limits.
+async function listDays() {
+  try {
+    const r = await fetch(`${DATA}/feed.xml`, {cache: "no-cache"});
+    if (!r.ok) return [];
+    const xml = new DOMParser().parseFromString(await r.text(), "application/xml");
+    const days = [...xml.querySelectorAll("entry > id")]
+      .map(n => (n.textContent.match(/#(\d{4}-\d{2}-\d{2})$/) || [])[1])
+      .filter(Boolean);
+    return [...new Set(days)].sort().reverse();
+  } catch { return []; }
+}
+
+function renderQuestions(papers) {
+  const rows = [];
+  for (const p of papers)
+    for (const q of (p.open_questions || []))
+      rows.push({q, p});
+  if (!rows.length)
+    return `<p class="empty">No questions were extracted for this day.</p>`;
+  const yes = rows.filter(r => r.q.label === "approachable").length;
+  return `
+    <h2 class="part">Part 1 — open questions (${rows.length}, ${yes} approachable)</h2>
+    <ol class="questions">
+      ${rows.map(({q, p}) => {
+        const ok = q.label === "approachable";
+        return `<li>
+          <div class="q">${esc(q.question)}</div>
+          <div class="qmeta"><span class="tag ${ok ? "yes" : "no"}">${esc(q.label)}</span>${esc(q.reason)}</div>
+          <div class="from">from <a href="${esc(p.url)}">${esc(p.title)}</a></div>
+        </li>`;
+      }).join("")}
+    </ol>`;
+}
+
+// Deliberately omits significance, novelty, the similarity value and the
+// screening reason. Nothing here argues for a paper. The title, the summary
+// and the questions are the whole case for reading it.
+function renderPapers(papers) {
+  if (!papers.length)
+    return `<p class="empty">Nothing passed the screen on this day. That is a
+      normal outcome, not a failure.</p>`;
+  return `
+    <h2 class="part">Part 2 — papers (${papers.length})</h2>
+    <div class="papers">
+      ${papers.map(p => `
+        <article class="paper">
+          <div class="t"><a href="${esc(p.url)}">${esc(p.title)}</a></div>
+          <div class="authors">${esc((p.authors || []).join(", "))}</div>
+          <div class="ids">${esc(p.arxiv_id)}${p.nearest_anchor_title
+            ? ` · nearest in the canon: <a href="https://arxiv.org/abs/${esc(p.nearest_anchor_id)}">${esc(p.nearest_anchor_title)}</a>`
+            : ""}</div>
+          ${p.one_sentence ? `<div class="summary">${esc(p.one_sentence)}</div>` : ""}
+          ${(p.open_questions || []).length ? `<ul>${p.open_questions.map(q => `
+            <li>${esc(q.question)}<br><span class="why">${esc(q.label)}: ${esc(q.reason)}</span></li>`).join("")}</ul>` : ""}
+        </article>`).join("")}
+    </div>`;
+}
+
+function renderDay(d) {
+  const c = d.counts || {};
+  document.getElementById("day-label").textContent = d.date;
+  document.title = `arXiv open questions — ${d.date}`;
+  document.getElementById("counts").innerHTML =
+    `<b>${c.fetched ?? "?"}</b> fetched · <b>${c.screened ?? "?"}</b> screened · ` +
+    `<b>${c.relevant ?? "?"}</b> relevant · <b>${c.kept ?? "?"}</b> kept`;
+  document.getElementById("main").innerHTML =
+    renderQuestions(d.papers || []) +
+    `<div style="height:2rem"></div>` +
+    renderPapers(d.papers || []);
+}
+
+async function show(day) {
+  const main = document.getElementById("main");
+  main.innerHTML = `<p class="skeleton">Loading ${esc(day || "the latest day")}…</p>`;
+  try {
+    renderDay(await getJSON(`${DATA}/${day ? day : "latest"}.json`));
+    if (day) history.replaceState(null, "", `?day=${day}`);
+  } catch (e) {
+    main.innerHTML = `<p class="err">Could not load that day. ${esc(e.message)}</p>`;
+  }
+}
+
+(async function init() {
+  const sel = document.getElementById("day-select");
+  const wanted = new URLSearchParams(location.search).get("day");
+  await show(wanted);
+  const days = await listDays();
+  if (!days.length) { sel.style.display = "none"; return; }
+  sel.innerHTML = days.map((d, i) =>
+    `<option value="${d}"${d === wanted || (!wanted && i === 0) ? " selected" : ""}>${d}</option>`
+  ).join("");
+  sel.addEventListener("change", () => show(sel.value));
+})();
+</script>
+</body>
+</html>
