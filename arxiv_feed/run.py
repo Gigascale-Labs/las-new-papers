@@ -46,7 +46,7 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
     # Via the standalone scraper, so the full day is archived to data/raw/ as a
     # by-product: every paper the filter saw, not just the ten that were sent.
     # A past day can then be re-ranked with different anchors without re-fetching.
-    papers = scrape_day(cfg.categories, day)
+    papers = scrape_day(cfg.categories, day, search_queries=cfg.search_queries)
     log.info("fetched %d papers for %s", len(papers), day)
     seen = SeenStore(cfg.seen_path)
     unseen = seen.filter_unseen(papers)
@@ -64,6 +64,7 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "config": {
             "categories": cfg.categories,
+            "search_queries": cfg.search_queries,
             "shortlist_n": cfg.shortlist_n,
             "explore_n": cfg.explore_n,
             "top_n": cfg.top_n,

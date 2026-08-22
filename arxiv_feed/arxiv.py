@@ -156,16 +156,27 @@ def default_day() -> str:
     return (datetime.now(timezone.utc) - timedelta(days=1)).strftime("%Y-%m-%d")
 
 
-def fetch_new_papers(categories: list[str], day: str | None = None) -> list[Paper]:
-    """Every paper submitted to `categories` on `day` (UTC, YYYY-MM-DD).
+def fetch_new_papers(
+    categories: list[str], day: str | None = None, search_queries: list[str] | None = None
+) -> list[Paper]:
+    """Every paper submitted to `categories`, or matching `search_queries`, on
+    `day` (UTC, YYYY-MM-DD).
 
-    Deduplicated: a paper cross-listed to three of the configured lists is one
-    paper, not three.
+    `search_queries` is matched against title, abstract and comments (arXiv's
+    `all:` field), OR'd in alongside the categories -- so a paper outside every
+    configured category is still fetched if its text uses one of the phrases.
+
+    Deduplicated: a paper cross-listed to three of the configured lists, or
+    matching two search queries, is one paper, not two or three.
     """
     day = day or default_day()
     stamp = day.replace("-", "")
     cat_clause = " OR ".join(f"cat:{c}" for c in categories)
-    query = f"({cat_clause}) AND submittedDate:[{stamp}0000 TO {stamp}2359]"
+    scope = f"({cat_clause})"
+    if search_queries:
+        kw_clause = " OR ".join(f'all:"{q}"' for q in search_queries)
+        scope = f"({scope} OR ({kw_clause}))"
+    query = f"{scope} AND submittedDate:[{stamp}0000 TO {stamp}2359]"
 
     seen: dict[str, Paper] = {}
     for page in range(_MAX_PAGES):

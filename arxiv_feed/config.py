@@ -25,6 +25,7 @@ class Config:
     categories: list[str]
     anchors: list[str]
     profile: str
+    search_queries: list[str] = field(default_factory=list)
     smtp_host: str = "smtp.gmail.com"
     smtp_port: int = 587
     shortlist_n: int = 40
@@ -164,6 +165,7 @@ def load_config(path: str | Path = REPO_ROOT / "config.yaml") -> Config:
         categories=[str(c).strip() for c in raw["categories"]],
         anchors=[str(a).strip() for a in raw["anchors"]],
         profile=str(raw["profile"]).strip(),
+        search_queries=[str(q).strip() for q in raw.get("search_queries") or []],
         smtp_host=str(raw.get("smtp_host", "smtp.gmail.com")).strip(),
         smtp_port=int(raw.get("smtp_port", 587)),
         shortlist_n=int(raw.get("shortlist_n", 40)),

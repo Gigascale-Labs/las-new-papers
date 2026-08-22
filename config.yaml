@@ -20,49 +20,54 @@ categories:
   - econ.EM    # Econometrics
 
 # ---------------------------------------------------------------------------
+# Search queries: pull in a paper by topic even outside the categories above.
+#
+# Matched against title, abstract and comments (arXiv's `all:` field), OR'd
+# into the same day's query. A paper about gradual disempowerment tagged only
+# cs.CY, outside every category above, is still fetched if its abstract uses
+# the phrase.
+# ---------------------------------------------------------------------------
+search_queries:
+  - "gradual disempowerment"
+  - "power concentration"
+  - "cooperative ai"
+  - "large multi-agent systems"
+  - "social-scale ai"
+
+# ---------------------------------------------------------------------------
 # Anchor papers: work already known to be in the field.
 #
-# These 33 are the arXiv entries of the 42-paper LAS canon, frozen in
-# data/ground-truth/. They spread across simulation, markets, safety and
-# governance. Anchors need that spread; anchors from one corner of the field
-# only find that corner.
+# 20 of the 42-paper LAS canon's 33 arXiv entries, kept for two themes:
+# gradual disempowerment, and dynamics that only appear in very large agent
+# populations. Papers whose contribution is a framework, protocol, dataset or
+# other piece of infrastructure are left out, even when the subject matter
+# fits -- an anchor should be a finding, not a tool. See PR history for the
+# 13 dropped and why.
 #
-# The other 9 canon entries are not on arXiv, so they have no ID to anchor on.
+# The other 22 canon entries (13 dropped here, 9 with no arXiv ID) are not
+# anchors, but stay in data/ground-truth/ as canon.
 #
 # Add or remove any of them. The vectors rebuild on the next run.
 # ---------------------------------------------------------------------------
 anchors:
   - "2503.13395"  # Causal Emergence 2.0: Quantifying Emergent Complexity
-  - "2410.07283"  # Prompt Infection: LLM-to-LLM Prompt Injection within Multi-Agent ...
-  - "2603.03140"  # How to Model AI Agents as Personas?: Applying the Persona Ecosyst...
-  - "2411.11581"  # OASIS: Open Agent Social Interaction Simulations with One Million...
-  - "2505.17479"  # Twin-2K-500: A dataset for building digital twins of over 2,000 p...
-  - "2512.02682"  # Beyond Single-Agent Safety: A Taxonomy of Risks in LLM-to-LLM Int...
+  - "2411.11581"  # OASIS: Open Agent Social Interaction Simulations with One Million Agents
+  - "2512.02682"  # Beyond Single-Agent Safety: A Taxonomy of Risks in LLM-to-LLM Interactions
   - "2605.24413"  # Habermolt: Delegating Deliberation to AI Representatives
   - "2409.02822"  # AI agents can coordinate beyond human scale
-  - "2211.03074"  # A Survey on Influence Maximization: From an ML-Based Combinatoria...
-  - "2406.12137"  # IDs for AI Systems
   - "2602.16136"  # Retrieval Collapses When AI Pollutes the Web
-  - "2402.08567"  # Agent Smith: A Single Image Can Jailbreak One Million Multimodal ...
   - "2409.10568"  # On the Limits of Agency in Agent-Based Models
   - "2603.23471"  # Regulating AI Agents
-  - "2411.10109"  # LLM Agents Grounded in Self-Reports Enable General-Purpose Simula...
   - "2502.14143"  # Multi-Agent Risks from Advanced AI
-  - "2408.02784"  # LLM economicus? Mapping the Behavioral Biases of LLMs via Utility...
   - "2509.01063"  # An Economy of AI Agents
-  - "2510.22422"  # Group size effects and collective misalignment in LLM multi-agent...
-  - "2606.04592"  # Synthetic Personalities: How Well Can LLMs Mimic Individual Respo...
-  - "2501.16946"  # Gradual Disempowerment: Systemic Existential Risks from Increment...
-  - "2502.08691"  # AgentSociety: Large-Scale Simulation of LLM-Driven Generative Age...
+  - "2510.22422"  # Group size effects and collective misalignment in LLM multi-agent systems
+  - "2501.16946"  # Gradual Disempowerment: Systemic Existential Risks from Incremental AI Development
+  - "2502.08691"  # AgentSociety: Large-Scale Simulation of LLM-Driven Generative Agents Advances Understanding of Human Behaviors and Society
   - "2602.11865"  # Intelligent AI Delegation
-  - "2604.10290"  # AI Organizations are More Effective but Less Aligned than Individ...
-  - "2404.16109"  # zkLLM: Zero Knowledge Proofs for Large Language Models
-  - "2508.16279"  # AgentScope 1.0: A Developer-Centric Framework for Building Agenti...
+  - "2604.10290"  # AI Organizations are More Effective but Less Aligned than Individual Agents
   - "2506.12078"  # Modeling Earth-Scale Human-Like Societies with One Billion Agents
   - "2512.16856"  # Distributional AGI Safety
-  - "2604.01151"  # Detecting Multi-Agent Collusion Through Multi-Agent Interpretability
-  - "2605.13860"  # The Moltbook Observatory Archive: an incremental dataset of agent...
-  - "2604.04604"  # AI Agents Under EU Law: A Compliance Architecture for AI Providers
+  - "2605.13860"  # The Moltbook Observatory Archive: an incremental dataset of agent-only social network activity
   - "2604.15236"  # Agentic Microphysics: A Manifesto for Generative AI Safety
   - "2509.10147"  # Virtual Agent Economies
 

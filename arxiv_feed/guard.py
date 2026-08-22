@@ -15,10 +15,10 @@ Three layers:
    and withholds what it flags.
 3. Keyword patterns. Always on. They annotate. They never block.
 
-Layer 3 never blocks because this corpus includes papers about prompt
-injection. One anchor is "Prompt Infection: LLM-to-LLM Prompt Injection within
-Multi-Agent Systems". A keyword rule strong enough to catch a real attack would
-hide exactly those papers.
+Layer 3 never blocks because this corpus can include papers about prompt
+injection and other attack techniques -- that is what the field studies. A
+keyword rule strong enough to catch a real attack would hide exactly those
+papers.
 
 Output is protected where it lands: HTML escaping in emailer.py, spreadsheet
 cells in canon.py, arXiv IDs in arxiv.py.
