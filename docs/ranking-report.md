@@ -1,88 +1,142 @@
-# Why the similarity ranking stopped deciding what you read
+# Why the similarity ranking stopped choosing papers
 
-Measured on system-1, 2026-08-22, against the archived listing for 2026-08-20
-(`data/raw/2026-08-20.jsonl.gz`, 185 papers) and the 20-anchor set from PR #7.
+Measured on system-1 on 2026-08-22. Source: the archived listing for
+2026-08-20 (`data/raw/2026-08-20.jsonl.gz`, n = 185 papers) and the 20-anchor
+set from PR #7.
 
-This is the evidence behind the two-stage model cascade that replaced the
-similarity filter. Full report, with the tables:
-<https://claude.ai/code/artifact/dd57e1dd-49c0-4a95-9a74-492c75a0498e>
+Tables and charts: <https://claude.ai/code/artifact/dd57e1dd-49c0-4a95-9a74-492c75a0498e>
 
 ## The short version
 
-The old ranking produced crap. Nine of its top ten papers were off-profile.
+The old ranking produces crap. Nine of its top ten papers are off-profile.
 
-The anchor set is not the fault. The anchors pass their own test. The ranking
-built on them is the fault. It decides what reaches a model, and it cannot make
+The anchors are not the fault. The anchors pass their own test. The ranking
+built on them is the fault. It decides what reaches a model. It cannot make
 that decision.
 
-## What was measured
+## Measured
 
-**The anchors themselves pass.** Leave-one-out over all 20 new anchors: 19 of 20
-returned inside the cut, median rank 1.5, 18 of 20 inside the top 10. The four
-anchors testable under both the old 33-anchor set and the new 20 ranked 1st under
-both, so narrowing the set cost nothing for the anchors that stayed.
+**The anchors pass.** Leave-one-out runs over all 20 anchors. 19 of 20 return
+inside the cut. Median rank is 1.5. 18 of 20 return inside the top 10.
 
-**The ranking has almost no discrimination where it matters.** Over the 185
-papers, SPECTER2 cosine spans 0.803 to 0.960. The rank-40 cut sits at 0.911.
-Ranks 10 through 40 — thirty papers, most of the old shortlist — are separated by
-0.011 in total, about 0.0004 each. Decisions resting on differences that small
-are close to arbitrary.
+**Narrowing cost nothing.** Four anchors are testable under both the old
+33-anchor set and the new 20. All four rank 1st under both.
 
-**One anchor dominated the result.** `2602.16136` (*Retrieval Collapses When AI
-Pollutes the Web*) won 71 of 185 papers and 21 of the 40 shortlist slots. It is
-also the single leave-one-out failure, at rank 59 of 274. Both facts have one
-cause: it sits furthest from the rest of the set (cohesion 0.8822 against a set
-mean of 0.9163), and `best_match` takes the max, so it owns its region of the
-embedding space unopposed. Across the 20 anchors, cohesion correlates −0.676 with
-papers won.
+**The ranking cannot discriminate.** Cosine over the 185 papers spans 0.803 to
+0.960. The rank-40 cut sits at 0.911. Ranks 10 to 40 hold 30 papers. Those 30
+span 0.011 in total. That is 0.0004 per paper.
 
-**The old top 10 is crap.** It holds retrieval-augmentation, prompt
-compression, uncertainty estimation, jailbreak and malicious-skill benchmark
-papers. A keyword proxy over title and abstract scores 1 of the 10 as on-theme.
-The profile asks for none of the other nine.
+**One anchor dominates.** `2602.16136` (*Retrieval Collapses When AI Pollutes
+the Web*) wins 71 of 185 papers. It wins 21 of the 40 shortlist slots. It is
+also the only leave-one-out failure, at rank 59 of 274.
 
-**Changing the pooling does not fix it.** Replacing max with a top-3 mean, a
-top-5 mean, or a full mean over all 20 anchors gives 0 or 1 on-theme papers in
-the top 10 — the same as max. The problem is not how anchor scores are combined.
+**Both facts share one cause.** That anchor sits furthest from the rest of the
+set. Its cohesion is 0.8822 against a set mean of 0.9163 (n = 20, range 0.8822
+to 0.9363). `best_match` takes the max over anchors. So the anchor owns its
+region of the embedding space unopposed. Across the 20 anchors, cohesion
+correlates −0.676 with papers won.
 
-## The control that matters
+**The top 10 is crap.** It holds retrieval-augmentation, prompt compression,
+uncertainty estimation, jailbreak and malicious-skill benchmark papers. A
+keyword proxy scores 1 of the 10 as on-theme. The profile asks for none of the
+other nine.
 
-Before concluding the filter was failing, count what was available to find. Of
-the 185 papers that day, **1 scored 3 or more on the keyword proxy and 2 scored
-2 or more**. The single strongest on-theme paper (*Growth Without Us: Machine
-Consumers, Corporate Circularity*) was ranked **9th** by the new anchors, well
-inside the shortlist.
+**Pooling is not the cause.** A top-3 mean, a top-5 mean and a full mean each
+give 0 or 1 on-theme papers in the top 10. Max gives 1. Changing how anchor
+scores combine changes nothing.
+
+## The control
+
+Count what the day holds before judging the filter. Of 185 papers, 1 scores 3
+or more on the keyword proxy. 2 score 2 or more.
+
+The strongest on-theme paper is *Growth Without Us: Machine Consumers,
+Corporate Circularity*. The filter ranks it 9th. That is inside the shortlist.
 
 So the filter finds what the day holds. It does not miss good papers. It fills
-the other nine slots with crap, and it cannot tell the difference. That is the
-defect this PR fixes.
+the other nine slots with crap. It cannot tell the difference. That is the
+defect this change fixes.
 
-## What follows from this
+## What follows
 
-Similarity can say a paper is about roughly the right subject. It cannot say
-whether the paper is relevant to a stated profile, whether it is good, or whether
-it is new. It was being asked to do the first of those and could not.
+Similarity says a paper is about roughly the right subject. It cannot say
+whether the paper suits a stated profile. It cannot say whether the paper is
+good. It cannot say whether the paper is new. It was asked the first question
+and could not answer it.
 
-Screening 200 papers with a cheap model costs about $0.10 a day — measured at
-408 tokens per paper across the 150 top-ranked papers of that listing. That is
-roughly what the single Opus scoring call cost when it read only 45 papers. Once
-reading every paper is that cheap, there is no reason to let a 0.0004-cosine
-margin decide what gets read.
+A cheap model screens 200 papers for about $0.10 a day. The first live run
+measures 380 tokens per paper (n = 155). That is about what the single Opus
+call cost to read 45 papers. Reading every paper is now cheap. A 0.0004 margin
+no longer decides what gets read.
 
-So the anchors were demoted rather than deleted. They order a day larger than
-`screen_n` so it can be cut to `screen_n`, and on a day under the cap they change
-nothing. `tests/leave_one_out.py` still measures that ordering, but it now
-measures a narrower thing: a failure means a paper could be pushed past the cap
-on a heavy day, not that it would be dropped outright.
+So the anchors are demoted, not deleted. They order a day larger than
+`screen_n` so it can be cut to `screen_n`. On a day under the cap they change
+nothing.
 
-## What was not checked
+`tests/leave_one_out.py` still measures that ordering. It now measures a
+narrower thing. A failure means a paper could be pushed past the cap on a heavy
+day. It no longer means the paper is dropped outright.
 
-- **The two model calls have never run live.** No `OPENROUTER_API_KEY` was
-  available on the machine this was measured on, so the screen and judge prompts
-  are tested against stubs only.
-- **One day, n = 1.** Only 2026-08-20 is usable; the 2026-08-21 archive is empty.
-- **The on-theme measure is a keyword proxy** over 18 theme words in title and
-  abstract. It is a signal about the filter, not a substitute for the model's
-  judgment, and it will miss on-theme papers that use other vocabulary.
-- **Sonnet 5 replacing Opus 5 on the judging call is a capability change**, not
-  only a cost change. It has not been evaluated.
+## The live run
+
+The cascade ran against real papers on 2026-08-22. It read the 2026-08-20
+listing: 185 fetched, 155 unseen, 155 screened, 2 relevant, 2 kept, 11
+questions. Ten model calls. No failures. No retries.
+
+| Stage | Model | Calls | In tok | Out tok | Reasoning | Cost |
+|---|---|---:|---:|---:|---:|---:|
+| screen | haiku-4.5 | 7 | 66,767 | 16,631 | 9,824 | $0.1499 |
+| judge | sonnet-5 | 1 | 2,849 | 427 | 216 | $0.0100 |
+| questions | opus-5 | 2 | 6,433 | 1,846 | 72 | $0.0783 |
+| total | | 10 | 76,049 | 18,904 | 10,112 | $0.2382 |
+
+The screen kept a paper that similarity ranked **109th**: *A Privacy Budgeting
+Framework for Online Experimentation*. The old filter kept ranks 1 to 40 plus 5
+drawn at random from ranks 41 to 140. It had about a 5 in 100 chance of
+surfacing that paper.
+
+The keyword proxy scored that paper as off-theme. It uses none of the 18 theme
+words. The screen read the abstract and saw population-level mechanism design.
+
+Reasoning was 9,824 of the screen's 16,631 output tokens. Haiku output costs
+$5 per MTok. So reasoning cost about $0.049 of the $0.150 screen bill, to
+answer one yes/no question per paper. The screen now runs at its own effort,
+`screen_effort: low`.
+
+## Recall
+
+The 20 anchors are relevant by construction. Feeding them to the screen
+measures recall on known positives.
+
+Two runs, both 18 of 20. The two runs reject different papers:
+
+| Run | Rejected |
+|---|---|
+| 1 | `2503.13395` Causal Emergence 2.0, `2603.23471` Regulating AI Agents |
+| 2 | `2503.13395` Causal Emergence 2.0, `2602.11865` Intelligent AI Delegation |
+
+The `Regulating AI Agents` reject drove a prompt change: governance and policy
+work now counts as steering, and the screen says yes to it.
+
+One anchor flipped between two identical runs. `llm.py` sets no temperature, so
+these calls run at the provider default. A borderline paper is decided partly
+by chance. Each paper is screened once in a real run, so the variance never
+causes a duplicate or a double miss.
+
+`2503.13395` fails both runs. That is a real disagreement between the canon and
+the screen, not noise.
+
+## Not checked
+
+- **The top-10 path has never run live.** Two papers is the most that has
+  passed the screen. Ranking more candidates than `top_n` runs in unit tests
+  only.
+- **Lakera never ran.** No `LAKERA_GUARD_API_KEY` was set on the machine.
+- **No email was sent.** Every run so far used `--dry-run`.
+- **The on-theme measure is a keyword proxy.** It counts 18 theme words in
+  title and abstract. It is not the model's judgment. It misses on-theme papers
+  that use other words, and the rank-109 paper proves it.
+- **n = 1 day.** Only 2026-08-20 is usable. The 2026-08-21 archive holds 0
+  records.
+- **Sonnet 5 replaces Opus 5 on judging.** That is a capability change, not
+  only a cost change. It is unevaluated.

@@ -30,29 +30,31 @@ arXiv, 7 lists, ~200-500 new papers
   send an email                       only if FEED_EMAIL_TO is set
 ```
 
-About US$0.21 a day in token cost, measured against a real 150-paper day: ~$0.10
-to screen and ~$0.11 to judge. That is roughly what the single Opus scoring call
-cost when it read only 45 papers, so the cascade buys 3.3x the coverage for the
-same money. OpenRouter passes through the provider's per-token price and adds a
-separate fee on credit purchases, reported at 5.5% by third-party sources as of
-this writing. Not verified against OpenRouter's own pricing page.
+US$0.24 a day in token cost. Measured on a live run over 155 papers: $0.15 to
+screen, $0.01 to judge, $0.08 to extract questions. The single Opus scoring
+call cost about the same to read 45 papers. The cascade reads 3.4x as many
+papers for the same money.
 
-**A model reads every paper now.** Screening 200 papers with a cheap model costs
-about ten cents, so there is no longer a reason to let similarity decide what
-gets read. It reads all of them and answers one question per paper: is this
-relevant at all. Only what passes reaches the expensive call.
+OpenRouter passes through the provider's per-token price. It adds a separate
+fee on credit purchases, reported at 5.5% by third-party sources. Not verified
+against OpenRouter's own pricing page.
+
+**A model reads every paper now.** Screening 200 papers with a cheap model
+costs about ten cents. So similarity no longer decides what gets read. The
+screen reads every paper and answers one question each: is this relevant at
+all. Only what passes reaches the expensive call.
 
 **Similarity no longer filters. It caps.** The anchors order a day larger than
 `screen_n` so it can be cut to `screen_n`. On a day under the cap they change
-nothing. This is a deliberate demotion. The old ranking produced crap: measured
-on 2026-08-20, ranks 10 to 40 are separated by 0.0004 cosine, which is noise,
-and 9 of the top 10 papers are off-profile. See
+nothing. This is a deliberate demotion. The old ranking produced crap. Measured
+on 2026-08-20: ranks 10 to 40 are separated by 0.0004 cosine, which is noise.
+Nine of the top 10 papers are off-profile. See
 [docs/ranking-report.md](docs/ranking-report.md).
 
-**The explore slice is gone.** It existed because similarity could only find
-more of what the anchors already described, so a genuinely new subfield had no
-anchor to be near. A screening model reading the whole day does not have that
-blind spot, so five random papers are no longer buying anything.
+**The explore slice is gone.** Similarity finds more of what the anchors
+already describe. A new subfield has no anchor to sit near, so the slice
+covered that blind spot. A screening model reads the whole day and has no such
+blind spot. Five random papers now buy nothing.
 
 **Similarity is still the highest score against any single anchor, never the
 average.** The anchors span simulation, market design, governance and safety.
@@ -152,10 +154,12 @@ unconfigured and a feed that wrote successfully is not a failure.
 different anchors, or a different embedding model, without fetching again.
 
 Nothing either model call learns is thrown away. Every screened paper keeps its
-yes/no verdict and its one-line reason, and everything that passed the screen
-keeps its significance and novelty, in both `data/YYYY-MM-DD.json` and
-`candidates.csv`, at no extra cost. The rejects are kept deliberately: the
-record of what the screen threw away is what makes it auditable.
+yes/no verdict and its one-line reason. Everything that passed the screen also
+keeps its significance and novelty. Both land in `data/YYYY-MM-DD.json` and
+`candidates.csv`, at no extra cost.
+
+The rejects stay on purpose. The record of what the screen threw away is what
+makes the screen auditable.
 
 ## The canon
 
@@ -174,8 +178,8 @@ large agent populations. The other 13 arXiv entries, and the 9 not on arXiv,
 stay in the canon but are not anchors.
 
 Every screened paper is appended to `data/canon/candidates.csv`, in the
-canon's column order. One file, not two: the ten that were emailed carry their
-six dimension tags and an `emailed` mark, and the rest carry their
+canon's column order. One file, not two. The ten that were emailed carry their
+six dimension tags and an `emailed` mark. The rest carry their
 similarity, rank and scores with the dimensions blank. Blank dimensions are
 normal in the canon.
 
