@@ -1,8 +1,19 @@
 """Building and sending the email. The email is the whole interface.
 
 Part 1 is every question in one list. That is the part you read. Part 2 is the
-papers, so a question that catches your eye can be traced back to its source,
-its nearest anchor and its scores.
+papers, so a question that catches your eye can be traced back to its source.
+
+Nothing here justifies a paper's presence. No score, no similarity value, no
+screening reason. The title, the one-sentence summary and the questions are the
+whole case for reading it.
+
+Significance and novelty order Part 2 and nothing else: a 1-5 score is the
+judge's working, not a fact about the paper. The similarity value is gone for a
+stronger reason -- similarity no longer selects anything, so printing it next to
+a paper the screen chose would imply a causal role it does not have. Only the
+nearest canon paper survives, as a bearing, without its number.
+
+All of it stays in data/*.json and candidates.csv, where it can be audited.
 """
 
 from __future__ import annotations
@@ -21,10 +32,6 @@ class EmailError(Exception):
     """The email could not be sent. The JSON file is still on disk."""
 
 
-def _mark(entry: dict) -> str:
-    return " [random]" if entry.get("from_random") else ""
-
-
 def render_text(result: dict) -> str:
     papers = result["papers"]
     lines: list[str] = []
@@ -35,7 +42,8 @@ def render_text(result: dict) -> str:
     counts = result["counts"]
     lines.append(
         f"{counts['fetched']} new papers, {counts['unseen']} unseen, "
-        f"{counts['shortlisted']} shortlisted, {counts['kept']} kept."
+        f"{counts.get('screened', 0)} screened, "
+        f"{counts.get('relevant', 0)} relevant, {counts['kept']} kept."
     )
     lines.append("")
 
@@ -63,15 +71,10 @@ def render_text(result: dict) -> str:
     lines.append(f"PART 2 -- PAPERS ({len(papers)})")
     lines.append("-" * 60)
     for i, p in enumerate(papers, 1):
-        lines.append(f"{i}. {p['title']}{_mark(p)}")
+        lines.append(f"{i}. {p['title']}")
         lines.append(f"   {', '.join(p['authors'])}")
         lines.append(f"   {p['arxiv_id']} -- {p['url']}")
-        lines.append(
-            f"   similarity {p['similarity']:.3f} to {p['nearest_anchor_id']} "
-            f"({p['nearest_anchor_title']})"
-        )
-        lines.append(f"   significance {p.get('significance', '?')}/5, "
-                     f"novelty {p.get('novelty', '?')}/5")
+        lines.append(f"   nearest in your canon: {p['nearest_anchor_title']}")
         if p.get("suspicious_markers"):
             lines.append(f"   note: text contains injection-like patterns "
                          f"({', '.join(p['suspicious_markers'])}) -- advisory, the "
@@ -96,10 +99,14 @@ def render_text(result: dict) -> str:
             lines.append(f"- {prob}")
         lines.append("")
 
-    lines.append(f"Filter: top {result['config']['shortlist_n']} by similarity to "
-                 f"{result['counts']['anchors']} anchors, plus "
-                 f"{result['config']['explore_n']} at random; "
-                 f"top {result['config']['top_n']} after scoring.")
+    counts = result["counts"]
+    lines.append(
+        f"Filter: {counts.get('screened', 0)} paper(s) screened by "
+        f"{result['config'].get('screen_model', '?')}, "
+        f"{counts.get('relevant', 0)} judged relevant, "
+        f"top {result['config']['top_n']} after "
+        f"{result['config'].get('judge_model', '?')} scored them."
+    )
     return "\n".join(lines)
 
 
@@ -123,7 +130,8 @@ def render_body_html(result: dict) -> str:
     c = result["counts"]
     out.append(
         f"<p style=\"color:#555\">{c['fetched']} new papers, {c['unseen']} unseen, "
-        f"{c['shortlisted']} shortlisted, {c['kept']} kept.</p>"
+        f"{c.get('screened', 0)} screened, {c.get('relevant', 0)} relevant, "
+        f"{c['kept']} kept.</p>"
     )
 
     total_q = sum(len(p["open_questions"]) for p in papers)
@@ -148,21 +156,15 @@ def render_body_html(result: dict) -> str:
 
     out.append(f"<h2 style=\"font-size:1.1em\">Part 2 — papers ({len(papers)})</h2>")
     for p in papers:
-        badge = (
-            "<span style=\"background:#eee;padding:1px 5px;border-radius:3px;"
-            "font-size:.85em\">random</span> " if p.get("from_random") else ""
-        )
         out.append(
             f"<div style=\"margin-bottom:1.4em\">"
-            f"<div style=\"font-weight:600\">{badge}"
+            f"<div style=\"font-weight:600\">"
             f"<a href=\"{e(p['url'])}\">{e(p['title'])}</a></div>"
             f"<div style=\"color:#555;font-size:.92em\">{e(', '.join(p['authors']))}</div>"
             f"<div style=\"color:#555;font-size:.92em\">{e(p['arxiv_id'])} · "
-            f"similarity {p['similarity']:.3f} to "
+            f"nearest in your canon: "
             f"<a href=\"https://arxiv.org/abs/{e(p['nearest_anchor_id'])}\">"
-            f"{e(p['nearest_anchor_title'])}</a> · "
-            f"significance {p.get('significance', '?')}/5 · "
-            f"novelty {p.get('novelty', '?')}/5</div>"
+            f"{e(p['nearest_anchor_title'])}</a></div>"
         )
         if p.get("suspicious_markers"):
             out.append(
