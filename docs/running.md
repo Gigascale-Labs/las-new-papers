@@ -6,8 +6,8 @@ it worked.
 ## Part 1. Get the keys
 
 **Step 1. Get a model API key.**
-Go to https://console.anthropic.com. Make an API key. Copy it.
-The key starts with `sk-ant-`.
+Go to https://openrouter.ai/keys. Make an API key. Copy it.
+The key starts with `sk-or-v1-`.
 
 **Step 2. Get an email password.**
 The system sends email through Gmail. Your normal Gmail password will not work.
@@ -52,7 +52,7 @@ This downloads about 2.5GB. Most of it is PyTorch. It takes a few minutes.
 **Step 7. Put the keys in your terminal.**
 
 ```bash
-export ANTHROPIC_API_KEY=sk-ant-...
+export OPENROUTER_API_KEY=sk-or-v1-...
 export SMTP_PASSWORD=your-16-letter-app-password
 export LAKERA_GUARD_API_KEY=lakera-...
 
@@ -142,7 +142,7 @@ Go to your repository on GitHub.
 Open Settings, then Secrets and variables, then Actions.
 Add these secrets, with these exact names:
 
-- `ANTHROPIC_API_KEY`
+- `OPENROUTER_API_KEY`
 - `FEED_EMAIL_TO` -- where the email goes
 - `SMTP_USER` -- the account that sends it
 - `SMTP_PASSWORD`

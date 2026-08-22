@@ -1,7 +1,7 @@
 # arXiv open questions feed -- settings.
 #
 # Secrets and email addresses are not in this file. They come from the
-# environment: ANTHROPIC_API_KEY, SMTP_PASSWORD, LAKERA_GUARD_API_KEY,
+# environment: OPENROUTER_API_KEY, SMTP_PASSWORD, LAKERA_GUARD_API_KEY,
 # FEED_EMAIL_TO, SMTP_USER. See the README.
 
 # ---------------------------------------------------------------------------
@@ -123,10 +123,14 @@ top_n: 10            # papers kept after the scoring call
 # adapter notes.
 embed_model: allenai/specter2_base
 
-# Model for the two calls (scoring, question extraction).
-model: claude-opus-5
+# Model for the two calls (scoring, question extraction), as an OpenRouter
+# model id. Change this to any id OpenRouter lists; the code makes no
+# provider assumption. List: https://openrouter.ai/models
+model: anthropic/claude-opus-5
 
-# Reasoning effort for the model calls: low | medium | high | xhigh | max.
+# Reasoning effort for the two calls. OpenRouter passes this to the provider
+# as reasoning_effort. Not every model supports it; unsupported models ignore
+# it. Values: low | medium | high | xhigh | max.
 effort: medium
 
 # ---------------------------------------------------------------------------

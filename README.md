@@ -26,7 +26,7 @@ arXiv, 7 lists, ~200-500 new papers
   write data/YYYY-MM-DD.json
 ```
 
-About US$0.10 a day.
+About US$0.10 a day in token cost, unchanged by the move to OpenRouter: OpenRouter passes through the provider's per-token price. OpenRouter adds a separate fee on credit purchases, reported at 5.5% by third-party sources as of this writing. Not verified against OpenRouter's own pricing page.
 
 **Similarity filters. It does not judge.** It says a paper is about what your
 anchors are about. It cannot say whether the paper is good or new. The model
@@ -47,7 +47,7 @@ The average of those directions points at no real paper.
 ```bash
 pip install -r requirements.txt          # 2.5GB, mostly PyTorch
 
-export ANTHROPIC_API_KEY=sk-ant-...      # model calls
+export OPENROUTER_API_KEY=sk-or-v1-...      # model calls, any provider OpenRouter lists
 export SMTP_PASSWORD=...                 # Gmail app password, not your login password
 export FEED_EMAIL_TO=you@example.com     # where the email goes
 export LAKERA_GUARD_API_KEY=...          # optional
@@ -75,7 +75,7 @@ address, and the committed data files do not record the recipient.
 ### Daily, without a machine of your own
 
 `.github/workflows/daily_feed.yml` runs at 07:23 UTC and commits that day's
-data. It needs four repository secrets: `ANTHROPIC_API_KEY`, `SMTP_PASSWORD`,
+data. It needs four repository secrets: `OPENROUTER_API_KEY`, `SMTP_PASSWORD`,
 `FEED_EMAIL_TO` and `SMTP_USER`, plus `LAKERA_GUARD_API_KEY` if you use it.
 
 The commit step runs even when the run failed. A run that wrote its JSON but

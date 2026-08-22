@@ -302,46 +302,75 @@ class TestSeen(unittest.TestCase):
 
 
 class TestRetryRule(unittest.TestCase):
+    """Exercises ModelClient._once() against a stub shaped like an OpenRouter
+    ChatResult: resp.choices[0].finish_reason and .message.content."""
+
+    class _Choice:
+        def __init__(self, text, finish_reason="stop"):
+            self.finish_reason = finish_reason
+            self.message = type("M", (), {"content": text})()
+
     class _Resp:
-        def __init__(self, text, stop_reason="end_turn"):
-            self.stop_reason = stop_reason
-            self.stop_details = None
-            self.content = [type("B", (), {"type": "text", "text": text})()]
+        def __init__(self, choice):
+            self.choices = [choice]
 
-    def _client(self, responses):
-        client = ModelClient("claude-opus-5")
+    def _client(self, choices):
+        client = ModelClient("anthropic/claude-opus-5")
         calls = {"n": 0}
+        responses = [self._Resp(c) for c in choices]
 
-        class Messages:
-            def create(_self, **kwargs):
+        class Chat:
+            def send(_self, **kwargs):
                 i = calls["n"]
                 calls["n"] += 1
                 return responses[i]
 
-        client._client = type("C", (), {"messages": Messages()})()
+        client._client = type("C", (), {"chat": Chat()})()
         return client, calls
 
     def test_bad_json_is_retried_once_and_then_succeeds(self):
-        client, calls = self._client([self._Resp("{oops"), self._Resp('{"ok": true}')])
+        client, calls = self._client([self._Choice("{oops"), self._Choice('{"ok": true}')])
         self.assertEqual(client.structured(system="s", user="u", schema={}), {"ok": True})
         self.assertEqual(calls["n"], 2)
 
     def test_bad_json_twice_raises_so_the_paper_is_skipped(self):
-        client, calls = self._client([self._Resp("{oops"), self._Resp("{still bad")])
+        client, calls = self._client([self._Choice("{oops"), self._Choice("{still bad")])
         with self.assertRaises(ModelError):
             client.structured(system="s", user="u", schema={})
         self.assertEqual(calls["n"], 2)                  # asks once more, not forever
 
     def test_refusal_and_truncation_are_reported_clearly(self):
-        client, _ = self._client([self._Resp("", "refusal"), self._Resp("", "refusal")])
+        client, _ = self._client([self._Choice("", "content_filter"),
+                                  self._Choice("", "content_filter")])
         with self.assertRaises(ModelError) as ctx:
             client.structured(system="s", user="u", schema={})
         self.assertIn("refused", str(ctx.exception))
 
-        client, _ = self._client([self._Resp("{", "max_tokens")] * 2)
+        client, _ = self._client([self._Choice("{", "length")] * 2)
         with self.assertRaises(ModelError) as ctx:
             client.structured(system="s", user="u", schema={})
         self.assertIn("truncated", str(ctx.exception))
+
+    def test_provider_error_finish_reason_is_reported(self):
+        client, _ = self._client([self._Choice("", "error")] * 2)
+        with self.assertRaises(ModelError) as ctx:
+            client.structured(system="s", user="u", schema={})
+        self.assertIn("provider reported an error", str(ctx.exception))
+
+
+class TestSchemaName(unittest.TestCase):
+    def test_strips_characters_outside_the_allowed_set(self):
+        from arxiv_feed.llm import _schema_name
+
+        self.assertEqual(_schema_name("call 2 (2608.12345)"), "call_2_2608_12345")
+        self.assertEqual(_schema_name("call 1 (scoring)"), "call_1_scoring")
+
+    def test_never_empty_and_never_over_64_chars(self):
+        from arxiv_feed.llm import _schema_name
+
+        self.assertEqual(_schema_name(""), "response")
+        self.assertEqual(_schema_name("!!!"), "response")
+        self.assertLessEqual(len(_schema_name("x" * 200)), 64)
 
 
 class TestEmail(unittest.TestCase):
