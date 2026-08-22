@@ -3,12 +3,14 @@
 Runs on your own CPU and costs nothing. It orders the day so a listing larger
 than screen_n can be cut to screen_n.
 
-CPU by default, deliberately. The work is small -- a few hundred abstracts
-through a BERT-base encoder -- and the daily job runs in GitHub Actions, which
-has no GPU, so CPU is what production uses anyway. Taking a GPU here only makes
-the run compete with whatever else is on the machine, and a run that holds GPU
-memory for its whole length is a run something else can reap. Set embed_device
-to cuda in config.yaml if the machine's GPUs are yours alone.
+CPU by default, and on purpose. The work is small: a few hundred abstracts
+through a BERT-base encoder. Measured at 67 ms per paper, 12.4 s for 185.
+
+The daily job runs in GitHub Actions, which has no GPU. So CPU is what
+production uses. Taking a GPU here only makes the run compete with other work
+on the machine. A run that holds GPU memory for its whole length is a run
+something else can reap. Two runs on system-1 died that way, by SIGKILL, with
+no OOM record. Set embed_device to cuda if the GPUs are yours alone.
 """
 
 from __future__ import annotations

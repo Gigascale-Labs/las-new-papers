@@ -1,14 +1,14 @@
 """The house style for every word a model writes into the digest.
 
-Two calls produce reader-facing text: the judge writes each paper's summary,
-and the question call writes the questions and their reasons. Both import the
-same spec from here, because a style rule that says "use the same word for the
-same thing" cannot itself be worded two different ways in two prompts.
+Two calls write reader-facing text. The judge writes each paper's summary. The
+question call writes the questions and their reasons. Both import the spec from
+here. A rule that says "use the same word for the same thing" cannot be worded
+two ways in two prompts.
 
-Nothing in the digest justifies a paper's presence, so the summary and the
-questions carry the whole case for reading it. That is why they are held to a
-standard rather than left to the model's default register, which reaches for
-"novel", "significant" and "state-of-the-art" without being asked.
+Nothing in the digest justifies a paper's presence. The summary and the
+questions carry the whole case for reading it. So they take a stated standard.
+The model's default register reaches for "novel", "significant" and
+"state-of-the-art" unprompted.
 """
 
 from __future__ import annotations

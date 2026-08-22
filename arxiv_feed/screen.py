@@ -4,10 +4,10 @@ A cheap model reads every paper that survived the pre-sort and answers one
 binary question per paper. This is the step that replaced the similarity
 filter, because similarity could not answer it.
 
-Papers go in batches, not one per call. A relevance judgement is comparative --
-"is this the kind of thing the profile asks for" is easier to answer with two
-dozen same-day papers in view than alone -- and batching costs a fraction of
-one call per paper.
+Papers go in batches, not one per call. A relevance judgement is comparative.
+The question "is this the kind of thing the profile asks for" is easier to
+answer with two dozen same-day papers in view. Batching also costs a fraction
+of one call per paper.
 
 A batch that fails costs its own papers, not the day. The remaining batches
 still run and the failure is reported.
@@ -89,8 +89,8 @@ SCHEMA = {
 def _render(candidates: list[Candidate]) -> str:
     """One fenced block per paper.
 
-    The arxiv_id sits outside the fence: it is the key the model must return,
-    it is validated against the batch afterwards, and keeping it out means no
+    The arxiv_id sits outside the fence. It is the key the model must return.
+    The caller validates it against the batch. Keeping it outside means no
     abstract can appear to relabel another paper's id.
     """
     blocks = []

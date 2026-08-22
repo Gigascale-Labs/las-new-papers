@@ -7,11 +7,13 @@ Nothing here justifies a paper's presence. No score, no similarity value, no
 screening reason. The title, the one-sentence summary and the questions are the
 whole case for reading it.
 
-Significance and novelty order Part 2 and nothing else: a 1-5 score is the
-judge's working, not a fact about the paper. The similarity value is gone for a
-stronger reason -- similarity no longer selects anything, so printing it next to
-a paper the screen chose would imply a causal role it does not have. Only the
-nearest canon paper survives, as a bearing, without its number.
+Significance and novelty order Part 2 and nothing else. A 1-5 score is the
+judge's working, not a fact about the paper.
+
+The similarity value is gone for a stronger reason. Similarity no longer
+selects anything. Printing it beside a paper the screen chose would imply a
+causal role it does not have. Only the nearest canon paper survives, as a
+bearing, without its number.
 
 All of it stays in data/*.json and candidates.csv, where it can be audited.
 """

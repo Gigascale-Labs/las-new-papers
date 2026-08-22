@@ -2,10 +2,10 @@
 
 This is no longer the filter. It is a cap.
 
-The screening call reads up to `screen_n` papers a day for about ten cents, so
-similarity no longer decides what gets judged -- it only decides what gets
-dropped on a day too large to screen whole. Most days are smaller than the cap
-and nothing is dropped at all.
+The screening call reads up to `screen_n` papers a day for about ten cents.
+Similarity no longer decides what gets judged. It decides only what gets
+dropped on a day too large to screen whole. Most days sit under the cap. On
+those days nothing is dropped.
 
 It orders. It does not judge. The screening and judging calls decide relevance,
 significance and novelty.
