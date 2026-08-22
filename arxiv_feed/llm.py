@@ -115,6 +115,21 @@ class ModelClient:
         if choice.finish_reason == "error":
             raise ModelError("provider reported an error")
 
+        # Logged on every call, success or not: resp.id is the OpenRouter
+        # generation id. Paste it into openrouter.ai/activity to see the exact
+        # request and response OpenRouter recorded -- the one place the full,
+        # un-truncated text is guaranteed to still exist after this call
+        # returns. resp.model is which model actually served the request,
+        # which can differ from the one asked for if OpenRouter routed to a
+        # fallback.
+        usage = getattr(resp, "usage", None)
+        log.info(
+            "%s: generation %s, served by %s, finish_reason=%s%s",
+            label, getattr(resp, "id", "?"), getattr(resp, "model", "?"),
+            choice.finish_reason,
+            f", usage={usage}" if usage is not None else "",
+        )
+
         text = choice.message.content
         if not text or not isinstance(text, str):
             raise ModelError("no text content in response")
@@ -126,4 +141,18 @@ class ModelClient:
 
         if not isinstance(data, dict):
             raise ModelError(f"expected a JSON object, got {type(data).__name__}")
+
+        # A schema-agnostic shape summary: works for call 1's {"scores": [...]}
+        # and call 2's {"open_questions": [...], "canon": {...}} without this
+        # module knowing either schema. This is what tells you "the call
+        # succeeded but came back empty" apart from "the call came back with
+        # the wrong shape entirely".
+        shape = {
+            k: f"list[{len(v)}]" if isinstance(v, list)
+            else f"dict[{len(v)}]" if isinstance(v, dict)
+            else type(v).__name__
+            for k, v in data.items()
+        }
+        log.info("%s: response shape %s", label, shape)
+
         return data
