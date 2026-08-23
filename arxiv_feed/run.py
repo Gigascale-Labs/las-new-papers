@@ -201,6 +201,8 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
         entry = c.to_dict()
         j = judgements.get(c.paper.arxiv_id, {})
         v = verdicts.get(c.paper.arxiv_id, {})
+        entry["on_topic"] = j.get("on_topic")
+        entry["topic_reason"] = j.get("topic_reason", "")
         entry["significance"] = j.get("significance")
         entry["novelty"] = j.get("novelty")
         entry["one_sentence"] = j.get("one_sentence", "")
@@ -247,6 +249,8 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
                 **brief,
                 "relevant": v.get("relevant"),
                 "screen_reason": v.get("reason", ""),
+                "on_topic": j.get("on_topic"),
+                "topic_reason": j.get("topic_reason", ""),
                 "significance": j.get("significance"),
                 "novelty": j.get("novelty"),
                 "one_sentence": j.get("one_sentence", ""),

@@ -22,10 +22,27 @@ log = logging.getLogger(__name__)
 
 SYSTEM = """\
 You judge new arXiv papers for one researcher, whose profile is given below.
-Every paper here already passed a relevance screen, so the question is no
-longer whether it is on topic. The question is whether it is worth their time.
+Every paper here already passed a relevance screen -- but that screen was a
+cheap model reading title and abstract alone, deciding fast. It can pass a
+paper that uses the profile's vocabulary ("multi-agent", "coordination",
+"collective") without actually being about population- or systemic-scale
+dynamics. You have the full profile and the full abstract, so you are the
+second, more careful opinion on relevance, not just a scorer of papers
+already agreed to be in scope.
 
-You judge two things, each 1-5:
+You judge three things:
+
+on_topic -- true only if the paper's actual subject is what the profile asks
+for: emergent dynamics across many interacting agents or people at a
+societal, economic or systemic scale, or measuring, steering or governing
+that. False for a paper about a small, fixed group solving one narrow task
+(a handful of vehicles, a robot team, one deployed system) even when its
+abstract says "multi-agent" -- that is group size, not population scale.
+False for a paper about making one agent or one model better. When unsure,
+say so in topic_reason rather than guessing true.
+
+significance and novelty, each 1-5 -- score both regardless of on_topic; do
+not skip them for a paper you marked off-topic.
 
 significance -- how much this paper matters to that researcher's stated
 interests if its claims hold. 5 means it would change how they approach a
@@ -52,6 +69,9 @@ not explain why it was selected. That is what significance and novelty are for,
 and neither is shown to the reader. A summary that argues for the paper is
 wrong even when the argument is correct.
 
+Give topic_reason at most 15 words: state what the paper is actually about,
+the same way the screen states its reason.
+
 Return a judgement for every paper you are given, keyed by its exact arxiv_id.
 The arxiv_id is the value stated on the line directly above each fenced
 document, in the form "arxiv_id: <value>". It is not the fence's nonce
@@ -69,11 +89,14 @@ SCHEMA = {
                 "type": "object",
                 "properties": {
                     "arxiv_id": {"type": "string"},
+                    "on_topic": {"type": "boolean"},
+                    "topic_reason": {"type": "string"},
                     "significance": {"type": "integer", "minimum": 1, "maximum": 5},
                     "novelty": {"type": "integer", "minimum": 1, "maximum": 5},
                     "one_sentence": {"type": "string"},
                 },
-                "required": ["arxiv_id", "significance", "novelty", "one_sentence"],
+                "required": ["arxiv_id", "on_topic", "topic_reason", "significance",
+                            "novelty", "one_sentence"],
                 "additionalProperties": False,
             },
         }
@@ -135,6 +158,8 @@ def judge_candidates(
         aid = str(row.get("arxiv_id", "")).strip()
         if aid in wanted:
             judgements[aid] = {
+                "on_topic": bool(row.get("on_topic", True)),
+                "topic_reason": str(row.get("topic_reason", "")).strip(),
                 "significance": int(row["significance"]),
                 "novelty": int(row["novelty"]),
                 "one_sentence": str(row.get("one_sentence", "")).strip(),
@@ -152,16 +177,32 @@ def judge_candidates(
     return judgements, problems
 
 
+MIN_SIGNIFICANCE = 2  # this module's own rubric: 1 means "too minor to act on"
+
+
 def rank(candidates: list[Candidate], judgements: dict[str, dict],
-         top_n: int) -> list[Candidate]:
-    """The `top_n` best-judged candidates.
+         top_n: int, min_significance: int = MIN_SIGNIFICANCE) -> list[Candidate]:
+    """The `top_n` best-judged candidates that clear the quality bar.
+
+    Two gates come before ranking, not after: `on_topic` false means the judge
+    -- reading the full profile and abstract -- disagrees with the screen's
+    cheap yes, and `min_significance` drops a paper the judge itself calls too
+    minor to act on. `top_n` caps a healthy day; it was never the only thing
+    standing between "kept" and "everything a loose screen let through". On a
+    thin day with one or two candidates, that cap does not bind at all, so
+    these gates are what actually keeps a weak paper out.
 
     Significance and novelty are summed with significance breaking ties, so a
     highly novel paper the researcher does not care about loses to a merely
     solid one that they do. Similarity is the last tie-break, which keeps the
     ordering deterministic for a given day.
     """
-    judged = [c for c in candidates if c.paper.arxiv_id in judgements]
+    judged = [
+        c for c in candidates
+        if c.paper.arxiv_id in judgements
+        and judgements[c.paper.arxiv_id].get("on_topic", True)
+        and judgements[c.paper.arxiv_id]["significance"] >= min_significance
+    ]
     judged.sort(
         key=lambda c: (
             judgements[c.paper.arxiv_id]["significance"]

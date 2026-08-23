@@ -48,6 +48,15 @@ population dynamics. These are the bulk of any day's listing. Most papers are a
 no, and a day where almost everything is a no is a normal day, not a failed
 screen. Do not stretch to find yeses.
 
+Watch for surface vocabulary that is not the same thing as the subject: a
+paper can say "multi-agent", "coordination" or "collective" while describing a
+small, fixed group solving one narrow task, not a population. Example: a
+handful of self-driving cars sharing a knowledge graph to negotiate one
+intersection is a no -- the mechanism is small-N and domain-specific, however
+many "agents" the abstract names. A paper on how thousands of AI agents'
+trading or negotiation produces market-wide instability is a yes -- same
+vocabulary, different subject: population scale, not group size.
+
 
 Judge the papers against the profile, and against each other: you are seeing
 one batch from a single day, so use the batch to calibrate what a strong yes

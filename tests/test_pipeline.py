@@ -112,9 +112,45 @@ class TestRanking(unittest.TestCase):
     def test_unjudged_papers_cannot_win_a_slot(self):
         papers = [paper(i) for i in range(2)]
         cands = preselect(papers, np.vstack([unit([1, 0, 0, 0])] * 2), store())
-        scores = {papers[1].arxiv_id: {"significance": 1, "novelty": 1, "one_sentence": ""}}
+        scores = {papers[1].arxiv_id: {"significance": 2, "novelty": 1, "one_sentence": ""}}
         ranked = judge.rank(cands, scores, top_n=2)
         self.assertEqual([c.paper.arxiv_id for c in ranked], [papers[1].arxiv_id])
+
+    def test_a_paper_too_minor_to_act_on_is_dropped_even_under_top_n(self):
+        """The cap was never meant to be the only gate: on a thin day it does
+        not bind, and a significance-1 paper must not ride along regardless."""
+        papers = [paper(i) for i in range(2)]
+        cands = preselect(papers, np.vstack([unit([1, 0, 0, 0])] * 2), store())
+        scores = {
+            papers[0].arxiv_id: {"significance": 1, "novelty": 4, "one_sentence": ""},
+            papers[1].arxiv_id: {"significance": 4, "novelty": 4, "one_sentence": ""},
+        }
+        ranked = judge.rank(cands, scores, top_n=2)
+        self.assertEqual([c.paper.arxiv_id for c in ranked], [papers[1].arxiv_id])
+
+    def test_off_topic_is_dropped_even_when_well_scored(self):
+        """on_topic is the judge's own second opinion on relevance, independent
+        of significance and novelty -- a screen false positive scored high on
+        both must still not reach the reader."""
+        papers = [paper(i) for i in range(2)]
+        cands = preselect(papers, np.vstack([unit([1, 0, 0, 0])] * 2), store())
+        scores = {
+            papers[0].arxiv_id: {"on_topic": False, "significance": 5, "novelty": 5,
+                                 "one_sentence": ""},
+            papers[1].arxiv_id: {"on_topic": True, "significance": 3, "novelty": 3,
+                                 "one_sentence": ""},
+        }
+        ranked = judge.rank(cands, scores, top_n=2)
+        self.assertEqual([c.paper.arxiv_id for c in ranked], [papers[1].arxiv_id])
+
+    def test_missing_on_topic_defaults_to_included(self):
+        """A judgement dict without the key (older data, a stubbed test) is not
+        penalised -- only an explicit False excludes."""
+        papers = [paper(i) for i in range(1)]
+        cands = preselect(papers, np.vstack([unit([1, 0, 0, 0])]), store())
+        scores = {papers[0].arxiv_id: {"significance": 3, "novelty": 3, "one_sentence": ""}}
+        ranked = judge.rank(cands, scores, top_n=1)
+        self.assertEqual([c.paper.arxiv_id for c in ranked], [papers[0].arxiv_id])
 
 
 def _cands(n=3):
@@ -783,7 +819,7 @@ class TestScoresAreRankingOnly(unittest.TestCase):
         """Removing them from the render must not remove them from the sort."""
         papers = [paper(i) for i in range(3)]
         cands = preselect(papers, np.vstack([unit([1, 0, 0, 0])] * 3), store())
-        j = {papers[0].arxiv_id: {"significance": 1, "novelty": 1, "one_sentence": ""},
+        j = {papers[0].arxiv_id: {"significance": 2, "novelty": 2, "one_sentence": ""},
              papers[1].arxiv_id: {"significance": 5, "novelty": 5, "one_sentence": ""},
              papers[2].arxiv_id: {"significance": 3, "novelty": 3, "one_sentence": ""}}
         ranked = judge.rank(cands, j, top_n=3)
