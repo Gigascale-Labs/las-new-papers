@@ -618,6 +618,37 @@ class TestRunWiring(unittest.TestCase):
         self.assertIsNone(by_id[papers[1].arxiv_id]["significance"])
         self.assertTrue(by_id[papers[0].arxiv_id]["kept"])
 
+    def test_no_unseen_papers_still_writes_output_and_rebuilds_the_feed(self):
+        """A weekend day with nothing unseen must still advance latest.json and
+        the feed. Left unwritten, the web UI freezes on the last day that had
+        papers -- arXiv's own Friday-to-Sunday gap, every week."""
+        from unittest import mock
+
+        from arxiv_feed import run as run_mod
+
+        class _Emb:
+            def __init__(self, *a, **k): pass
+            def encode(self, texts): return np.zeros((0, 4), dtype=np.float32)
+
+        with mock.patch.object(run_mod, "scrape_day", return_value=[]), \
+             mock.patch.object(run_mod, "Embedder", _Emb), \
+             mock.patch.object(run_mod.anchors_mod, "load_or_build",
+                               return_value=store()), \
+             mock.patch.object(run_mod, "ModelClient") as model_client, \
+             mock.patch.object(run_mod, "write_output") as write_output, \
+             mock.patch.object(run_mod.canon, "append_candidates", return_value=0), \
+             mock.patch.object(run_mod.feed_mod, "rebuild", return_value=7) as rebuild, \
+             mock.patch.object(run_mod, "SeenStore") as seen:
+            seen.return_value.filter_unseen.side_effect = lambda ps: ps
+            result = run_mod.run(self._cfg(), day="2026-08-21", dry_run=True)
+
+        model_client.assert_not_called()               # no screen, no judge
+        write_output.assert_called_once_with(self._cfg(), result, "2026-08-21")
+        rebuild.assert_called_once()
+        self.assertEqual(result["counts"]["fetched"], 0)
+        self.assertEqual(result["feed"]["entries"], 7)
+        self.assertTrue(any("no unseen papers" in p for p in result["problems"]))
+
     def test_a_day_the_screen_rejects_entirely_sends_nothing_and_says_so(self):
         papers = [paper(i) for i in range(3)]
         screen = {"verdicts": [

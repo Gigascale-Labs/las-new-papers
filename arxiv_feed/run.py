@@ -93,6 +93,17 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
 
     if not unseen:
         problems.append(f"no unseen papers found for {day}")
+        # Still publish: a day with nothing unseen is a real outcome, and
+        # latest.json is the web UI's only signal of the most recent run. Left
+        # unwritten, the UI freezes on the last day that had papers -- exactly
+        # arXiv's own Friday-to-Sunday gap, every week.
+        write_output(cfg, result, day)
+        n_entries = feed_mod.rebuild(
+            DATA_DIR, cfg.feed_path, cfg.feed_url, cfg.feed_url, result["generated_at"],
+            max_entries=cfg.feed_max_entries,
+        )
+        result["feed"] = {"entries": n_entries,
+                          "path": str(cfg.feed_path.relative_to(DATA_DIR.parent))}
         return result
 
     # 3. embed + 4. pre-sort to the screening cap
