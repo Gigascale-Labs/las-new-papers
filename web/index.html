@@ -14,7 +14,6 @@
     --ground:#F4F6F5; --surface:#FFFFFF; --sunk:#EAEEEC;
     --ink:#171C1F; --muted:#5C676C; --faint:#838E92; --rule:#DCE2E1;
     --accent:#1C5F5A; --accent-w:#E2EDEB;
-    --yes:#2F6B46; --no:#8A8F92;
     --sans:"IBM Plex Sans",ui-sans-serif,system-ui,-apple-system,sans-serif;
     --serif:"IBM Plex Serif",ui-serif,Georgia,serif;
     --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
@@ -25,7 +24,6 @@
       --ground:#111618; --surface:#171D1F; --sunk:#1D2426;
       --ink:#E4E9E8; --muted:#99A5A7; --faint:#768285; --rule:#2A3436;
       --accent:#63B5AE; --accent-w:#1B2E2D;
-      --yes:#6FB98A; --no:#7C8688;
     }
   }
   * { box-sizing:border-box }
@@ -58,27 +56,6 @@
            background:var(--surface); color:var(--ink);
            border:1px solid var(--rule); border-radius:2px }
 
-  h2.part { font-family:var(--mono); font-size:.72rem; font-weight:600;
-            letter-spacing:.14em; text-transform:uppercase; color:var(--faint);
-            margin:0 0 .9rem; display:flex; align-items:center; gap:.7rem }
-  h2.part::after { content:""; flex:1; height:1px; background:var(--rule) }
-
-  ol.questions { list-style:none; counter-reset:q; margin:0; padding:0;
-                 display:flex; flex-direction:column; gap:1.15rem }
-  ol.questions li { counter-increment:q; display:grid;
-                    grid-template-columns:2.4rem 1fr; gap:.2rem .6rem }
-  ol.questions li::before { content:counter(q); font-family:var(--mono);
-    font-size:.8rem; color:var(--faint); padding-top:.2rem;
-    font-variant-numeric:tabular-nums }
-  .q { max-width:var(--measure); grid-column:2 }
-  .qmeta { grid-column:2; font-size:.87rem; color:var(--muted);
-           max-width:var(--measure) }
-  .tag { font-family:var(--mono); font-size:.68rem; font-weight:600;
-         letter-spacing:.06em; text-transform:uppercase; padding:.1em .45em;
-         border:1px solid currentColor; border-radius:2px; margin-right:.45rem }
-  .tag.yes { color:var(--yes) } .tag.no { color:var(--no) }
-  .from { grid-column:2; font-size:.83rem; color:var(--faint) }
-
   .paper { background:var(--surface); border:1px solid var(--rule);
            padding:1.15rem 1.3rem; display:flex; flex-direction:column; gap:.5rem }
   .papers { display:flex; flex-direction:column; gap:1rem }
@@ -87,11 +64,13 @@
   .paper .authors { font-size:.88rem; color:var(--muted) }
   .paper .ids { font-family:var(--mono); font-size:.75rem; color:var(--faint) }
   .paper .summary { max-width:var(--measure) }
-  .paper ul { margin:.2rem 0 0; padding-left:1.1rem; display:flex;
-              flex-direction:column; gap:.45rem; font-size:.93rem;
-              max-width:var(--measure) }
-  .paper li::marker { color:var(--faint) }
-  .why { color:var(--muted); font-size:.87rem }
+  .paper ul { list-style:none; margin:.2rem 0 0; padding:0; display:flex;
+              flex-direction:column; gap:.55rem; max-width:var(--measure) }
+  .paper li { font-family:var(--serif); font-style:italic; color:var(--muted);
+              font-size:.95rem; line-height:1.55; padding-left:.9rem;
+              border-left:2px solid var(--rule) }
+  .paper li::before { content:"\201C" }
+  .paper li::after { content:"\201D" }
 
   a { color:var(--accent); text-decoration-thickness:1px; text-underline-offset:2px }
   a:focus-visible, select:focus-visible { outline:2px solid var(--accent);
@@ -169,37 +148,15 @@ async function listDays() {
   } catch { return []; }
 }
 
-function renderQuestions(papers) {
-  const rows = [];
-  for (const p of papers)
-    for (const q of (p.open_questions || []))
-      rows.push({q, p});
-  if (!rows.length)
-    return `<p class="empty">No questions were extracted for this day.</p>`;
-  const yes = rows.filter(r => r.q.label === "approachable").length;
-  return `
-    <h2 class="part">Part 1 — open questions (${rows.length}, ${yes} approachable)</h2>
-    <ol class="questions">
-      ${rows.map(({q, p}) => {
-        const ok = q.label === "approachable";
-        return `<li>
-          <div class="q">${esc(q.question)}</div>
-          <div class="qmeta"><span class="tag ${ok ? "yes" : "no"}">${esc(q.label)}</span>${esc(q.reason)}</div>
-          <div class="from">from <a href="${esc(p.url)}">${esc(p.title)}</a></div>
-        </li>`;
-      }).join("")}
-    </ol>`;
-}
-
-// Deliberately omits significance, novelty, the similarity value and the
-// screening reason. Nothing here argues for a paper. The title, the summary
+// Deliberately omits significance, novelty, the similarity value, the
+// screening reason, and each question's approachability label and reason.
+// Nothing here argues for a paper, or for a question. The title, the summary
 // and the questions are the whole case for reading it.
 function renderPapers(papers) {
   if (!papers.length)
     return `<p class="empty">Nothing passed the screen on this day. That is a
       normal outcome, not a failure.</p>`;
   return `
-    <h2 class="part">Part 2 — papers (${papers.length})</h2>
     <div class="papers">
       ${papers.map(p => `
         <article class="paper">
@@ -210,7 +167,7 @@ function renderPapers(papers) {
             : ""}</div>
           ${p.one_sentence ? `<div class="summary">${esc(p.one_sentence)}</div>` : ""}
           ${(p.open_questions || []).length ? `<ul>${p.open_questions.map(q => `
-            <li>${esc(q.question)}<br><span class="why">${esc(q.label)}: ${esc(q.reason)}</span></li>`).join("")}</ul>` : ""}
+            <li>${esc(q.question)}</li>`).join("")}</ul>` : ""}
         </article>`).join("")}
     </div>`;
 }
@@ -222,10 +179,7 @@ function renderDay(d) {
   document.getElementById("counts").innerHTML =
     `<b>${c.fetched ?? "?"}</b> fetched · <b>${c.screened ?? "?"}</b> screened · ` +
     `<b>${c.relevant ?? "?"}</b> relevant · <b>${c.kept ?? "?"}</b> kept`;
-  document.getElementById("main").innerHTML =
-    renderQuestions(d.papers || []) +
-    `<div style="height:2rem"></div>` +
-    renderPapers(d.papers || []);
+  document.getElementById("main").innerHTML = renderPapers(d.papers || []);
 }
 
 async function show(day) {
