@@ -722,6 +722,117 @@ class TestRunWiring(unittest.TestCase):
         self.assertNotIn(papers[20].arxiv_id, screened_user)
 
 
+class TestBackfillDays(unittest.TestCase):
+    """Two known causes leave a day with nothing on record: arXiv does not
+    announce Friday/Saturday submissions until the following Sunday/Monday,
+    and an arXiv rate limit (429) can crash a run before it writes any file
+    at all for that day. Either way, the day is worth a fresh attempt.
+
+    Every test targets "2026-08-24", whose 5-day window is 08-19..08-23. Each
+    test fills that whole window with real (fetched > 0) days except the one
+    or two it means to exercise -- an unpopulated window day would otherwise
+    look just as "missing" as the one under test.
+    """
+
+    _WINDOW_DAYS = ["2026-08-19", "2026-08-20", "2026-08-21", "2026-08-22",
+                    "2026-08-23"]
+
+    def _cfg(self):
+        from arxiv_feed.config import Config
+        return Config(categories=["cs.MA"], anchors=["a1", "a2"], profile="p")
+
+    def _write(self, cfg, day: str, fetched: int, unseen: int | None = None):
+        path = cfg.output_path(day)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(
+            {"date": day, "counts": {"fetched": fetched,
+                                     "unseen": unseen if unseen is not None else fetched}}
+        ), encoding="utf-8")
+
+    def _fill_window(self, cfg, exclude=()):
+        for day in self._WINDOW_DAYS:
+            if day not in exclude:
+                self._write(cfg, day, fetched=50)
+
+    def test_a_zero_fetch_day_is_picked_up(self):
+        from unittest import mock
+
+        from arxiv_feed.run import backfill_days
+
+        with tempfile.TemporaryDirectory() as d:
+            with mock.patch("arxiv_feed.config.DATA_DIR", Path(d)):
+                cfg = self._cfg()
+                self._fill_window(cfg, exclude=("2026-08-21", "2026-08-22"))
+                self._write(cfg, "2026-08-21", fetched=0)   # Friday
+                self._write(cfg, "2026-08-22", fetched=0)   # Saturday
+                self.assertEqual(backfill_days(cfg, "2026-08-24"),
+                                 ["2026-08-21", "2026-08-22"])
+
+    def test_a_thin_but_nonzero_day_is_left_alone(self):
+        from unittest import mock
+
+        from arxiv_feed.run import backfill_days
+
+        with tempfile.TemporaryDirectory() as d:
+            with mock.patch("arxiv_feed.config.DATA_DIR", Path(d)):
+                cfg = self._cfg()
+                self._fill_window(cfg)
+                # Every paper had already been sent -- a real outcome, not a miss.
+                self._write(cfg, "2026-08-23", fetched=185, unseen=0)
+                self.assertEqual(backfill_days(cfg, "2026-08-24"), [])
+
+    def test_a_missing_file_is_treated_as_unresolved(self):
+        """A crashed run (e.g. arXiv rate-limited the request) never reaches
+        write_output, so the day has no file at all -- not a fetched: 0 one."""
+        from unittest import mock
+
+        from arxiv_feed.run import backfill_days
+
+        with tempfile.TemporaryDirectory() as d:
+            with mock.patch("arxiv_feed.config.DATA_DIR", Path(d)):
+                cfg = self._cfg()
+                self._fill_window(cfg, exclude=("2026-08-23",))
+                self.assertEqual(backfill_days(cfg, "2026-08-24"), ["2026-08-23"])
+
+    def test_a_corrupt_day_file_is_treated_as_unresolved(self):
+        from unittest import mock
+
+        from arxiv_feed.run import backfill_days
+
+        with tempfile.TemporaryDirectory() as d:
+            with mock.patch("arxiv_feed.config.DATA_DIR", Path(d)):
+                cfg = self._cfg()
+                self._fill_window(cfg, exclude=("2026-08-22",))
+                path = cfg.output_path("2026-08-22")
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("{not json", encoding="utf-8")
+                self.assertEqual(backfill_days(cfg, "2026-08-24"), ["2026-08-22"])
+
+    def test_window_reaches_five_days_but_no_further(self):
+        from unittest import mock
+
+        from arxiv_feed.run import backfill_days
+
+        with tempfile.TemporaryDirectory() as d:
+            with mock.patch("arxiv_feed.config.DATA_DIR", Path(d)):
+                cfg = self._cfg()
+                self._fill_window(cfg, exclude=("2026-08-19",))
+                self._write(cfg, "2026-08-19", fetched=0)   # 5 days before target
+                self.assertEqual(backfill_days(cfg, "2026-08-24"), ["2026-08-19"])
+
+    def test_a_day_more_than_five_days_back_is_out_of_reach(self):
+        from unittest import mock
+
+        from arxiv_feed.run import backfill_days
+
+        with tempfile.TemporaryDirectory() as d:
+            with mock.patch("arxiv_feed.config.DATA_DIR", Path(d)):
+                cfg = self._cfg()
+                self._fill_window(cfg)
+                self._write(cfg, "2026-08-18", fetched=0)   # 6 days before target
+                self.assertEqual(backfill_days(cfg, "2026-08-24"), [])
+
+
 class TestCandidatesCsvSchema(unittest.TestCase):
     def test_a_stale_header_is_refused_not_silently_misaligned(self):
         """Appending under an old header would write values under wrong names."""

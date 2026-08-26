@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 
 from . import anchors as anchors_mod
 from . import arxiv, canon, emailer, feed as feed_mod, guard, judge, questions, screen
@@ -29,6 +29,50 @@ from .select import preselect
 from scrapers.arxiv_scraper import scrape_day
 
 log = logging.getLogger(__name__)
+
+
+def backfill_days(cfg: Config, target_day: str, window: int = 5) -> list[str]:
+    """Days before `target_day` with no good retrieval on record, oldest first.
+
+    Two known causes make a day come back with nothing:
+
+    - arXiv does not announce Friday or Saturday submissions until the
+      following Sunday or Monday (info.arxiv.org/help/availability.html), so
+      a run that queries "yesterday" the next morning always gets 0 papers
+      for either day -- not because nothing was submitted, but because the
+      query landed before arXiv's own backlog was processed.
+    - arXiv occasionally rate-limits the query (HTTP 429) past every retry
+      _get() already makes; that run crashes before it ever writes a file
+      for the day, rather than writing one with `fetched: 0`.
+
+    By the time `target_day` comes around, both are usually resolved: the
+    backlog is announced, and a fresh request is a fresh chance to not be
+    rate-limited. So a day counts as needing a retry if its file is missing,
+    unreadable, or reports `fetched == 0` -- anything short of a file that
+    reports a real, nonzero fetch. `unseen == 0` on a nonzero `fetched` is
+    left alone: that is a real, already-understood outcome (every paper that
+    day had already been sent), not a retrieval miss.
+
+    The default 5-day window is deliberately wider than the two-day weekend
+    gap: a single stretch of bad luck (a rate limit landing right after a
+    weekend, say) can leave several consecutive days unresolved, and this
+    must still reach all of them once things clear up.
+    """
+    target = date.fromisoformat(target_day)
+    candidates = []
+    for i in range(window, 0, -1):
+        day = (target - timedelta(days=i)).isoformat()
+        path = cfg.output_path(day)
+        fetched = None
+        if path.exists():
+            try:
+                fetched = json.loads(path.read_text(encoding="utf-8")).get("counts", {}).get("fetched")
+            except (json.JSONDecodeError, OSError) as exc:
+                log.warning("backfill: %s is unreadable (%s); treating %s as unresolved",
+                           path, exc, day)
+        if not fetched:
+            candidates.append(day)
+    return candidates
 
 
 def run(cfg: Config, day: str | None = None, dry_run: bool = False,
