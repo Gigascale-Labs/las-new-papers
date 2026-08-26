@@ -84,4 +84,18 @@ jobs:
           fi
           DAY=$(date -u -d yesterday +%Y-%m-%d)
           git commit -m "data: arXiv open-questions feed for ${DAY} [skip ci]"
-          git push
+
+          # This job runs for tens of minutes, so main can move under it. A
+          # plain push then loses the whole day's work -- fetched, screened,
+          # judged and paid for -- to a race it could have just rebased past.
+          # Only data/ is touched here, and the concurrency group means no
+          # other run of this workflow is writing it, so a rebase is safe.
+          for attempt in 1 2 3; do
+            if git push; then
+              exit 0
+            fi
+            echo "push rejected (attempt ${attempt}); rebasing onto origin/main"
+            git pull --rebase origin main || exit 1
+          done
+          echo "could not push after 3 attempts"
+          exit 1
