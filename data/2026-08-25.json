@@ -32,8 +32,8 @@
   "counts": {
     "fetched": 243,
     "unseen": 243,
-    "screened": 200,
-    "relevant": 20,
+    "screened": 209,
+    "relevant": 21,
     "kept": 13,
     "anchors": 20
   },

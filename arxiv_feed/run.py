@@ -394,7 +394,6 @@ def merge_into_existing(result: dict, path: Path) -> dict:
         now = counts.get(key)
         if isinstance(was, int) and isinstance(now, int):
             counts[key] = max(now, was)
-    counts["kept"] = len(result["papers"])
     result["counts"] = counts
 
     recovered = len(result["papers"]) - kept_before
@@ -402,6 +401,37 @@ def merge_into_existing(result: dict, path: Path) -> dict:
         log.info("%s: kept %d paper(s) already on file, %d in this run",
                  result["date"], recovered, kept_before)
     return result
+
+
+def coherent_counts(result: dict) -> dict:
+    """Keep the day's funnel monotone: fetched >= unseen >= screened >= relevant >= kept.
+
+    A single run reports these consistently. Merging two runs does not: the
+    second run screened only what the first had not already sent, so its
+    `relevant` counts a different, smaller population than the file now
+    holds. On 2026-08-20 that read "2 relevant, 11 kept", which cannot
+    happen -- every paper in the file was judged relevant by whichever run
+    kept it, so `relevant` can never sit below `kept`.
+
+    Each level is raised to the largest number the file itself can support:
+    what the run reported, what its own records show, and what the level
+    below it already proves. Nothing is invented and nothing shrinks.
+    """
+    counts = dict(result.get("counts") or {})
+    papers = result.get("papers") or []
+    screened = result.get("screened") or []
+
+    counts["kept"] = len(papers)
+    marked_relevant = sum(1 for row in screened if row.get("relevant") is True)
+    counts["relevant"] = max(counts.get("relevant") or 0, marked_relevant,
+                             counts["kept"])
+    counts["screened"] = max(counts.get("screened") or 0, len(screened),
+                             counts["relevant"])
+    counts["unseen"] = max(counts.get("unseen") or 0, counts["screened"])
+    counts["fetched"] = max(counts.get("fetched") or 0, counts["unseen"])
+
+    result["counts"] = counts
+    return counts
 
 
 def write_output(cfg: Config, result: dict, day: str) -> None:
@@ -417,6 +447,7 @@ def write_output(cfg: Config, result: dict, day: str) -> None:
     path = cfg.output_path(day)
     path.parent.mkdir(parents=True, exist_ok=True)
     merge_into_existing(result, path)
+    coherent_counts(result)
     payload = json.dumps(result, indent=2, ensure_ascii=False)
     path.write_text(payload, encoding="utf-8")
     (path.parent / "latest.json").write_text(payload, encoding="utf-8")

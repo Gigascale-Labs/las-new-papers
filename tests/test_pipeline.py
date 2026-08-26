@@ -869,8 +869,11 @@ class TestDayFileIsAdditive(unittest.TestCase):
 
             self.assertEqual([p["arxiv_id"] for p in rerun["papers"]],
                              ["a", "b", "c", "x", "y"])
-            self.assertEqual(rerun["counts"]["kept"], 5)      # recomputed, not 2
             self.assertEqual(rerun["counts"]["unseen"], 243)  # the larger of the two
+            # `kept` is settled by coherent_counts, which write_output runs
+            # straight after this -- see TestCountsStayCoherent.
+            from arxiv_feed.run import coherent_counts
+            self.assertEqual(coherent_counts(rerun)["kept"], 5)
 
     def test_a_day_that_finds_nothing_new_does_not_empty_the_file(self):
         """The 'no unseen papers' path writes papers: [] -- on a day that
@@ -953,6 +956,84 @@ class TestDayFileIsAdditive(unittest.TestCase):
                 self.assertEqual([p["arxiv_id"] for p in on_disk["papers"]], ["a", "b"])
                 latest = json.loads((Path(d) / "latest.json").read_text())
                 self.assertEqual([p["arxiv_id"] for p in latest["papers"]], ["a", "b"])
+
+
+class TestCountsStayCoherent(unittest.TestCase):
+    """fetched >= unseen >= screened >= relevant >= kept, always.
+
+    A merge mixes two runs' telemetry: the second run screened only what the
+    first had not already sent, so its `relevant` describes a smaller
+    population than the file ends up holding. 2026-08-20 displayed
+    "2 relevant, 11 kept", which cannot happen.
+    """
+
+    def test_relevant_can_never_sit_below_kept(self):
+        from arxiv_feed.run import coherent_counts
+
+        counts = coherent_counts({
+            "counts": {"fetched": 185, "unseen": 185, "screened": 155,
+                       "relevant": 2, "kept": 11},
+            "papers": [{"arxiv_id": str(i)} for i in range(11)],
+            "screened": [{"arxiv_id": "0", "relevant": True}],
+        })
+        self.assertEqual(counts["kept"], 11)
+        self.assertEqual(counts["relevant"], 11)
+        self.assertGreaterEqual(counts["screened"], counts["relevant"])
+
+    def test_a_clean_single_run_is_left_alone(self):
+        from arxiv_feed.run import coherent_counts
+
+        rows = [{"arxiv_id": str(i), "relevant": i < 17} for i in range(200)]
+        counts = coherent_counts({
+            "counts": {"fetched": 320, "unseen": 320, "screened": 200,
+                       "relevant": 17, "kept": 7},
+            "papers": [{"arxiv_id": str(i)} for i in range(7)],
+            "screened": rows,
+        })
+        self.assertEqual(
+            {k: counts[k] for k in ("fetched", "unseen", "screened", "relevant", "kept")},
+            {"fetched": 320, "unseen": 320, "screened": 200, "relevant": 17, "kept": 7},
+        )
+
+    def test_the_screening_record_can_raise_relevant(self):
+        """A merged screened list knows about relevant papers the last run's
+        own count never saw."""
+        from arxiv_feed.run import coherent_counts
+
+        counts = coherent_counts({
+            "counts": {"fetched": 243, "unseen": 243, "screened": 200,
+                       "relevant": 20, "kept": 13},
+            "papers": [{"arxiv_id": str(i)} for i in range(13)],
+            "screened": [{"arxiv_id": str(i), "relevant": True} for i in range(21)],
+        })
+        self.assertEqual(counts["relevant"], 21)
+        self.assertGreaterEqual(counts["screened"], 21)
+
+    def test_the_whole_funnel_is_monotone(self):
+        from arxiv_feed.run import coherent_counts
+
+        counts = coherent_counts({
+            "counts": {"fetched": 0, "unseen": 0, "screened": 0, "relevant": 0, "kept": 0},
+            "papers": [{"arxiv_id": str(i)} for i in range(5)],
+            "screened": [{"arxiv_id": str(i), "relevant": True} for i in range(9)],
+        })
+        order = ["fetched", "unseen", "screened", "relevant", "kept"]
+        values = [counts[k] for k in order]
+        self.assertEqual(values, sorted(values, reverse=True),
+                         f"funnel not monotone: {dict(zip(order, values))}")
+
+    def test_an_empty_day_stays_all_zero_at_the_bottom(self):
+        from arxiv_feed.run import coherent_counts
+
+        counts = coherent_counts({
+            "counts": {"fetched": 142, "unseen": 142, "screened": 142,
+                       "relevant": 0, "kept": 0},
+            "papers": [],
+            "screened": [{"arxiv_id": str(i), "relevant": False} for i in range(142)],
+        })
+        self.assertEqual(counts["kept"], 0)
+        self.assertEqual(counts["relevant"], 0)
+        self.assertEqual(counts["fetched"], 142)
 
 
 class TestCandidatesCsvSchema(unittest.TestCase):
