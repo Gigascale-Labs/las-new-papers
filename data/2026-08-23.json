@@ -3874,7 +3874,9 @@
       "kept": false
     }
   ],
-  "problems": [],
+  "problems": [
+    "day file re-filtered through the judge's current gates (off-topic, significance floor, top_n)"
+  ],
   "guard": {
     "lakera_enabled": false,
     "lakera_available": false,

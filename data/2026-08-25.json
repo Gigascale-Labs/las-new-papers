@@ -6413,7 +6413,8 @@
   ],
   "problems": [
     "screening batch 2/8 returned no verdict for 1 paper(s): 2608.24302",
-    "day file rebuilt from every committed run of this day; earlier runs' papers had been overwritten"
+    "day file rebuilt from every committed run of this day; earlier runs' papers had been overwritten",
+    "day file re-filtered through the judge's current gates (off-topic, significance floor, top_n)"
   ],
   "guard": {
     "lakera_enabled": false,
