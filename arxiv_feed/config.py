@@ -76,7 +76,7 @@ class Config:
         """
         base = str(
             self.feed.get("base_url")
-            or "https://raw.githubusercontent.com/one-2/las-new-papers/main"
+            or "https://raw.githubusercontent.com/Gigascale-Labs/las-new-papers/main"
         ).rstrip("/")
         return f"{base}/data/feed.xml"
 

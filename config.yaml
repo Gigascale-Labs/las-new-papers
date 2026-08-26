@@ -223,5 +223,5 @@ guard:
 # Switch to the first once Pages is on.
 # ---------------------------------------------------------------------------
 feed:
-  base_url: https://raw.githubusercontent.com/one-2/las-new-papers/main
+  base_url: https://raw.githubusercontent.com/Gigascale-Labs/las-new-papers/main
   max_entries: 60    # about two months of daily runs

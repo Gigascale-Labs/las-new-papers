@@ -22,7 +22,7 @@ To turn it on: get a key at https://platform.lakera.ai, set
 **Step 3. Get the code.**
 
 ```bash
-git clone https://github.com/one-2/las-new-papers.git
+git clone https://github.com/Gigascale-Labs/las-new-papers.git
 cd las-new-papers
 ```
 
