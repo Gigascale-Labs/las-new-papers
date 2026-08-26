@@ -65,7 +65,7 @@
       "topic_reason": "Measures how a large-scale recommender system changes population-level consumption concentration and herding patterns.",
       "significance": 4,
       "novelty": 3,
-      "one_sentence": "Uses an 8.5-million-user Netflix experiment to measure how recommendation quality shifts consumption across popularity tiers.Finds improved recommendations diffuse consumption from superstar titles toward middle-tail titles rather than polarizing it.",
+      "one_sentence": "Uses an 8.5-million-user Netflix experiment to measure how recommendation quality shifts consumption across popularity tiers. Finds improved recommendations diffuse consumption from superstar titles toward middle-tail titles rather than polarizing it.",
       "screen_reason": "Netflix experiment on 8.5M users shows how recommendation algorithms shape aggregate consumption across populations.",
       "open_questions": [
         {
@@ -141,7 +141,7 @@
       "topic_reason": "Proposes a framework for comparing population-level sociotechnical interventions such as misinformation countermeasures.",
       "significance": 3,
       "novelty": 2,
-      "one_sentence": "Presents a multi-criteria framework evaluating sociotechnical interventions on effectiveness, feasibility, cost, and acceptance.Surveys 39 researchers rating 40 misinformation interventions across these criteria, finding tradeoffs between effectiveness and feasibility.",
+      "one_sentence": "Presents a multi-criteria framework evaluating sociotechnical interventions on effectiveness, feasibility, cost, and acceptance. Surveys 39 researchers rating 40 misinformation interventions across these criteria, finding tradeoffs between effectiveness and feasibility.",
       "screen_reason": "Comparing steering interventions on misinformation across expert judgment; population-level policy.",
       "open_questions": [
         {

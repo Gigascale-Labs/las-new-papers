@@ -65,7 +65,7 @@
       "from_random": false,
       "significance": 4,
       "novelty": 4,
-      "one_sentence": "Casts model routing with costly value estimation as a Pandora's Box problem and studies both a centralized router and a decentralized bidding market of specialists.",
+      "one_sentence": "Casts model routing with costly value estimation as a Pandora's Box problem. Studies both a centralized router and a decentralized bidding market of specialists.",
       "open_questions": [
         {
           "question": "When autonomous specialists each decide whether to invest in self-assessment before bidding for a task, under what conditions does value-of-information reasoning shift surplus from the mechanism to strategic bidders rather than improving allocative efficiency?",
@@ -153,7 +153,7 @@
       "from_random": false,
       "significance": 4,
       "novelty": 4,
-      "one_sentence": "Trains four-cell societies of language-model agents sharing one adapter and shows that restricting each cell's evidence visibility increases the chance of a compositionally generalizing communication interface.",
+      "one_sentence": "Trains four-cell societies of language-model agents that share one adapter. Shows that restricting each cell's evidence visibility increases the chance of a compositionally generalizing communication interface.",
       "open_questions": [
         {
           "question": "Does restricting evidence visibility among communicating LLM modules still favor generalizing, reusable interfaces as the number of agents grows well beyond four cells, and how does the effect scale with society size and relay topology?",
@@ -231,7 +231,7 @@
       "from_random": false,
       "significance": 4,
       "novelty": 4,
-      "one_sentence": "Identifies correlated provenance among memories written by different agents as a source of false majorities and proposes a framework estimating effective independent evidence before arbitration.",
+      "one_sentence": "Identifies correlated provenance among memories written by different agents as a source of false majorities. Proposes a framework that estimates effective independent evidence before arbitration.",
       "open_questions": [
         {
           "question": "How does memory correlation bias scale as the number of agents sharing a memory store grows — does the false-majority effect worsen superlinearly with population size and shared upstream sources?",
@@ -309,7 +309,7 @@
       "from_random": false,
       "significance": 4,
       "novelty": 4,
-      "one_sentence": "Fine-tunes a language-model pedestrian agent policy so that simulated destination composition matches aggregate mobile-network origin-destination flows, using iterative proportional fitting and resampled training data.",
+      "one_sentence": "Fine-tunes a language-model pedestrian agent policy so that simulated destination composition matches aggregate mobile-network origin-destination flows. Uses iterative proportional fitting and resampled training data.",
       "open_questions": [
         {
           "question": "Does distilling aggregate destination composition into an LLM agent policy generalise beyond stadium egress after sporting events, to other event types, cities, or transport modes?",
@@ -391,7 +391,7 @@
       "from_random": false,
       "significance": 4,
       "novelty": 4,
-      "one_sentence": "Audits step-level credit signals for LLM agents against counterfactual replay ground truth and finds none identifies causally pivotal steps better than chance.",
+      "one_sentence": "Audits step-level credit signals for LLM agents against counterfactual replay ground truth. Finds that none identifies causally pivotal steps better than chance.",
       "open_questions": [
         {
           "question": "Do step-level credit signals (LLM-judge scores, outcome-conditioned logprob ratios, policy confidence) fail to track causal contribution in multi-agent or multi-turn interactive environments as they do in a single-agent tool environment?",
@@ -464,7 +464,7 @@
       "similarity_rank": 1,
       "significance": 4,
       "novelty": 3,
-      "one_sentence": "Models a post-AGI economy where corporations own producing-and-consuming AI/robot agent populations, using a von Neumann expanding-economy framework.\nDerives closed-economy demand closure, growth-rate decoupling from human demography, and a golden-rule theorem showing human ownership share decays exponentially unless growth stays below the machine economy's expansion frontier.\nCharacterizes three terminal regimes (rentier post-scarcity, full circular decoupling, socialized ownership) and the policy instruments that select among them.",
+      "one_sentence": "Models a post-AGI economy where corporations own producing-and-consuming AI/robot agent populations, using a von Neumann expanding-economy framework. Derives closed-economy demand closure and growth-rate decoupling from human demography. Proves a golden-rule theorem showing human ownership share decays exponentially unless growth stays below the machine economy's expansion frontier, and characterizes three terminal regimes (rentier post-scarcity, full circular decoupling, socialized ownership) along with the policy instruments that select among them.",
       "screen_reason": "Models post-AGI economy with agent populations, emergent dynamics, and ownership policy steering.",
       "open_questions": [
         {
@@ -550,7 +550,7 @@
       "from_random": false,
       "significance": 3,
       "novelty": 4,
-      "one_sentence": "Audits per-problem gain/loss statistics used to claim LLM self-improvement against measured null baselines and shows seven measurement artifacts that invert reported findings.",
+      "one_sentence": "Audits per-problem gain/loss statistics used to claim LLM self-improvement against measured null baselines. Shows seven measurement artifacts that invert the reported findings.",
       "open_questions": [
         {
           "question": "Does the finding that external distillation adds genuinely new problem solutions while self-training does not hold across model families and scales, or is it specific to an 8B model with rank-32 LoRA?",
@@ -627,7 +627,7 @@
       "from_random": false,
       "significance": 3,
       "novelty": 3,
-      "one_sentence": "Compares task-level versus subtask-level and text versus code skill induction for cross-task transfer among LLM agents and proposes a skill utility score predicting transfer success.",
+      "one_sentence": "Compares task-level versus subtask-level and text versus code skill induction for cross-task transfer among LLM agents. Proposes a skill utility score that predicts transfer success.",
       "open_questions": [
         {
           "question": "Does a skill library shared across many agents produce behavioural monoculture or correlated failures, and how does that scale with the number of agents drawing on the same induced skills?",

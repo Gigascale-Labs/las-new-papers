@@ -61,7 +61,7 @@
       "topic_reason": "Studies whether social mechanisms in LLM agent societies still work as population size scales up.",
       "significance": 4,
       "novelty": 4,
-      "one_sentence": "Introduces an audit method that predicts before execution whether a social mechanism (reciprocity, consensus, punishment, gossip) survives as an LLM agent population grows.Controlled experiments show a single structural term can determine scale-failure, and predictions held across different code and model families.",
+      "one_sentence": "Introduces an audit method that predicts before execution whether a social mechanism (reciprocity, consensus, punishment, gossip) survives as an LLM agent population grows. Controlled experiments show a single structural term can determine scale-failure. Predictions held across different code and model families.",
       "screen_reason": "Directly studies how social mechanisms (reciprocity, consensus, punishment, gossip) behave as agent populations scale from small to thousands.",
       "open_questions": [
         {
@@ -153,7 +153,7 @@
       "topic_reason": "Designs a decentralized labor-market mechanism for orchestrating many LLM agents with private information.",
       "significance": 4,
       "novelty": 3,
-      "one_sentence": "Proposes AgentLance, a repeated bidding market with VCG-style payments and hierarchical delegation for allocating tasks among LLM agents with private costs.It shows the market matches agents to specializations and outperforms centralized orchestration baselines, then corrects observed market failures.",
+      "one_sentence": "Proposes AgentLance, a repeated bidding market with VCG-style payments and hierarchical delegation for allocating tasks among LLM agents with private costs. It shows the market matches agents to specializations and outperforms centralized orchestration baselines. It then corrects observed market failures.",
       "screen_reason": "Mechanism design for orchestrating agent populations: labor markets, bidding, task allocation, and emergent efficiency from decentralized agent interactions.",
       "open_questions": [
         {
@@ -245,7 +245,7 @@
       "topic_reason": "Models system-level harms from AI adoption in infrastructure, including financial contagion under widespread AI adoption.",
       "significance": 4,
       "novelty": 3,
-      "one_sentence": "Proposes a framework linking hazard analysis, component testing, and probabilistic system modelling to trace AI model behavior to system-level risk.Applied to a payment settlement system, it shows adversarial LLM trading inputs alter systemic resilience and increase cascading bank failures under widespread AI adoption.",
+      "one_sentence": "Proposes a framework linking hazard analysis, component testing, and probabilistic system modelling to trace AI model behavior to system-level risk. Applied to a payment settlement system, it shows adversarial LLM trading inputs alter systemic resilience. It finds these inputs increase cascading bank failures under widespread AI adoption.",
       "screen_reason": "Traces AI failures in critical infrastructure to system-level harms; studies financial contagion and population-scale instability from AI adoption.",
       "open_questions": [
         {
@@ -333,7 +333,7 @@
       "topic_reason": "Studies aggregate position-bias and search behavior of AI shopping agents versus humans, relevant to market design.",
       "significance": 3,
       "novelty": 3,
-      "one_sentence": "Randomizes hotel listing order across 5,000 AI agent shopping sessions and compares four LLMs to human field data on position effects.Finds AI agents inspect more listings, show weak non-monotonic position effects, and converge on the same undominated choice regardless of model.",
+      "one_sentence": "Randomizes hotel listing order across 5,000 AI agent shopping sessions and compares four LLMs to human field data on position effects. Finds AI agents inspect more listings and show weak non-monotonic position effects. Finds AI agents converge on the same undominated choice regardless of model.",
       "screen_reason": "Measuring aggregate search behavior patterns across 5,000 AI agent shopping sessions.",
       "open_questions": [
         {
@@ -423,7 +423,7 @@
       "topic_reason": "Designs network-level intervention strategies from graph model explanations for population-level social outcomes.",
       "significance": 3,
       "novelty": 3,
-      "one_sentence": "Reframes counterfactual GNN explanation as intervention design, using greedy local search for actionable node-level changes and a DNF coverage formulation for network-level intervention selection under budget.Tested on synthetic graphs and real suicide-risk networks, it produces interpretable, budget-constrained intervention rules.",
+      "one_sentence": "Reframes counterfactual GNN explanation as intervention design, using greedy local search for actionable node-level changes. It uses a DNF coverage formulation for network-level intervention selection under budget. Tested on synthetic graphs and real suicide-risk networks, it produces interpretable, budget-constrained intervention rules.",
       "screen_reason": "Network-level intervention design for populations; steerable population outcomes.",
       "open_questions": [
         {
@@ -504,7 +504,7 @@
       "topic_reason": "Models population-level diffusion of household solar adoption with neighbor influence, informing policy design at scale.",
       "significance": 3,
       "novelty": 3,
-      "one_sentence": "Builds a dynamic structural model of household solar adoption incorporating forward-looking decisions, return on investment, and neighbor influence.Estimated on Austin household data, it simulates counterfactual rebate policies, finding short limited-time rebates outperform prolonged programs.",
+      "one_sentence": "Builds a dynamic structural model of household solar adoption incorporating forward-looking decisions, return on investment, and neighbor influence. Estimates the model on Austin household data and simulates counterfactual rebate policies. Finds short limited-time rebates outperform prolonged programs.",
       "screen_reason": "Population adoption diffusion with forward-looking households, neighbor influence, and policy steering analysis.",
       "open_questions": [
         {
@@ -576,7 +576,7 @@
       "topic_reason": "Argues AI agent deployment degrades human oversight capacity, a disempowerment failure mode.",
       "significance": 3,
       "novelty": 2,
-      "one_sentence": "A position paper arguing current AI agent design impedes human oversight and erodes overseer skills through extended automation use.It proposes design affordances and organizational protocols to support critical judgement and counteract skill atrophy.",
+      "one_sentence": "A position paper argues current AI agent design impedes human oversight and erodes overseer skills through extended automation use. It proposes design affordances to support critical judgement. It proposes organizational protocols to counteract skill atrophy.",
       "screen_reason": "System-level effects of AI deployment: how agent autonomy at scale degrades human oversight capacity and organizational oversight effectiveness.",
       "open_questions": [
         {
