@@ -72,8 +72,18 @@ def main(argv: list[str] | None = None) -> int:
 
     delivered_ok = True
     for i, d in enumerate(days):
-        result = run(cfg, day=d, dry_run=args.dry_run,
-                     rebuild_anchors=args.rebuild_anchors and i == 0)
+        try:
+            result = run(cfg, day=d, dry_run=args.dry_run,
+                         rebuild_anchors=args.rebuild_anchors and i == 0)
+        except arxiv.ArxivError as exc:
+            # One day's arXiv fetch failing for good must not cost every day
+            # after it in this run -- least of all the primary, requested
+            # day. Credits already spent on earlier days are unaffected:
+            # each day's screen/judge/questions calls, and its write, happen
+            # only after that day's own fetch has already succeeded.
+            print(f"{d}: arXiv did not answer -- {exc}")
+            delivered_ok = False
+            continue
         delivered_ok = _report(result)
 
     # Only the last day (the primary, requested one) decides the exit code:
