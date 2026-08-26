@@ -78,8 +78,8 @@ def strip_version(arxiv_id: str) -> str:
     return re.sub(r"v\d+$", "", arxiv_id.strip())
 
 
-# New-style (2502.14143) and pre-2007 style (math/0309136). Every link in the
-# email and every URL in the archive is built from this ID, so it is validated
+# New-style (2502.14143) and pre-2007 style (math/0309136). Every link on the
+# page and every URL in the archive is built from this ID, so it is validated
 # at the point it enters the system rather than trusted because arXiv sent it.
 _VALID_ID = re.compile(r"^(\d{4}\.\d{4,5}|[a-z-]+(\.[A-Z]{2})?/\d{7})$")
 

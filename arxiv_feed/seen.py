@@ -27,7 +27,7 @@ class SeenStore:
             self._entries = dict(raw.get("sent", {}))
         except Exception as exc:
             # A corrupt seen list must not stop the run: worst case is one
-            # repeated paper, which is better than no email at all.
+            # repeated paper, which is better than losing the day entirely.
             log.warning("seen list at %s unreadable (%s); starting empty", self.path, exc)
             self._entries = {}
 

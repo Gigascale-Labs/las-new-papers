@@ -1,4 +1,4 @@
-"""arXiv open questions feed -- daily email of new papers near your anchors."""
+"""arXiv open questions feed -- a daily page and RSS feed of new papers near your anchors."""
 
 __all__ = ["config", "arxiv", "embed", "anchors", "select", "screen", "judge",
-           "questions", "canon", "seen", "emailer", "run"]
+           "questions", "canon", "seen", "render", "run"]

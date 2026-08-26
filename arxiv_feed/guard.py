@@ -1,8 +1,8 @@
 """Defences for untrusted text.
 
 Every abstract comes from outside. Anyone who can submit a preprint writes one,
-and that text reaches two model calls, an HTML email, a CSV, and a JSON file
-the site reads.
+and that text reaches two model calls, the RSS feed's HTML content, a CSV,
+and a JSON file the site reads.
 
 Three layers:
 
@@ -23,7 +23,7 @@ injection and other attack techniques -- that is what the field studies. A
 keyword rule strong enough to catch a real attack would hide exactly those
 papers.
 
-Output is protected where it lands: HTML escaping in emailer.py, spreadsheet
+Output is protected where it lands: HTML escaping in render.py, spreadsheet
 cells in canon.py, arXiv IDs in arxiv.py.
 """
 
@@ -55,7 +55,7 @@ _INVISIBLE = re.compile(
 )
 
 # Annotation only. Wide by design: a false positive costs one line in the
-# email, and these never gate anything.
+# archive record, and these never gate anything.
 _SUSPICIOUS = [
     (re.compile(r"ignore\s+(all\s+)?(previous|prior|above|earlier)\s+", re.I), "ignore-previous"),
     (re.compile(r"disregard\s+(all\s+)?(previous|prior|above|the)\s+", re.I), "disregard"),
@@ -154,7 +154,7 @@ class LakeraGuard:
     """Screens text with Lakera Guard before it reaches a model.
 
     `on_error` decides what an unreachable service means. The default is
-    `allow`: a screening outage should not cost you the day's email, given
+    `allow`: a screening outage should not cost you the day's feed, given
     layer 1 does not depend on this service and the content is arXiv metadata
     rather than an open input box. Set it to `block` if that trade is wrong for
     you -- the run then reports every paper it could not screen.
@@ -268,8 +268,3 @@ def neutralize_cell(value: str) -> str:
     if isinstance(value, str) and value[:1] in _FORMULA_START:
         return "'" + value
     return value
-
-
-def safe_header_value(value: str) -> str:
-    """Strip CR/LF so a config value cannot inject extra email headers."""
-    return re.sub(r"[\r\n]+", " ", value or "").strip()

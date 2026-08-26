@@ -11,7 +11,7 @@ on:
         description: "UTC day to read (YYYY-MM-DD). Blank = yesterday."
         required: false
       dry_run:
-        description: "Write the JSON but send no email"
+        description: "Write the JSON but do not mark papers as seen"
         type: boolean
         default: false
 
@@ -61,12 +61,8 @@ jobs:
       - name: Run the feed
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-          # Addresses are secrets here, not config: this repository is public.
-          FEED_EMAIL_TO: ${{ secrets.FEED_EMAIL_TO }}
-          SMTP_USER: ${{ secrets.SMTP_USER }}
-          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           # Optional. Without it the run still applies the structural
-          # defences and says so in the email.
+          # defences and says so in the feed.
           LAKERA_GUARD_API_KEY: ${{ secrets.LAKERA_GUARD_API_KEY }}
         run: |
           python main.py \
@@ -74,7 +70,7 @@ jobs:
             ${{ inputs.dry_run && '--dry-run' || '' }}
 
       # Runs even if the step above failed. A run that wrote its JSON but
-      # could not send the email exits non-zero, and that day's archive is
+      # rebuilt an empty feed exits non-zero, and that day's archive is
       # still worth keeping.
       - name: Commit the day's archive
         if: always()

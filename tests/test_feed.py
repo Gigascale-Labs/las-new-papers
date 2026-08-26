@@ -57,7 +57,6 @@ def _result(date, arxiv_id="2608.00001", title="A paper", n_questions=1,
             }
         ],
         "problems": [],
-        "email": {"sent": False, "error": None, "dry_run": True},
     }
 
 
@@ -104,8 +103,8 @@ class TestBuildFeed(unittest.TestCase):
         root = ET.fromstring(xml_text)
         content = root.find(f"{ATOM_NS}entry/{ATOM_NS}content")
         self.assertEqual(content.get("type"), "html")
-        self.assertIn("Part 1", content.text)
         self.assertIn("A paper", content.text)
+        self.assertIn("Q0?", content.text)
 
 
 class TestFeedEscaping(unittest.TestCase):

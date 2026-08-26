@@ -6,7 +6,7 @@
     python scrapers/arxiv_scraper.py --categories cs.MA cs.AI --no-store
 
 The daily feed calls the same function, so the archive is a by-product of the
-run. Every paper the filter saw is kept, not just the ten that were emailed.
+run. Every paper the filter saw is kept, not just the ten in the day's feed.
 You can re-rank an old day with different anchors, or a different embedding
 model, without fetching anything again.
 

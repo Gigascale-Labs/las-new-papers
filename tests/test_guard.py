@@ -11,7 +11,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from arxiv_feed import canon, emailer, guard
+from arxiv_feed import canon, guard
 from arxiv_feed.arxiv import is_valid_id
 from tests.stubs import paper
 
@@ -191,38 +191,12 @@ class TestSinks(unittest.TestCase):
             body = path.read_text(encoding="utf-8")
         self.assertIn("'=cmd", body)
 
-    def test_email_headers_cannot_be_injected(self):
-        self.assertEqual(
-            guard.safe_header_value("me@example.com\r\nBcc: attacker@evil.com"),
-            "me@example.com Bcc: attacker@evil.com",
-        )
-
     def test_arxiv_ids_that_could_forge_a_link_are_rejected(self):
         self.assertTrue(is_valid_id("2502.14143"))
         self.assertTrue(is_valid_id("math/0309136"))
         for bad in ("javascript:alert(1)", "../../etc/passwd", "2502.14143?x=1",
                     "2502.14143 onmouseover=x", ""):
             self.assertFalse(is_valid_id(bad))
-
-    def test_suspicious_markers_reach_the_email(self):
-        result = {
-            "date": "2026-08-21",
-            "counts": {"fetched": 1, "unseen": 1, "screened": 1, "relevant": 1,
-                       "kept": 1, "anchors": 20},
-            "config": {"screen_n": 200, "screen_batch_size": 25, "top_n": 10,
-                       "screen_model": "anthropic/claude-haiku-4.5",
-                       "judge_model": "anthropic/claude-sonnet-5"},
-            "papers": [{"arxiv_id": "2608.00001", "title": "T", "authors": ["A"],
-                        "url": "https://arxiv.org/abs/2608.00001", "similarity": 0.5,
-                        "nearest_anchor_id": "x", "nearest_anchor_title": "y",
-                        "significance": 3, "novelty": 3,
-                        "one_sentence": "s", "open_questions": [],
-                        "suspicious_markers": ["ignore-previous"]}],
-            "problems": [], "email": {"sent": False, "to": "a@b.c", "error": None, "dry_run": True},
-        }
-        self.assertIn("ignore-previous", emailer.render_text(result))
-        self.assertIn("ignore-previous", emailer.render_html(result))
-
 
 class TestKeywordsNeverBlock(unittest.TestCase):
     """The corpus contains papers about prompt injection. They must survive."""
@@ -252,40 +226,6 @@ class TestKeywordsNeverBlock(unittest.TestCase):
     def test_ordinary_abstract_has_no_markers(self):
         self.assertEqual(guard.suspicious_markers(
             "We simulate one million agents in a market and measure price stability."), [])
-
-
-class TestNoAddressesInTheRepo(unittest.TestCase):
-    """This repository is public. An address committed to it gets scraped."""
-
-    REPO = Path(__file__).resolve().parent.parent
-
-    def test_config_file_holds_no_address(self):
-        text = (self.REPO / "config.yaml").read_text(encoding="utf-8")
-        self.assertNotRegex(text, r"[\w.+-]+@[\w-]+\.[\w.]+")
-
-    def test_config_loader_rejects_an_address_in_the_file(self):
-        import tempfile
-
-        from arxiv_feed.config import ConfigError, load_config
-
-        with tempfile.TemporaryDirectory() as d:
-            path = Path(d) / "config.yaml"
-            path.write_text(
-                "categories: [cs.MA]\nanchors: ['2502.14143', '2509.10147']\n"
-                "profile: me\nemail_to: someone@example.com\n",
-                encoding="utf-8",
-            )
-            with self.assertRaises(ConfigError) as ctx:
-                load_config(path)
-            self.assertIn("FEED_EMAIL_TO", str(ctx.exception))
-
-    def test_the_committed_archive_carries_no_address(self):
-        # data/*.json is committed by the daily workflow, so the run record
-        # must not name the recipient.
-        from arxiv_feed import run as run_mod
-
-        source = Path(run_mod.__file__).read_text(encoding="utf-8")
-        self.assertNotIn('"to": cfg.email_to', source)
 
 
 if __name__ == "__main__":

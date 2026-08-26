@@ -1,12 +1,13 @@
 """An Atom feed, built fresh from the day files already on disk.
 
-No password. No account. A feed reader polls a URL; nothing sends mail. This
-exists because the spec's one channel (email) needs an SMTP login, and some
-readers of this feed do not want to hold one, 2FA app password or not.
+No password, no account: a feed reader polls a URL. This is the only
+delivery channel -- there is no email step, so nothing here needs an SMTP
+login or a recipient address.
 
-The feed and the email describe a run the same way: both call
-emailer.render_body_html() for the content, so a paper reads the same in
-either place.
+The feed and the site describe a run the same way: both call
+render.render_body_html() (the feed directly, the page by rendering the same
+JSON client-side in the same shape), so a paper reads the same in either
+place.
 
 Rebuilt in full on every run, from the last MAX_ENTRIES day files. Not
 appended to. A rebuild cannot drift from what is on disk, and there is no
@@ -21,7 +22,7 @@ import re
 import xml.sax.saxutils as saxutils
 from pathlib import Path
 
-from . import emailer
+from . import render
 
 log = logging.getLogger(__name__)
 
@@ -41,7 +42,7 @@ def _entry_xml(result: dict, site_url: str) -> str:
     n_papers, n_q = _entry_count(result)
     title = f"arXiv open questions — {date} — {n_papers} papers, {n_q} questions"
     entry_url = f"{site_url}#{date}"
-    body_html = emailer.render_body_html(result)
+    body_html = render.render_body_html(result)
     # Atom content is HTML text inside an XML text node: escape once for XML
     # on top of the HTML escaping render_body_html already applied for HTML.
     # That double layer is what stops a paper's own text from closing the

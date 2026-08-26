@@ -83,7 +83,7 @@ def build(cfg: Config, embedder: Embedder) -> AnchorStore:
     missing = [a for a in cfg.anchors if a not in meta_by_id]
     if missing:
         # Not fatal: a withdrawn or mistyped anchor should cost you that anchor,
-        # not the day's email.
+        # not the day's feed.
         log.warning("arXiv returned nothing for %d anchor(s): %s",
                     len(missing), ", ".join(missing))
 

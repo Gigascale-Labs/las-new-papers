@@ -14,7 +14,7 @@ from pathlib import Path
 
 import numpy as np
 
-from arxiv_feed import canon, emailer, judge, questions, screen
+from arxiv_feed import canon, judge, questions, render, screen
 from arxiv_feed.llm import ModelClient, ModelError
 from arxiv_feed.seen import SeenStore
 from arxiv_feed.select import preselect
@@ -480,7 +480,10 @@ class TestSchemaName(unittest.TestCase):
         self.assertLessEqual(len(_schema_name("x" * 200)), 64)
 
 
-class TestEmail(unittest.TestCase):
+class TestFeedContent(unittest.TestCase):
+    """render_body_html() feeds data/feed.xml's <content>. It must read like
+    the page: one feed of papers, questions listed plainly underneath."""
+
     def _result(self, problems=None):
         return {
             "date": "2026-08-21",
@@ -507,35 +510,30 @@ class TestEmail(unittest.TestCase):
                  "one_sentence": "Optimises register allocation.", "open_questions": []},
             ],
             "problems": problems or [],
-            "email": {"sent": False, "to": "x@example.com", "error": None, "dry_run": True},
         }
 
-    def test_text_email_has_both_parts_and_the_anchor_reason(self):
-        text = emailer.render_text(self._result())
-        self.assertIn("PART 1 -- OPEN QUESTIONS (2, 1 approachable)", text)
-        self.assertIn("PART 2 -- PAPERS (2)", text)
-        self.assertIn("Virtual Agent Economies", text)           # why it was picked
-        self.assertIn("needs proprietary exchange data", text)
-        # The two-stage cascade is stated in the footer, not the explore slice.
-        self.assertIn("200 paper(s) screened by anthropic/claude-haiku-4.5", text)
-        self.assertIn("12 judged relevant", text)
-        # Scores order Part 2. They are not shown -- see emailer's docstring.
-        self.assertNotIn("significance", text)
-        self.assertNotIn("novelty", text)
+    def test_papers_and_their_questions_appear_with_no_section_split_or_label(self):
+        body = render.render_body_html(self._result())
+        self.assertIn("Agent markets", body)
+        self.assertIn("Does it hold at 10k agents?", body)
+        self.assertIn("Virtual Agent Economies", body)          # nearest-anchor bearing stays
+        self.assertNotIn("Part 1", body)
+        self.assertNotIn("Part 2", body)
+        # A question is quoted plainly -- no approachability label or reason.
+        self.assertNotIn("approachable", body)
+        self.assertNotIn("needs proprietary exchange data", body)
 
-    def test_failures_appear_in_the_email(self):
-        text = emailer.render_text(self._result(["2608.00009: question extraction failed"]))
-        self.assertIn("PROBLEMS", text)
-        self.assertIn("2608.00009", text)
-        html = emailer.render_html(self._result(["2608.00009: failed"]))
-        self.assertIn("Problems", html)
+    def test_failures_appear_in_the_body(self):
+        body = render.render_body_html(self._result(["2608.00009: question extraction failed"]))
+        self.assertIn("Problems", body)
+        self.assertIn("2608.00009", body)
 
     def test_html_escapes_paper_text(self):
         result = self._result()
         result["papers"][0]["title"] = "Agents <script>alert(1)</script> & markets"
-        html = emailer.render_html(result)
-        self.assertNotIn("<script>", html)
-        self.assertIn("&lt;script&gt;", html)
+        body = render.render_body_html(result)
+        self.assertNotIn("<script>", body)
+        self.assertIn("&lt;script&gt;", body)
 
     def test_json_output_is_serialisable(self):
         json.dumps(self._result())
@@ -908,23 +906,15 @@ class TestScoresAreRankingOnly(unittest.TestCase):
                 "open_questions": [{"question": "Q?", "label": "approachable",
                                     "reason": "public data"}]}],
             "problems": [],
-            "email": {"sent": False, "error": None, "dry_run": True},
         }
 
-    def test_nothing_justifies_a_paper_in_the_text_email(self):
-        text = emailer.render_text(self._result())
-        for token in ("significance", "novelty", "3/5", "4/5", "similarity", "0.92"):
-            self.assertNotIn(token, text)
-        self.assertIn("Models a post-AGI economy.", text)   # the sentence stays
-        # The anchor survives as a bearing, without its number.
-        self.assertIn("nearest in your canon: Gradual Disempowerment", text)
-
-    def test_nothing_justifies_a_paper_in_the_html_or_feed_body(self):
-        html = emailer.render_body_html(self._result())
+    def test_nothing_justifies_a_paper_in_the_feed_body(self):
+        html = render.render_body_html(self._result())
         for token in ("significance", "novelty", "3/5", "4/5", "similarity", "0.92"):
             self.assertNotIn(token, html)
         self.assertIn("Growth Without Us", html)
-        self.assertIn("nearest in your canon:", html)
+        # The anchor survives as a bearing, without its number.
+        self.assertIn("nearest in the canon:", html)
 
     def test_the_scores_still_rank(self):
         """Removing them from the render must not remove them from the sort."""

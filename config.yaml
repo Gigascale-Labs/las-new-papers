@@ -1,8 +1,7 @@
 # arXiv open questions feed -- settings.
 #
-# Secrets and email addresses are not in this file. They come from the
-# environment: OPENROUTER_API_KEY, SMTP_PASSWORD, LAKERA_GUARD_API_KEY,
-# FEED_EMAIL_TO, SMTP_USER. See the README.
+# Secrets are not in this file. They come from the environment:
+# OPENROUTER_API_KEY, LAKERA_GUARD_API_KEY. See the README.
 
 # ---------------------------------------------------------------------------
 # arXiv lists to read each day.
@@ -81,7 +80,7 @@ anchors:
 # Both model calls read it: to score significance for you, and to decide
 # whether a question is approachable by you.
 #
-# Change this first if the emails are interesting but not useful.
+# Change this first if the papers are interesting but not useful.
 # ---------------------------------------------------------------------------
 profile: |
   I work on large agent systems: the economies, markets, social networks and
@@ -190,14 +189,14 @@ screen_effort: low
 # about machine consumers.
 #
 # Set `enabled: true` and supply $LAKERA_GUARD_API_KEY to turn it back on.
-# With no key the run warns, says so in the email, and continues.
+# With no key the run warns, says so in the feed, and continues.
 # ---------------------------------------------------------------------------
 guard:
   enabled: false
   # project_id: project-xxxxxxxx   # optional: screen under a specific Lakera policy
   endpoint: https://api.lakera.ai/v2/guard
   timeout_seconds: 20
-  # What an unreachable Lakera means. `allow` keeps the day's email and
+  # What an unreachable Lakera means. `allow` keeps the day's feed and
   # reports the failure. `block` withholds every paper it could not screen.
   on_error: allow
   max_title_chars: 500
@@ -226,21 +225,3 @@ guard:
 feed:
   base_url: https://raw.githubusercontent.com/one-2/las-new-papers/main
   max_entries: 60    # about two months of daily runs
-
-# ---------------------------------------------------------------------------
-# Email delivery. Optional: the feed above delivers every run on its own.
-# Set FEED_EMAIL_TO to also get a daily email; leave it unset for feed-only,
-# no SMTP account or app password needed.
-#
-# No address is stored in this file. This repository is public, and an address
-# in a public file is scraped. Addresses come from the environment:
-#
-#   FEED_EMAIL_TO    where the digest is sent          (required to send)
-#   FEED_EMAIL_FROM  the From: header                  (optional, defaults to FEED_EMAIL_TO)
-#   SMTP_USER        the account that logs in to send  (optional, defaults to FEED_EMAIL_FROM)
-#   SMTP_PASSWORD    that account's app password       (required to send)
-#
-# Only the server settings, which identify nobody, are here.
-# ---------------------------------------------------------------------------
-smtp_host: smtp.gmail.com
-smtp_port: 587

@@ -119,7 +119,7 @@ def extract(client: ModelClient, profile: str, paper: Paper,
     """Questions and canon tags for one paper.
 
     Raises ModelError if the call failed twice -- the caller drops that paper and
-    marks it in the email. One bad paper never stops the run.
+    marks it in the problems list. One bad paper never stops the run.
     """
     tag_vocab = canon.known_tags() if tag_vocab is None else tag_vocab
     body, _ = fence(

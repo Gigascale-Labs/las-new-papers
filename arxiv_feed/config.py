@@ -1,7 +1,7 @@
 """Config loading and checking.
 
-One YAML file holds every setting. Secrets and email addresses come from the
-environment instead, because this repository is public.
+One YAML file holds every setting. Secrets come from the environment
+instead, because this repository is public.
 """
 
 from __future__ import annotations
@@ -26,8 +26,6 @@ class Config:
     anchors: list[str]
     profile: str
     search_queries: list[str] = field(default_factory=list)
-    smtp_host: str = "smtp.gmail.com"
-    smtp_port: int = 587
     screen_n: int = 200
     screen_batch_size: int = 25
     top_n: int = 10
@@ -91,29 +89,8 @@ class Config:
         return os.environ.get("OPENROUTER_API_KEY")
 
     @staticmethod
-    def smtp_password() -> str | None:
-        return os.environ.get("SMTP_PASSWORD")
-
-    @staticmethod
     def lakera_key() -> str | None:
         return os.environ.get("LAKERA_GUARD_API_KEY")
-
-    # ---- addresses ---------------------------------------------------------
-    #
-    # Never stored in config.yaml. This is a public repository, and an address
-    # committed to one is scraped. They come from the environment, and nothing
-    # writes them to the archive files the daily job commits.
-    @staticmethod
-    def email_to() -> str:
-        return os.environ.get("FEED_EMAIL_TO", "").strip()
-
-    @classmethod
-    def email_from(cls) -> str:
-        return os.environ.get("FEED_EMAIL_FROM", "").strip() or cls.email_to()
-
-    @classmethod
-    def smtp_user(cls) -> str:
-        return os.environ.get("SMTP_USER", "").strip() or cls.email_from()
 
     # ---- guard settings, with the defaults spelled out ---------------------
     @property
@@ -170,8 +147,6 @@ def load_config(path: str | Path = REPO_ROOT / "config.yaml") -> Config:
         anchors=[str(a).strip() for a in raw["anchors"]],
         profile=str(raw["profile"]).strip(),
         search_queries=[str(q).strip() for q in raw.get("search_queries") or []],
-        smtp_host=str(raw.get("smtp_host", "smtp.gmail.com")).strip(),
-        smtp_port=int(raw.get("smtp_port", 587)),
         screen_n=int(raw.get("screen_n", 200)),
         screen_batch_size=int(raw.get("screen_batch_size", 25)),
         top_n=int(raw.get("top_n", 10)),
@@ -196,13 +171,6 @@ def load_config(path: str | Path = REPO_ROOT / "config.yaml") -> Config:
         raise ConfigError(
             f"guard.on_error must be 'allow' or 'block', got {cfg.guard_on_error!r}"
         )
-    for key in ("email_to", "email_from", "smtp_user"):
-        if raw.get(key):
-            raise ConfigError(
-                f"{path}: {key} must not be set in this file -- it is public. "
-                f"Use the FEED_EMAIL_TO / FEED_EMAIL_FROM / SMTP_USER environment "
-                f"variables instead."
-            )
     for name in ("effort", "screen_effort"):
         value = getattr(cfg, name)
         if value not in _EFFORTS:

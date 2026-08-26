@@ -2,7 +2,7 @@
 
 fetch -> drop seen -> embed -> pre-sort to the cap -> guard -> screen (cheap
 model, every paper) -> judge (strong model, what passed) -> keep the top 10 ->
-questions -> email -> save.
+questions -> save.
 
 Two model tiers, not one. The cheap screen reads every paper that survives the
 pre-sort and answers "is this relevant at all"; the strong judge reads only
@@ -20,7 +20,7 @@ import logging
 from datetime import date, datetime, timedelta, timezone
 
 from . import anchors as anchors_mod
-from . import arxiv, canon, emailer, feed as feed_mod, guard, judge, questions, screen
+from . import arxiv, canon, feed as feed_mod, guard, judge, questions, screen
 from .config import DATA_DIR, Config, anchor_count_warning
 from .embed import Embedder
 from .llm import ModelClient, ModelError
@@ -130,9 +130,6 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
         "papers": [],
         "screened": [],
         "problems": problems,
-        # No address here: data/*.json is committed to a public repository by
-        # the daily workflow.
-        "email": {"sent": False, "error": None, "dry_run": dry_run},
     }
 
     if not unseen:
@@ -332,32 +329,17 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
     result["feed"] = {"entries": n_entries, "path": str(cfg.feed_path.relative_to(DATA_DIR.parent))}
 
     if dry_run:
-        log.info("dry run: no email sent, %d paper(s) written, %d feed entries",
+        log.info("dry run: %d paper(s) written, %d feed entries, nothing marked seen",
                  len(result["papers"]), n_entries)
         write_output(cfg, result, day)
         return result
 
-    # 11. email, if a recipient is configured. Optional: the feed above has
-    # already delivered the day, so a missing or failing email is not fatal to
-    # anything but the email itself.
-    if cfg.email_to():
-        try:
-            emailer.send(result, cfg)
-            result["email"]["sent"] = True
-        except emailer.EmailError as exc:
-            result["email"]["error"] = str(exc)
-            problems.append(f"email not sent: {exc}")
-            log.error("email not sent: %s", exc)
-    else:
-        log.info("no FEED_EMAIL_TO configured; delivered via the feed only")
-
-    # Seen-marking follows the feed, not the email: by this point every paper
-    # is already in data/feed.xml, so it must not be shown again regardless of
-    # whether the optional email succeeded.
+    # By this point every paper is already in data/feed.xml, so it must not
+    # be shown again.
     seen.mark([p["arxiv_id"] for p in result["papers"]], day)
     seen.save()
 
-    write_output(cfg, result, day)          # rewrite with the delivery outcome
+    write_output(cfg, result, day)          # rewrite now that "feed" is set
     return result
 
 
