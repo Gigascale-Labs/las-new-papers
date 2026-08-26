@@ -45,8 +45,11 @@ Write everything in Simplified Technical English:
   method or caveat. The detail comes after it, never instead of it.
 - Short sentences. One idea in each. If a sentence needs a comma to hold two
   claims together, make it two sentences.
-- Active voice. Present tense. "The model treats agents as consumers", not
-  "agents were treated as consumers".
+- Active voice. Present tense. Never the passive. "The model treats agents as
+  consumers", not "agents were treated as consumers"; "measures a 12-point
+  drop", not "a 12-point drop was measured". Dropping a weak opener must not
+  cost the active voice: cut "This paper shows that X does Y" to "X does Y",
+  never to "Y is done by X".
 - The same word for the same thing, every time. Do not vary wording for
   interest. If the paper says "agent", say "agent" throughout, not "actor"
   then "participant".
