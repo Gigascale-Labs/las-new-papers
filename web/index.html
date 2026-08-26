@@ -144,9 +144,11 @@
 
   <header>
     <div class="kicker">
-      <span>Daily</span><span class="sep">/</span>
-      <span>large agent systems</span><span class="sep">/</span>
+      <span>Daily arXiv scrape for large agent systems papers</span>
+      <span class="sep">|</span>
       <span id="day-label">loading</span>
+      <span class="sep">|</span>
+      <span>arXiv does not publish at weekends</span>
     </div>
     <h1>arXiv open questions</h1>
     <p class="standfirst">
@@ -309,7 +311,8 @@ const spy = new IntersectionObserver(entries => {
     `<li><a href="#${esc(d)}" data-day="${esc(d)}">${esc(d)}<span class="n"></span></a></li>`
   ).join("")}</ul>`;
   main.innerHTML = days.map(daySkeleton).join("");
-  label.textContent = `${days.length} day${days.length === 1 ? "" : "s"} to ${days[0]}`;
+  // The oldest day on file: where the archive begins, not where it ends.
+  label.textContent = `Dataset starts ${days[days.length - 1]}`;
 
   const sections = [...main.querySelectorAll("section.day")];
   await Promise.all(sections.slice(0, EAGER_DAYS).map(loadDay));
