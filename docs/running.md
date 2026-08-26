@@ -9,18 +9,7 @@ it worked.
 Go to https://openrouter.ai/keys. Make an API key. Copy it.
 The key starts with `sk-or-v1-`.
 
-**Step 2. Skip this step unless you want email too.**
-Every run writes an RSS/Atom feed. Reading it needs no password and no
-account. If a feed reader is enough for you, skip to Step 3.
-
-To also get a daily email, go to https://myaccount.google.com/apppasswords.
-Make an app password. Copy the 16 letters. Your normal Gmail password will not
-work here, even with two-factor authentication on -- an app password is a
-separate credential Google issues for exactly this. If you use a different
-email provider, change `smtp_host`, `smtp_port` and `smtp_user` in
-`config.yaml` instead.
-
-**Step 3. Skip Lakera.**
+**Step 2. Skip Lakera.**
 Lakera is off. `config.yaml` sets `guard.enabled: false`. You need no Lakera
 account and no Lakera key. The structural defences still run on every paper.
 They need no key and no network. See README, "Why Lakera is off".
@@ -30,14 +19,14 @@ To turn it on: get a key at https://platform.lakera.ai, set
 
 ## Part 2. Set it up on your computer
 
-**Step 4. Get the code.**
+**Step 3. Get the code.**
 
 ```bash
 git clone https://github.com/one-2/las-new-papers.git
 cd las-new-papers
 ```
 
-**Step 5. Make a Python environment.**
+**Step 4. Make a Python environment.**
 
 ```bash
 python3 -m venv .venv
@@ -46,7 +35,7 @@ source .venv/bin/activate
 
 Do this once. After that, run `source .venv/bin/activate` in each new terminal.
 
-**Step 6. Install the code it needs.**
+**Step 5. Install the code it needs.**
 
 ```bash
 pip install -r requirements.txt
@@ -54,25 +43,16 @@ pip install -r requirements.txt
 
 This downloads about 2.5GB. Most of it is PyTorch. It takes a few minutes.
 
-**Step 7. Put the keys in your terminal.**
+**Step 6. Put the key in your terminal.**
 
 ```bash
 export OPENROUTER_API_KEY=sk-or-v1-...
-
-# Only if you did Step 2 and want email too:
-export SMTP_PASSWORD=your-16-letter-app-password
-export FEED_EMAIL_TO=you@example.com          # where the email goes
-export SMTP_USER=you@example.com              # the account that sends it
 ```
 
-These last until you close the terminal. To keep them, put the lines in
+This lasts until you close the terminal. To keep it, put the line in
 `~/.bashrc` or `~/.zshrc`.
 
-Your address is an environment variable, not a config setting. This repository
-is public, and an address in a public file is scraped. `config.yaml` refuses to
-load if it finds one.
-
-**Step 8. Check the settings.**
+**Step 7. Check the settings.**
 Open `config.yaml`. Check one thing:
 
 - `profile` describes you, in about 300 words. It decides which papers count
@@ -81,21 +61,25 @@ Open `config.yaml`. Check one thing:
 
 ## Part 3. First run
 
-**Step 9. Run it without sending email.**
+**Step 8. Run a preview.**
 
 ```bash
 python main.py --dry-run
 ```
 
+`--dry-run` does the full run and writes the day's file, but marks no paper
+as seen. Run it again later on the same day and you get the same papers back,
+not the next unseen batch -- useful while you are still checking the setup.
+
 The first run downloads the embedding model, about 440MB. It also embeds the 33
 anchor papers. Both are saved, so this only happens once.
 The run takes about 10 minutes. Most of that is embedding papers on your CPU.
 
-**Step 10. Check the result.**
+**Step 9. Check the result.**
 The run prints a summary line. It looks like this:
 
 ```
-2026-08-20: 185 fetched, 10 kept, 24 questions, email skipped (dry run)
+2026-08-20: 185 fetched, 185 screened, 14 relevant, 10 kept, 24 questions, feed 1 entries
 ```
 
 Then read the file it wrote:
@@ -107,27 +91,36 @@ python -c "import json;d=json.load(open('data/latest.json'));[print(p['title']) 
 If you see ten paper titles, the system works.
 If you see lines starting with `problem:`, read them. They say what failed.
 
-**Step 11. Run it for real.**
+**Step 10. Run it for real.**
 
 ```bash
 python main.py
 ```
 
-This writes `data/feed.xml`. Point a feed reader at the file's path on your
-computer to check it now, before it is anywhere public:
+This marks the day's papers seen and writes `data/feed.xml`. Point a feed
+reader at the file's path on your computer to check it now, before it is
+anywhere public:
 
 ```
 file:///absolute/path/to/las-new-papers/data/feed.xml
 ```
 
-If you did Step 2, check your inbox too. Part 1 of the email is all the
-questions. Part 2 is the papers. If the email does not arrive, the feed and
-the data file are still saved -- the error is in the terminal output, and it
-does not stop the run.
+To see the page, serve the repository root over HTTP and open
+`web/index.html` -- its `/data/...` paths need that, and a plain `file://`
+open will not resolve them:
+
+```bash
+python -m http.server 8000               # from the repository root
+# then open http://localhost:8000/web/
+```
+
+Each paper on the page carries its title, authors, a one-sentence summary,
+and its open questions quoted underneath -- one list of papers, no parts, no
+label on a question. The feed shows the same content.
 
 ## Part 4. Check the filter works
 
-**Step 12. Run the leave-one-out test.**
+**Step 11. Run the leave-one-out test.**
 
 ```bash
 python -m tests.leave_one_out
@@ -139,7 +132,7 @@ It costs nothing and makes no model calls.
 
 If it fails: add more anchors first, then change the embedding model.
 
-**Step 13. Run the unit tests.**
+**Step 12. Run the unit tests.**
 
 ```bash
 python -m unittest discover tests
@@ -149,39 +142,32 @@ python -m unittest discover tests
 
 ## Part 5. Make it daily
 
-**Step 14. Put the keys in GitHub.**
+**Step 13. Put the key in GitHub.**
 Go to your repository on GitHub.
 Open Settings, then Secrets and variables, then Actions.
-Add these secrets, with these exact names:
+Add this secret, with this exact name:
 
 - `OPENROUTER_API_KEY`
 
-Add these three only for email too:
+`LAKERA_GUARD_API_KEY` is read only if you set `guard.enabled: true` in
+`config.yaml`.
 
-- `FEED_EMAIL_TO` -- where the email goes
-- `SMTP_USER` -- the account that sends it
-- `SMTP_PASSWORD`
-
-The two addresses are secrets, not config. They never appear in the repository
-or in the data the workflow commits.
-
-**Step 15. Turn the workflow on.**
+**Step 14. Turn the workflow on.**
 Open the Actions tab. Enable workflows if GitHub asks.
 The workflow is `Daily arXiv open-questions feed`. It runs at 07:23 UTC each
 day.
 
-**Step 16. Test the workflow by hand.**
+**Step 15. Test the workflow by hand.**
 In the Actions tab, open the workflow. Press "Run workflow".
 Set `dry_run` to true for the first test. Press the green button.
 Watch it run. It takes a few minutes.
 If it is green, do it again with `dry_run` false. Check `data/feed.xml` in the
-repository -- it should show today's date. If you did Step 2, check your
-inbox too.
+repository -- it should show today's date.
 
 After this, the system runs by itself. It commits each day's data back to the
 repository.
 
-**Step 17. Subscribe to the feed.**
+**Step 16. Subscribe to the feed.**
 The feed's URL, with no setup:
 
 ```
@@ -201,25 +187,30 @@ For the correct content type: repo Settings -> Pages -> Deploy from a branch
 https://<your-username>.github.io/las-new-papers/data/feed.xml
 ```
 
+Once Pages is on, the page is also served, at
+`https://<your-username>.github.io/las-new-papers/web/`.
+
 ## Part 6. Normal use
 
-**Step 18. Read the feed, or the email, each morning.**
-Part 1 is the list of questions. Read that first. `approachable` means you
-could start on it within a few weeks, with public data or a simulation you
-write yourself.
+**Step 17. Read the page, or the feed, each morning.**
+Both show the same list: each paper with its title, a one-sentence summary,
+and the open questions it leaves, quoted underneath with no label. Read the
+questions. None of them is marked "approachable" for you any more -- that
+judgement is still made and saved to the day's JSON file, but it is no longer
+shown on either channel.
 
-**Step 19. Judge it after seven days.**
+**Step 18. Judge it after seven days.**
 The whole system has one test: at least one question a week worth working on.
 If it fails, change `profile` in `config.yaml` first. Change the prompts
 second.
 
-**Step 20. Grow the corpus from the shortlist.**
+**Step 19. Grow the corpus from the shortlist.**
 `data/canon/candidates.csv` holds every paper the screen read, not just
-the ten that were emailed. Sort it by `significance` and `novelty`. The first
+the ten kept each day. Sort it by `significance` and `novelty`. The first
 15 columns are the canon's own columns, in its order, so a paper you want to
 keep is a copy across, not a re-tagging job.
 
-**Step 21. Change the anchors when your interests change.**
+**Step 20. Change the anchors when your interests change.**
 Edit the `anchors` list in `config.yaml`. Add or remove arXiv IDs.
 Nothing else to do. The system rebuilds the vectors on the next run.
 
@@ -256,10 +247,9 @@ python main.py --dry-run
 | What you see | What it means | What to do |
 |---|---|---|
 | `config error: ...` | `config.yaml` is wrong | The message names the key. Fix that key. |
-| `Could not resolve authentication method` | No model API key | Do step 7 again in this terminal. |
-| `SMTP_PASSWORD is not set` | No email configured, or an incomplete one | Normal if you skipped Step 2 -- the feed still delivers. If you want email, do Step 7 again with an app password, not your login password. |
+| `Could not resolve authentication method` | No model API key | Do step 6 again in this terminal. |
 | `Lakera screening did not run` | `guard.enabled: true` with no key | Set `guard.enabled: false`, or add the key. The other defences run either way. |
 | `arXiv did not answer after 3 attempts` | arXiv is down | Wait. Run it again later with `--date` set to that day. |
 | `no unseen papers found` | You already ran that day | Normal. Nothing was lost. |
-| `question extraction failed` for one paper | One model call failed twice | Normal. The other papers are still sent. |
+| `question extraction failed` for one paper | One model call failed twice | Normal. The other papers still appear. |
 | Every paper says `withheld from the model calls` | Lakera is flagging everything | Set `guard.enabled: false`. That is the default. |

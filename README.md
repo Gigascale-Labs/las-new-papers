@@ -1,9 +1,9 @@
 # las-new-papers
 
-A daily digest of new arXiv papers close to papers you already value, the
-open questions each one leaves, and whether you could work on them. Delivered
-as an RSS/Atom feed — no account, no password — and, if you set it up, an
-email too.
+A daily digest of new arXiv papers close to papers you already value, and the
+open questions each one leaves. Delivered as a page
+([`web/index.html`](web/index.html)) and an RSS/Atom feed
+([`data/feed.xml`](data/feed.xml)) — no account, no password, for either.
 
 The repository is standalone, like
 [`las-usage-stats`](https://github.com/Gigascale-Labs/las-usage-stats): it
@@ -18,16 +18,15 @@ Built to [`docs/spec.md`](docs/spec.md). To run it, follow
 
 ```
 arXiv, 7 lists, ~200-500 new papers
-  drop papers already sent
+  drop papers already shown
   embed title + abstract locally      free, on your CPU
   rank against 20 anchor papers       ONLY to cut a big day to 200
   SCREEN all of them, cheap model     relevant? yes/no, in batches of 25
   JUDGE what passed, strong model     significance 1-5, novelty 1-5
   keep the top 10
   ONE model call per paper            open questions, marked approachable or not
-  write data/feed.xml                 always -- the no-password channel
-  write data/YYYY-MM-DD.json
-  send an email                       only if FEED_EMAIL_TO is set
+  write data/feed.xml                 rebuilt fresh every run -- the RSS/Atom feed
+  write data/YYYY-MM-DD.json          the page (web/index.html) reads this
 ```
 
 US$0.24 a day in token cost. Measured on a live run over 155 papers: $0.15 to
@@ -68,15 +67,8 @@ pip install -r requirements.txt          # 2.5GB, mostly PyTorch
 export OPENROUTER_API_KEY=sk-or-v1-...      # model calls, any provider OpenRouter lists
 # LAKERA_GUARD_API_KEY is not needed. Lakera is off by default.
 
-# Email is optional. Every run writes data/feed.xml, an RSS/Atom feed you can
-# read with no account and no password. Set these three only if you also want
-# a daily email:
-export SMTP_PASSWORD=...                 # Gmail app password, not your login password
-export FEED_EMAIL_TO=you@example.com     # where the email goes
-export SMTP_USER=you@example.com         # the account that sends it
-
-python main.py --dry-run                 # full run, writes the JSON, sends nothing
-python main.py                           # and send the email
+python main.py --dry-run                 # full run, writes the JSON, marks nothing seen
+python main.py                           # writes the JSON and rebuilds data/feed.xml, marks papers seen
 python main.py --date 2026-08-19         # read one past day
 python main.py --rebuild-anchors         # rebuild the anchor vectors
 
@@ -90,15 +82,27 @@ vectors. Both are cached.
 profile, the filter sizes, and the two model names. The anchor vectors rebuild
 themselves when the anchor list or the embedding model changes.
 
-**No email address is stored in this repository.** It is public, and an address
-in a public file is scraped. `FEED_EMAIL_TO`, `FEED_EMAIL_FROM` and `SMTP_USER`
-come from the environment. `config.yaml` refuses to load if it finds an
-address, and the committed data files do not record the recipient.
+To see the result, serve the repository root over HTTP -- the page's
+`/data/...` paths need that, and a plain `file://` open will not resolve them
+-- then open `web/index.html`:
 
-### Reading it without a password
+```bash
+python -m http.server 8000               # from the repository root
+# then open http://localhost:8000/web/
+```
 
-Every run writes `data/feed.xml`, an Atom feed of the last 60 days. No SMTP
-account, no app password, no 2FA to work around — a feed reader polls the URL.
+The page reads `data/latest.json` and the archived `data/YYYY-MM-DD.json`
+files directly, client-side -- no build step, no server-side code.
+
+### Reading it
+
+`web/index.html` is the page: one day of papers at a time, with a selector for
+any earlier day still in the archive. It reads the JSON files above and
+nothing else.
+
+Every run also writes `data/feed.xml`, an Atom feed of the last 60 days, for
+anyone who would rather subscribe than visit. No SMTP account, no app
+password, no 2FA to work around — a feed reader polls the URL.
 
 ```
 https://raw.githubusercontent.com/<owner>/<repo>/main/data/feed.xml
@@ -122,21 +126,16 @@ I could not get a clean HTTP measurement of GitHub Pages' `.xml` content type
 in the environment this was built in. Check it yourself once Pages is on:
 `curl -I <pages-url>/data/feed.xml`, and look at the `content-type` header.
 
-Email is now fully optional. Set `FEED_EMAIL_TO` (and `SMTP_USER`,
-`SMTP_PASSWORD`) only if you want a daily email in addition to the feed;
-leave them all unset for feed-only, and the run never attempts to send.
-
 ### Daily, without a machine of your own
 
 `.github/workflows/daily_feed.yml` runs at 07:23 UTC and commits that day's
 data, including the rebuilt feed. It needs one repository secret,
-`OPENROUTER_API_KEY`. Add `FEED_EMAIL_TO`, `SMTP_USER` and `SMTP_PASSWORD`
-only for email too. `LAKERA_GUARD_API_KEY` is read only if you set
+`OPENROUTER_API_KEY`. `LAKERA_GUARD_API_KEY` is read only if you set
 `guard.enabled: true`.
 
 The commit step runs even when the run failed. A run that wrote its JSON but
-delivered nothing on any enabled channel exits non-zero; a run with email
-unconfigured and a feed that wrote successfully is not a failure.
+rebuilt an empty feed exits non-zero; that day's archive is still committed so
+nothing is lost.
 
 ## What it writes
 
@@ -147,7 +146,7 @@ unconfigured and a feed that wrote successfully is not a failure.
 | `data/feed.xml` | An Atom feed of the last 60 days. No password needed to read it. |
 | `data/raw/YYYY-MM-DD.jsonl.gz` | Every paper scraped that day. ~120KB. |
 | `data/canon/candidates.csv` | Every screened paper ever seen, in the canon's schema, with the screen's yes/no. |
-| `data/seen.json` | IDs already sent. Nothing is sent twice. |
+| `data/seen.json` | IDs already shown. Nothing appears twice. |
 | `data/eval/leave-one-out.json` | The most recent filter evaluation. |
 | `data/ground-truth/` | A frozen copy of the human canon. |
 
@@ -179,10 +178,11 @@ large agent populations. The other 13 arXiv entries, and the 9 not on arXiv,
 stay in the canon but are not anchors.
 
 Every screened paper is appended to `data/canon/candidates.csv`, in the
-canon's column order. One file, not two. The ten that were emailed carry their
-six dimension tags and an `emailed` mark. The rest carry their
-similarity, rank and scores with the dimensions blank. Blank dimensions are
-normal in the canon.
+canon's column order. One file, not two. The ten kept each run carry their
+six dimension tags and an `emailed` mark -- the column keeps its name from
+when email was the delivery channel; it now marks the ten kept, nothing more.
+The rest carry their similarity, rank and scores with the dimensions blank.
+Blank dimensions are normal in the canon.
 
 This is the pool the canon grows from. Sort by `significance` and `novelty`,
 read what looks worth reading, and copy the row across — the first 15 columns
@@ -203,8 +203,8 @@ here.
 ## Defences against untrusted text
 
 An arXiv abstract is untrusted. Anyone who can submit a preprint writes one,
-and that text reaches two model calls, an HTML email, a CSV, and a JSON file
-the site reads. Three layers, in `arxiv_feed/guard.py`:
+and that text reaches two model calls, the RSS feed's HTML content, a CSV, and
+a JSON file the site reads. Three layers, in `arxiv_feed/guard.py`:
 
 1. **Structural. Always on, no key.** Invisible characters removed (zero-width,
    bidirectional overrides, and the Unicode Tags block, which hides
@@ -215,9 +215,9 @@ the site reads. Three layers, in `arxiv_feed/guard.py`:
    holds.
 2. **Lakera Guard. Off.** Screens the papers before any model call and
    withholds what it flags. Up to `screen_n` a day. A withheld paper stays in
-   the archive and is named in the email. It is off because arXiv is a trusted
-   source and the false-positive cost is higher than the attack risk. See
-   *Why Lakera is off* below.
+   the archive and is named in the feed's problems list. It is off because
+   arXiv is a trusted source and the false-positive cost is higher than the
+   attack risk. See *Why Lakera is off* below.
 3. **Keyword patterns. Always on, never blocking.**
 
 Layer 3 never blocks because this corpus can include papers about prompt
@@ -229,15 +229,14 @@ Each output is protected where it lands:
 
 | Output | Risk | Defence |
 |---|---|---|
-| HTML email | markup from a title or abstract | every field escaped |
+| The feed's HTML content | markup from a title or abstract | every field escaped |
 | `candidates.csv` | `=HYPERLINK(...)` in a title runs when Excel opens it | cells starting `= + - @` prefixed with `'` |
-| Email headers | a newline adding a header | CR/LF stripped, and rejected at config load |
 | Links | a forged ID becoming a `javascript:` href | IDs checked against arXiv's two real formats |
 | Model output | invented values or wrong shape | JSON schema, closed lists, IDs checked against the batch |
 
 `guard.on_error` sets what a Lakera outage means: `allow` (default, you still
-get the email) or `block` (withhold everything it could not screen). It applies
-only when `guard.enabled` is true.
+get the day's feed) or `block` (withhold everything it could not screen). It
+applies only when `guard.enabled` is true.
 
 ### Why Lakera is off
 
@@ -249,8 +248,8 @@ Measured against that low risk, the layer costs papers. On 2026-08-22 it
 blocked 19 of 155 screened papers. One of them was `2608.20231`, *Growth
 Without Us: Machine Consumers, Corporate Circularity*, flagged `prompt_attack`.
 That paper is the strongest on-theme paper in the archive and the control case
-in `docs/ranking-report.md`. The two papers that reached the digest instead
-were about ride-hailing dispatch and a lead service-line audit.
+in `docs/ranking-report.md`. The two papers kept in its place instead were
+about ride-hailing dispatch and a lead service-line audit.
 
 Layers 1 and 3 still run on every paper. They need no key and no network. They
 are the layers that hold.
@@ -262,10 +261,7 @@ Set `guard.enabled: true` in `config.yaml` to turn Lakera back on.
 - arXiv does not answer: 3 tries, 60 seconds apart.
 - The scoring call fails: fall back to the similarity ranking.
 - One paper's question call fails twice: drop that paper, keep the rest, name
-  it in the email and the feed.
-- The email fails (if configured at all): report it as a problem, but the
-  feed has already delivered the day, so the papers are still marked seen and
-  the run still exits 0.
+  it in the feed's problems list.
 
 ## Tests
 
@@ -293,12 +289,8 @@ and every guard layer.
 ## Current state
 
 The model calls and the Lakera call have both run live. Lakera is now off; see
-*Why Lakera is off*. The email send has never run against a live SMTP server,
-because this environment has no password for one. It is written against the
-current API and tested with a stub.
-
-Everything else has run against live data: arXiv, embedding, the anchor store,
-the filter, and the leave-one-out evaluation.
+*Why Lakera is off*. Everything has run against live data: arXiv, embedding,
+the anchor store, the filter, and the leave-one-out evaluation.
 
 Volume is lower than the spec's 300-600 a day. These seven lists gave 185
 papers on 2026-08-20. To widen the net, add categories (`cs.CY`, `cs.GT`,
@@ -307,8 +299,8 @@ papers on 2026-08-20. To widen the net, add categories (`cs.CY`, `cs.GT`,
 `data/feed.xml` is checked as well-formed XML (parsed with
 `xml.etree.ElementTree`, 6 unit tests) and validated in a dry run to contain
 the expected entries. It has not been opened in a real feed reader, and
-GitHub Pages' `.xml` content type has not been measured — see "Reading it
-without a password" above for what to check once Pages is on.
+GitHub Pages' `.xml` content type has not been measured — see "Reading it"
+above for what to check once Pages is on.
 
 ## Layout
 
@@ -325,8 +317,11 @@ arxiv_feed/
   canon.py                  the site canon's schema, mirrored
   guard.py                  sanitising, fencing, Lakera, output protection
   llm.py                    structured output, one retry
-  seen.py                   never send the same paper twice
-  emailer.py                part 1 (questions), part 2 (papers)
+  seen.py                   never show the same paper twice
+  render.py                 one HTML fragment per day: papers, each with its
+                             questions quoted underneath. Feeds data/feed.xml;
+                             web/index.html renders the same JSON client-side,
+                             in the same shape
   feed.py                   rebuilds data/feed.xml from the day files on disk
   run.py                    the day, in order
 scrapers/

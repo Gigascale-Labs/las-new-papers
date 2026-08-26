@@ -6,23 +6,25 @@ Written in simplified technical English.
 
 ## 1. Purpose
 
-The system sends you one email each day.
-The email lists new arXiv papers that are close to papers you already value.
-For each paper, the email lists the open questions in that paper.
-For each question, the email says if you can work on it.
+The system publishes one update each day: a page, and an entry in an RSS/Atom
+feed.
+Both list new arXiv papers that are close to papers you already value.
+For each paper, the update lists the open questions in that paper.
+The system also judges, for each question, whether you could work on it, and
+saves that judgement to the day's data file.
 
 ## 2. Daily flow
 
 The system gets the new papers from arXiv.
-The system removes papers it has already sent.
+The system removes papers it has already shown.
 The system embeds the title and abstract of each new paper.
 The system compares each paper to your anchor papers. It uses cosine similarity.
 The system keeps the 40 closest papers. It also keeps 5 random papers from the next 100.
 One model call scores these 45 papers for significance and novelty.
 The system keeps the top 10 papers.
 One model call per paper extracts the open questions.
-The system writes the email and sends it.
-The system saves the results to a file.
+The system saves the results to a file, then rebuilds the page's data and the
+RSS/Atom feed from it.
 
 Step 5 keeps the 5 random papers on purpose. Similarity finds papers like the
 ones you know. It hides new topics. The random papers protect against this.
@@ -51,33 +53,40 @@ The system reads one config file:
 | top_n | papers kept after scoring | 10 |
 | embed_model | embedding model | allenai/specter2 |
 | model | model for scoring and questions | claude-opus-5 |
-| email_to | where to send the email | one address |
+| feed.base_url | where the page and feed are served from | a URL |
 
-The system reads two secrets from the environment.
-One secret is the model API key.
-One secret is the email password or token.
+The system reads one secret from the environment.
+The secret is the model API key.
 
 ## 5. Output
 
-The system sends one email with two parts.
+The system publishes one update each day: the page, and an entry in the
+RSS/Atom feed. Both are built from the same day's data and show it the same
+way.
 
-Part 1 lists all questions from all papers in one list.
-
-Part 2 lists each paper with these fields:
+The update lists each kept paper with these fields:
 
 - title, authors, arXiv ID, and link;
-- similarity score, and the name of the nearest anchor paper;
+- the name of the nearest anchor paper, as a bearing to why it was picked;
+- one sentence that says what the paper does;
+- the open questions, quoted plainly.
+
+The nearest anchor is important. It shows you why the system picked the
+paper.
+
+The system also writes the full day's data to `data/YYYY-MM-DD.json`. This
+adds, for every paper the update does not have room to justify:
+
+- the similarity score;
 - a mark if the paper came from the random slice;
 - score for significance, from 1 to 5;
 - score for novelty, from 1 to 5;
-- one sentence that says what the paper does;
-- the open questions;
 - for each question, one label: approachable or not approachable;
 - for each question, one short reason.
 
-The nearest anchor is important. It shows you why the system picked the paper.
-
-The system also writes the same data to `data/YYYY-MM-DD.json`.
+Nothing in this second list appears on the page or in the feed. It is a
+working record, kept for audit, not shown to you as a justification for a
+paper's presence.
 
 ## 6. Parts to build
 
@@ -87,7 +96,7 @@ Embedding step. Load a local model. Embed the title and abstract. Use sentence-t
 Anchor store. Embed the anchors. Save the vectors as a .npy file. Rebuild when the list changes.
 Similarity filter. Use a numpy dot product on normalised vectors. Sort. Take the top 40. Add 5 random papers.
 Model calls with tool use. Use the LiteLLM merge, or copy the method from the ArxivDigest-extra fork.
-Seen list. Save the arXiv IDs already sent. Skip them.
+Seen list. Save the arXiv IDs already shown. Skip them.
 
 Do not build a vector database. The system holds about 500 vectors a day. A numpy array is enough.
 Do not build a RAG system. This is a filter, not a question-answering system.
@@ -116,19 +125,19 @@ Use the Batch API for call 1 if you want to halve that cost. The job is not urge
 ## 9. Error rules
 
 If arXiv does not answer, wait 60 seconds. Try three times in total.
-If one paper fails in call 2, keep the other papers. Mark the failure in the email.
+If one paper fails in call 2, keep the other papers. Mark the failure in the day's data.
 If the model returns bad JSON, ask once more. Then skip that paper.
-If the email fails to send, keep the JSON file. Write the error to the log.
+If the feed rebuild fails, keep the JSON file already written. Write the error to the log.
 Never stop the whole run because one paper failed.
 
 ## 10. Done when
 
-`python main.py --dry-run` writes a JSON file and sends no email.
-The email arrives each day without manual work.
-The system never sends the same paper twice.
-A run with a broken paper still sends the email.
+`python main.py --dry-run` writes a JSON file and marks nothing as seen.
+The page and the feed update each day without manual work.
+The system never shows the same paper twice.
+A run with a broken paper still updates the page and the feed.
 Leave-one-out test. Remove one anchor from the set. Run the filter on the day that anchor appeared. The system must still rank that paper in the top 40. Repeat for 10 anchors. At least 8 must pass.
-You read seven days of emails. At least one question per week is good enough to work on.
+You read seven days of updates. At least one question per week is good enough to work on.
 
 Test 5 checks the filter. Test 6 checks the whole system.
 If test 5 fails, add more anchors, or change the embedding model.
@@ -136,7 +145,7 @@ If test 6 fails, change the profile first. Then change the prompts.
 
 ## 11. Not in scope
 
-No web interface. The email is the interface.
+No email delivery. The page and the feed are the interface.
 No full PDF reading. Abstracts only.
 No vector database. Files are enough.
 No other users. This tool is for one person.
