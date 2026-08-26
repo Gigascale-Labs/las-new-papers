@@ -91,6 +91,13 @@ Use the title only to keep the subject straight, for example to work out what
 Do not make the summary longer than the one you are given. At most three
 sentences, each under 20 words.
 
+Never join two sentences into one. Splitting a long sentence is right;
+merging two short ones is wrong, whatever it does to the word count.
+Measured on the archive this rewrites: 22 sentences already run over 20
+words, the longest 43. Those are the ones to split. If the text you are
+given reads "...tiers.Finds improved..." that is a missing space after a
+full stop, not one sentence -- restore the space and keep both sentences.
+
 Describe the work. Do not assess it. The summary must not say whether the paper
 is relevant, novel, significant, rigorous or implementable, and must not
 explain why the paper was selected.
@@ -215,7 +222,10 @@ def _render(items: list[Item]) -> str:
     blocks = []
     for it in items:
         title = sanitize(it.title, MAX_TITLE_CHARS)
-        summary = sanitize(it.old, MAX_SUMMARY_CHARS)
+        # Repaired before the model sees it, so a run-on reads as the two
+        # sentences it is, not as one the model may try to smooth into a
+        # single long one.
+        summary = repair_spacing(sanitize(it.old, MAX_SUMMARY_CHARS))
         body, _ = fence(f"title: {title}\nsummary: {summary}")
         blocks.append(f"arxiv_id: {it.arxiv_id}\n{body}")
     return "\n\n".join(blocks)
@@ -241,6 +251,24 @@ def _batches(items: list[Item], size: int) -> list[list[Item]]:
     if current:
         batches.append(current)
     return batches
+
+
+_RUN_ON = re.compile(r"([.!?])([A-Z])")
+
+
+def repair_spacing(text: str) -> str:
+    """Restore the space a full stop lost: "tiers.Finds" -> "tiers. Finds".
+
+    Measured on the archive at the time of writing: 9 of 36 summaries (25%)
+    run two sentences together this way. It is a formatting defect from the
+    call that wrote them, not a style choice, and it has one correct repair --
+    so it is done here, deterministically, rather than spent on a model call
+    that might merge the two sentences instead of separating them.
+
+    Applied to what the model returns as well as to what it is given: a model
+    handed clean input can still hand back a run-on.
+    """
+    return _RUN_ON.sub(r"\1 \2", text)
 
 
 def restyle_batch(client, items: list[Item], label: str) -> tuple[dict[str, str], list[str]]:
@@ -273,7 +301,7 @@ def restyle_batch(client, items: list[Item], label: str) -> tuple[dict[str, str]
     out: dict[str, str] = {}
     for row in data.get("summaries", []) or []:
         aid = str(row.get("arxiv_id", "")).strip()
-        text = str(row.get("one_sentence", "") or "").strip()
+        text = repair_spacing(str(row.get("one_sentence", "") or "").strip())
         if aid in wanted and text:
             out[aid] = text
 

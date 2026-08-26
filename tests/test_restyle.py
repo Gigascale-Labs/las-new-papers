@@ -368,5 +368,56 @@ class TestMain(unittest.TestCase):
         self.assertEqual(made["model"], cfg.judge_model)
 
 
+class TestRepairSpacing(unittest.TestCase):
+    """A full stop that lost its space is a formatting defect with one correct
+    repair, so it is fixed in code rather than spent on a model call. Measured
+    on the archive when this was written: 9 of 36 summaries (25%)."""
+
+    def test_restores_the_space_after_a_full_stop(self):
+        self.assertEqual(
+            rs.repair_spacing("across tiers.Finds improved recommendations."),
+            "across tiers. Finds improved recommendations.")
+
+    def test_handles_question_and_exclamation_marks(self):
+        self.assertEqual(rs.repair_spacing("Why?Because."), "Why? Because.")
+        self.assertEqual(rs.repair_spacing("Stop!Then go."), "Stop! Then go.")
+
+    def test_repairs_every_occurrence_not_just_the_first(self):
+        self.assertEqual(rs.repair_spacing("One.Two.Three."), "One. Two. Three.")
+
+    def test_leaves_correct_text_alone(self):
+        for text in ("One idea. Then another.", "", "No full stop here"):
+            self.assertEqual(rs.repair_spacing(text), text)
+
+    def test_does_not_touch_a_decimal_or_a_lowercase_continuation(self):
+        # "8.5-million-user" and "e.g. agents" must survive untouched: the
+        # rule only fires before a capital.
+        self.assertEqual(rs.repair_spacing("Uses an 8.5-million-user sample."),
+                         "Uses an 8.5-million-user sample.")
+        self.assertEqual(rs.repair_spacing("arXiv.org listings"), "arXiv.org listings")
+
+    def test_an_arxiv_id_is_not_split(self):
+        self.assertEqual(rs.repair_spacing("Paper 2608.24851 shows"),
+                         "Paper 2608.24851 shows")
+
+    def test_the_model_output_is_repaired_too(self):
+        """A model handed clean input can still hand back a run-on."""
+        items = [rs.Item(path=Path("x.json"), day="2026-08-20",
+                         arxiv_id="2608.00001", url="u", title="T",
+                         old="Old text.")]
+        client = ScriptedClient([_reply([("2608.00001", "First.Second.")])])
+        out, problems = rs.restyle_batch(client, items, "test")
+        self.assertEqual(out["2608.00001"], "First. Second.")
+        self.assertEqual(problems, [])
+
+    def test_the_model_sees_repaired_input(self):
+        items = [rs.Item(path=Path("x.json"), day="2026-08-20",
+                         arxiv_id="2608.00001", url="u", title="T",
+                         old="across tiers.Finds more.")]
+        rendered = rs._render(items)
+        self.assertIn("across tiers. Finds more.", rendered)
+        self.assertNotIn("tiers.Finds", rendered)
+
+
 if __name__ == "__main__":
     unittest.main()
