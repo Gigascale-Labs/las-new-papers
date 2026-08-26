@@ -66,19 +66,35 @@ class Config:
         return int(self.feed.get("max_entries", 60))
 
     @property
-    def feed_url(self) -> str:
-        """Where data/feed.xml is fetchable, once this repository serves it.
+    def feed_site_url(self) -> str:
+        """Where a reader reads these days as a page.
 
-        Defaults to raw.githubusercontent.com, which needs no setup but sends
-        the wrong Content-Type for a feed (measured: text/plain, not xml). Set
-        feed.base_url in config.yaml to a GitHub Pages URL once Pages is
-        enabled, for the correct type -- see README.
+        Every entry id is built as `{site_url}#{date}`, and the papers page
+        gives each day section that bare date as its element id -- so a link
+        followed out of a feed reader lands on its own day. This is the feed's
+        alternate link, not the feed's own address; see feed_url for that.
         """
-        base = str(
-            self.feed.get("base_url")
-            or "https://raw.githubusercontent.com/Gigascale-Labs/las-new-papers/main"
+        return str(
+            self.feed.get("site_url") or "https://largeagentsystems.org/papers"
         ).rstrip("/")
-        return f"{base}/data/feed.xml"
+
+    @property
+    def feed_url(self) -> str:
+        """Where this feed is fetchable -- its own canonical address.
+
+        `self_url` names it outright. `base_url` is the older spelling, kept
+        working: it points at whatever serves this repository's data/
+        directory, and the feed sits inside it. Neither should be
+        raw.githubusercontent.com in production -- that host sends
+        `text/plain` for .xml, which the README notes as a defect.
+        """
+        explicit = self.feed.get("self_url")
+        if explicit:
+            return str(explicit).rstrip("/")
+        base = self.feed.get("base_url")
+        if base:
+            return f"{str(base).rstrip('/')}/data/feed.xml"
+        return "https://largeagentsystems.org/papers/feed.xml"
 
     def output_path(self, day: str) -> Path:
         return DATA_DIR / f"{day}.json"

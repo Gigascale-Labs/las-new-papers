@@ -223,5 +223,13 @@ guard:
 # Switch to the first once Pages is on.
 # ---------------------------------------------------------------------------
 feed:
-  base_url: https://raw.githubusercontent.com/Gigascale-Labs/las-new-papers/main
+  # Where a reader reads these days as a page. Every entry link is built as
+  # "<site_url>#<date>", and that page gives each day section the bare date
+  # as its element id, so a link followed out of a feed reader lands on its
+  # own day.
+  site_url: https://largeagentsystems.org/papers
+  # This feed's own address. largeagentsystems.org serves data/feed.xml at
+  # this path, so the file generated here is the file readers subscribe to --
+  # nothing downstream rebuilds it.
+  self_url: https://largeagentsystems.org/papers/feed.xml
   max_entries: 60    # about two months of daily runs

@@ -141,7 +141,7 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
         # arXiv's own Friday-to-Sunday gap, every week.
         write_output(cfg, result, day)
         n_entries = feed_mod.rebuild(
-            DATA_DIR, cfg.feed_path, cfg.feed_url, cfg.feed_url, result["generated_at"],
+            DATA_DIR, cfg.feed_path, cfg.feed_site_url, cfg.feed_url, result["generated_at"],
             max_entries=cfg.feed_max_entries,
         )
         result["feed"] = {"entries": n_entries,
@@ -324,7 +324,7 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
     # password, no account: this is the channel that needs neither. Rebuilt on
     # a dry run too, so --dry-run lets you inspect data/feed.xml locally.
     n_entries = feed_mod.rebuild(
-        DATA_DIR, cfg.feed_path, cfg.feed_url, cfg.feed_url, result["generated_at"],
+        DATA_DIR, cfg.feed_path, cfg.feed_site_url, cfg.feed_url, result["generated_at"],
         max_entries=cfg.feed_max_entries,
     )
     result["feed"] = {"entries": n_entries, "path": str(cfg.feed_path.relative_to(DATA_DIR.parent))}
