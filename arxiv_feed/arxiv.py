@@ -2,11 +2,20 @@
 
 Uses the public Atom API. No key needed. arXiv asks for three seconds between
 requests, and `_MIN_INTERVAL` enforces that.
+
+That spacing is not the only limit in practice. This runs on GitHub Actions,
+whose runner IPs are shared across many unrelated workflows; arXiv rate
+limited two separate runs within the same hour (2026-08-26), each time on the
+very first request of a fresh query, well after the last request and with
+_MIN_INTERVAL respected throughout. A 429 there is evidence of load on the
+shared IP, not of this client misbehaving, so it gets its own longer,
+exponential backoff -- see `_retry_wait`.
 """
 
 from __future__ import annotations
 
 import logging
+import random
 import re
 import time
 import xml.etree.ElementTree as ET
@@ -20,13 +29,21 @@ log = logging.getLogger(__name__)
 API = "https://export.arxiv.org/api/query"
 _NS = {"atom": "http://www.w3.org/2005/Atom", "arxiv": "http://arxiv.org/schemas/atom"}
 
+# Identifies this tool to arXiv, as their API etiquette asks -- no contact
+# address: that would send a personal detail to a third-party service for no
+# functional benefit here.
+_USER_AGENT = "las-new-papers/1.0 (+https://github.com/Gigascale-Labs/las-new-papers)"
+
 _MIN_INTERVAL = 3.0          # arXiv's requested politeness delay, seconds
 _PAGE_SIZE = 100
 _MAX_PAGES = 20              # 2,000 papers/day ceiling; far above the ~600 expected
 
-# If arXiv does not answer: wait 60 seconds, try three times in total.
-_ATTEMPTS = 3
-_RETRY_WAIT = 60.0
+# If arXiv does not answer: five attempts total, so a rate limit's backoff
+# (see _retry_wait) has room to actually grow before giving up.
+_ATTEMPTS = 5
+_RETRY_WAIT = 60.0                # a non-429 error: same fixed wait as before
+_RATE_LIMIT_BASE_WAIT = 30.0      # a 429 with no Retry-After: 30s, 60s, 120s, 240s
+_RATE_LIMIT_MAX_WAIT = 300.0      # ...capped at 5 minutes, honouring Retry-After up to here too
 
 _last_request = 0.0
 
@@ -88,6 +105,28 @@ def is_valid_id(arxiv_id: str) -> bool:
     return bool(_VALID_ID.match(arxiv_id or ""))
 
 
+def _retry_wait(exc: Exception, attempt: int) -> float:
+    """How long to sleep before the next attempt.
+
+    A 429 gets the server's own Retry-After if it sent one; otherwise an
+    exponential backoff that grows well past the default fixed wait, since a
+    rate limit on a shared IP can take minutes to clear, not seconds. Every
+    other error (a timeout, a dropped connection) keeps the original,
+    shorter fixed wait -- there is no evidence those need more.
+    """
+    response = getattr(exc, "response", None)
+    if response is not None and response.status_code == 429:
+        retry_after = response.headers.get("Retry-After")
+        if retry_after:
+            try:
+                return min(float(retry_after), _RATE_LIMIT_MAX_WAIT)
+            except ValueError:
+                pass
+        base = _RATE_LIMIT_BASE_WAIT * (2 ** (attempt - 1))
+        return min(base * random.uniform(0.85, 1.15), _RATE_LIMIT_MAX_WAIT)
+    return _RETRY_WAIT
+
+
 def _get(params: dict) -> str:
     """One API call, with the retry rule and the politeness delay."""
     global _last_request
@@ -98,7 +137,8 @@ def _get(params: dict) -> str:
         if wait > 0:
             time.sleep(wait)
         try:
-            resp = requests.get(API, params=params, timeout=60)
+            resp = requests.get(API, params=params, timeout=60,
+                                headers={"User-Agent": _USER_AGENT})
             _last_request = time.monotonic()
             resp.raise_for_status()
             return resp.text
@@ -107,7 +147,7 @@ def _get(params: dict) -> str:
             last_error = exc
             log.warning("arXiv attempt %d/%d failed: %s", attempt, _ATTEMPTS, exc)
             if attempt < _ATTEMPTS:
-                time.sleep(_RETRY_WAIT)
+                time.sleep(_retry_wait(exc, attempt))
 
     raise ArxivError(f"arXiv did not answer after {_ATTEMPTS} attempts: {last_error}")
 
