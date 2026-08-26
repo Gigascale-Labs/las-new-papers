@@ -27,14 +27,14 @@
     }
   }
   * { box-sizing:border-box }
-  html { -webkit-text-size-adjust:100% }
+  html { -webkit-text-size-adjust:100%; scroll-behavior:smooth }
   body {
     background:var(--ground); color:var(--ink); font-family:var(--sans);
     font-size:16.5px; line-height:1.62; margin:0;
     -webkit-font-smoothing:antialiased;
     padding:clamp(1.5rem,1rem+3vw,4rem) clamp(1.1rem,.6rem+3vw,3rem) 6rem;
   }
-  .wrap { max-width:82ch; margin:0 auto; display:flex; flex-direction:column; gap:2rem }
+  .wrap { max-width:104ch; margin:0 auto; display:flex; flex-direction:column; gap:2rem }
 
   header { display:flex; flex-direction:column; gap:.85rem;
            padding-bottom:1.4rem; border-bottom:2px solid var(--ink) }
@@ -48,33 +48,68 @@
   .standfirst { font-family:var(--serif); color:var(--muted); margin:0;
                 font-size:clamp(1rem,.95rem+.3vw,1.15rem); max-width:var(--measure) }
 
-  .bar { display:flex; flex-wrap:wrap; gap:.6rem 1rem; align-items:center;
-         justify-content:space-between }
-  .counts { font-family:var(--mono); font-size:.78rem; color:var(--muted) }
-  .counts b { color:var(--ink); font-weight:600 }
-  select { font-family:var(--mono); font-size:.8rem; padding:.35rem .5rem;
-           background:var(--surface); color:var(--ink);
-           border:1px solid var(--rule); border-radius:2px }
+  /* ---- the two-column shell: day index beside one long scroll ---- */
+  .layout { display:grid; grid-template-columns:11.5rem minmax(0,1fr); gap:2.6rem;
+            align-items:start }
+  .daynav { position:sticky; top:1.5rem; align-self:start;
+            max-height:calc(100vh - 3rem); overflow-y:auto }
+  .navtitle { font-family:var(--mono); font-size:.68rem; font-weight:600;
+              letter-spacing:.14em; text-transform:uppercase; color:var(--faint);
+              margin:0 0 .6rem .5rem }
+  .daynav ul { list-style:none; margin:0; padding:0; display:flex;
+               flex-direction:column; gap:.08rem }
+  .daynav a { display:flex; justify-content:space-between; gap:.5rem;
+              font-family:var(--mono); font-size:.77rem; color:var(--muted);
+              text-decoration:none; padding:.24rem .5rem;
+              border-left:2px solid transparent; border-radius:0 2px 2px 0 }
+  .daynav a:hover { color:var(--ink); background:var(--sunk) }
+  .daynav a[aria-current="true"] { color:var(--accent); font-weight:600;
+              border-left-color:var(--accent); background:var(--accent-w) }
+  .daynav .n { color:var(--faint); font-variant-numeric:tabular-nums }
+  .daynav a[aria-current="true"] .n { color:var(--accent) }
 
+  main { display:flex; flex-direction:column; gap:2.6rem }
+  .day { scroll-margin-top:1.5rem; display:flex; flex-direction:column; gap:.9rem }
+  .dayhead { display:flex; flex-wrap:wrap; gap:.3rem .9rem; align-items:baseline;
+             padding-bottom:.5rem; border-bottom:1px solid var(--rule) }
+  .dayhead h2 { font-family:var(--mono); font-size:.95rem; font-weight:600;
+                letter-spacing:.02em; margin:0; color:var(--ink) }
+  .daycounts { font-family:var(--mono); font-size:.74rem; color:var(--faint) }
+  .daycounts b { color:var(--muted); font-weight:600 }
+
+  .papers { display:flex; flex-direction:column; gap:1rem }
   .paper { background:var(--surface); border:1px solid var(--rule);
            padding:1.15rem 1.3rem; display:flex; flex-direction:column; gap:.5rem }
-  .papers { display:flex; flex-direction:column; gap:1rem }
   .paper .t { font-weight:600; line-height:1.35; text-wrap:balance;
               font-size:1.03rem }
   .paper .authors { font-size:.88rem; color:var(--muted) }
   .paper .ids { font-family:var(--mono); font-size:.75rem; color:var(--faint) }
   .paper .summary { max-width:var(--measure) }
-  .paper ul { list-style:none; margin:.2rem 0 0; padding:0; display:flex;
-              flex-direction:column; gap:.55rem; max-width:var(--measure) }
-  .paper li { font-family:var(--serif); font-style:italic; color:var(--muted);
-              font-size:.95rem; line-height:1.55; padding-left:.9rem;
-              border-left:2px solid var(--rule) }
-  .paper li::before { content:"\201C" }
-  .paper li::after { content:"\201D" }
+
+  /* ---- questions: closed by default, opened by the chip inside the card ---- */
+  .qs { margin-top:.15rem }
+  .qs summary { list-style:none; cursor:pointer; width:fit-content;
+                display:inline-flex; align-items:center; gap:.45rem;
+                font-family:var(--mono); font-size:.7rem; font-weight:600;
+                letter-spacing:.07em; text-transform:uppercase;
+                color:var(--accent); background:var(--sunk);
+                border:1px solid var(--rule); border-radius:2px;
+                padding:.32rem .62rem }
+  .qs summary::-webkit-details-marker { display:none }
+  .qs summary:hover { border-color:var(--accent) }
+  .qs summary:focus-visible { outline:2px solid var(--accent); outline-offset:2px }
+  .qs .caret { display:inline-block; transition:transform .15s ease }
+  .qs[open] .caret { transform:rotate(90deg) }
+  .qs ul { list-style:none; margin:.85rem 0 .15rem; padding:0; display:flex;
+           flex-direction:column; gap:.55rem; max-width:var(--measure) }
+  .qs li { font-family:var(--serif); font-style:italic; color:var(--muted);
+           font-size:.95rem; line-height:1.55; padding-left:.9rem;
+           border-left:2px solid var(--rule) }
+  .qs li::before { content:"\201C" }
+  .qs li::after { content:"\201D" }
 
   a { color:var(--accent); text-decoration-thickness:1px; text-underline-offset:2px }
-  a:focus-visible, select:focus-visible { outline:2px solid var(--accent);
-    outline-offset:2px }
+  a:focus-visible { outline:2px solid var(--accent); outline-offset:2px }
 
   .empty, .err { background:var(--sunk); border:1px solid var(--rule);
                  padding:1.1rem 1.25rem; color:var(--muted);
@@ -83,7 +118,25 @@
            font-size:.82rem; color:var(--faint); display:flex;
            flex-direction:column; gap:.35rem; max-width:var(--measure) }
   .skeleton { color:var(--faint); font-family:var(--mono); font-size:.85rem }
-  @media (prefers-reduced-motion:reduce){ *{animation:none!important;transition:none!important} }
+
+  @media (max-width:62rem) {
+    .layout { grid-template-columns:minmax(0,1fr); gap:1.2rem }
+    .daynav { top:0; z-index:5; background:var(--ground); max-height:none;
+              padding:.55rem 0; margin-bottom:.2rem;
+              border-bottom:1px solid var(--rule) }
+    .navtitle { display:none }
+    .daynav ul { flex-direction:row; overflow-x:auto; gap:.4rem;
+                 padding-bottom:.2rem }
+    .daynav li { flex:0 0 auto }
+    .daynav a { border-left:0; border:1px solid var(--rule); border-radius:2px;
+                padding:.26rem .55rem; white-space:nowrap }
+    .daynav a[aria-current="true"] { border-color:var(--accent) }
+    .day { scroll-margin-top:4rem }
+  }
+  @media (prefers-reduced-motion:reduce) {
+    html { scroll-behavior:auto }
+    * { animation:none!important; transition:none!important }
+  }
 </style>
 </head>
 <body>
@@ -103,15 +156,10 @@
     </p>
   </header>
 
-  <div class="bar">
-    <div class="counts" id="counts"></div>
-    <label>
-      <span class="visually-hidden"></span>
-      <select id="day-select" aria-label="Choose a day"></select>
-    </label>
+  <div class="layout">
+    <nav class="daynav" id="daynav" aria-label="Days"></nav>
+    <main id="main"><p class="skeleton">Loading…</p></main>
   </div>
-
-  <main id="main"><p class="skeleton">Loading the latest day…</p></main>
 
   <footer>
     <div>Papers come from arXiv. Questions and summaries are written by a model
@@ -126,6 +174,7 @@
 
 <script>
 const DATA = "/data";
+const EAGER_DAYS = 2;          // loaded up front; the rest load as they scroll in
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c =>
   ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
@@ -152,57 +201,141 @@ async function listDays() {
 // screening reason, and each question's approachability label and reason.
 // Nothing here argues for a paper, or for a question. The title, the summary
 // and the questions are the whole case for reading it.
-function renderPapers(papers) {
+//
+// The questions start closed. A day of ten papers is a page of titles you can
+// scan; opening one paper's questions is a decision to read that paper, not a
+// wall you scroll past.
+function questionsHTML(qs) {
+  if (!qs.length) return "";
+  return `<details class="qs">
+      <summary><span class="caret" aria-hidden="true">▸</span>${qs.length} open
+        question${qs.length === 1 ? "" : "s"}</summary>
+      <ul>${qs.map(q => `<li>${esc(q.question)}</li>`).join("")}</ul>
+    </details>`;
+}
+
+function paperHTML(p) {
+  return `<article class="paper">
+      <div class="t"><a href="${esc(p.url)}">${esc(p.title)}</a></div>
+      <div class="authors">${esc((p.authors || []).join(", "))}</div>
+      <div class="ids">${esc(p.arxiv_id)}${p.nearest_anchor_title
+        ? ` · nearest in the canon: <a href="https://arxiv.org/abs/${esc(p.nearest_anchor_id)}">${esc(p.nearest_anchor_title)}</a>`
+        : ""}</div>
+      ${p.one_sentence ? `<div class="summary">${esc(p.one_sentence)}</div>` : ""}
+      ${questionsHTML(p.open_questions || [])}
+    </article>`;
+}
+
+function papersHTML(papers) {
   if (!papers.length)
     return `<p class="empty">Nothing passed the screen on this day. That is a
       normal outcome, not a failure.</p>`;
-  return `
-    <div class="papers">
-      ${papers.map(p => `
-        <article class="paper">
-          <div class="t"><a href="${esc(p.url)}">${esc(p.title)}</a></div>
-          <div class="authors">${esc((p.authors || []).join(", "))}</div>
-          <div class="ids">${esc(p.arxiv_id)}${p.nearest_anchor_title
-            ? ` · nearest in the canon: <a href="https://arxiv.org/abs/${esc(p.nearest_anchor_id)}">${esc(p.nearest_anchor_title)}</a>`
-            : ""}</div>
-          ${p.one_sentence ? `<div class="summary">${esc(p.one_sentence)}</div>` : ""}
-          ${(p.open_questions || []).length ? `<ul>${p.open_questions.map(q => `
-            <li>${esc(q.question)}</li>`).join("")}</ul>` : ""}
-        </article>`).join("")}
-    </div>`;
+  return `<div class="papers">${papers.map(paperHTML).join("")}</div>`;
 }
 
-function renderDay(d) {
-  const c = d.counts || {};
-  document.getElementById("day-label").textContent = d.date;
-  document.title = `arXiv open questions — ${d.date}`;
-  document.getElementById("counts").innerHTML =
-    `<b>${c.fetched ?? "?"}</b> fetched · <b>${c.screened ?? "?"}</b> screened · ` +
-    `<b>${c.relevant ?? "?"}</b> relevant · <b>${c.kept ?? "?"}</b> kept`;
-  document.getElementById("main").innerHTML = renderPapers(d.papers || []);
+function countsHTML(c = {}) {
+  return `<b>${c.fetched ?? "?"}</b> fetched · <b>${c.screened ?? "?"}</b> screened · ` +
+         `<b>${c.relevant ?? "?"}</b> relevant · <b>${c.kept ?? "?"}</b> kept`;
 }
 
-async function show(day) {
-  const main = document.getElementById("main");
-  main.innerHTML = `<p class="skeleton">Loading ${esc(day || "the latest day")}…</p>`;
+// The date is the element id, so the feed's own entry links (site#YYYY-MM-DD)
+// land on the right day without translation.
+function daySkeleton(day) {
+  return `<section class="day" id="${esc(day)}" data-day="${esc(day)}">
+      <div class="dayhead">
+        <h2>${esc(day)}</h2>
+        <div class="daycounts"></div>
+      </div>
+      <div class="daybody"><p class="skeleton">Loading…</p></div>
+    </section>`;
+}
+
+async function loadDay(section) {
+  if (section.dataset.state) return;          // loading, done, or failed
+  section.dataset.state = "loading";
+  const day = section.dataset.day;
   try {
-    renderDay(await getJSON(`${DATA}/${day ? day : "latest"}.json`));
-    if (day) history.replaceState(null, "", `?day=${day}`);
+    const d = await getJSON(`${DATA}/${day}.json`);
+    const papers = d.papers || [];
+    section.querySelector(".daycounts").innerHTML = countsHTML(d.counts);
+    section.querySelector(".daybody").innerHTML = papersHTML(papers);
+    const tally = document.querySelector(`#daynav a[data-day="${day}"] .n`);
+    if (tally) tally.textContent = papers.length || "—";
+    section.dataset.state = "done";
   } catch (e) {
-    main.innerHTML = `<p class="err">Could not load that day. ${esc(e.message)}</p>`;
+    section.querySelector(".daybody").innerHTML =
+      `<p class="err">Could not load ${esc(day)}. ${esc(e.message)}</p>`;
+    section.dataset.state = "failed";
   }
 }
 
+// Load a day slightly before it reaches the viewport, so scrolling does not
+// stop at a skeleton.
+const loader = new IntersectionObserver(
+  entries => entries.forEach(e => e.isIntersecting && loadDay(e.target)),
+  {rootMargin: "800px 0px"});
+
+// Which day the reader is actually looking at. Sections are in the DOM newest
+// first, so the topmost visible one is the one with the largest date.
+const visible = new Set();
+const spy = new IntersectionObserver(entries => {
+  entries.forEach(e => e.isIntersecting ? visible.add(e.target.dataset.day)
+                                        : visible.delete(e.target.dataset.day));
+  const active = [...visible].sort().reverse()[0];
+  if (!active) return;                        // between sections: keep the last
+  document.querySelectorAll("#daynav a").forEach(a =>
+    a.dataset.day === active ? a.setAttribute("aria-current", "true")
+                             : a.removeAttribute("aria-current"));
+}, {rootMargin: "-12% 0px -60% 0px"});
+
 (async function init() {
-  const sel = document.getElementById("day-select");
-  const wanted = new URLSearchParams(location.search).get("day");
-  await show(wanted);
-  const days = await listDays();
-  if (!days.length) { sel.style.display = "none"; return; }
-  sel.innerHTML = days.map((d, i) =>
-    `<option value="${d}"${d === wanted || (!wanted && i === 0) ? " selected" : ""}>${d}</option>`
-  ).join("");
-  sel.addEventListener("change", () => show(sel.value));
+  const nav = document.getElementById("daynav");
+  const main = document.getElementById("main");
+  const label = document.getElementById("day-label");
+
+  let days = await listDays();
+  // The feed is the index; latest.json is the fallback if it cannot be read.
+  if (!days.length) {
+    try {
+      days = [(await getJSON(`${DATA}/latest.json`)).date];
+    } catch {
+      main.innerHTML = `<p class="err">No days could be loaded.</p>`;
+      label.textContent = "unavailable";
+      return;
+    }
+  }
+
+  nav.innerHTML = `<div class="navtitle">Days</div><ul>${days.map(d =>
+    `<li><a href="#${esc(d)}" data-day="${esc(d)}">${esc(d)}<span class="n"></span></a></li>`
+  ).join("")}</ul>`;
+  main.innerHTML = days.map(daySkeleton).join("");
+  label.textContent = `${days.length} day${days.length === 1 ? "" : "s"} to ${days[0]}`;
+
+  const sections = [...main.querySelectorAll("section.day")];
+  await Promise.all(sections.slice(0, EAGER_DAYS).map(loadDay));
+  sections.forEach(s => { loader.observe(s); spy.observe(s); });
+
+  // A day link must land on real content, not on a skeleton that resizes
+  // under the reader, so the day is loaded before the jump.
+  nav.addEventListener("click", async ev => {
+    const a = ev.target.closest("a[data-day]");
+    if (!a) return;
+    ev.preventDefault();
+    const section = document.getElementById(a.dataset.day);
+    if (!section) return;
+    await loadDay(section);
+    section.scrollIntoView({block: "start"});
+    history.replaceState(null, "", `#${a.dataset.day}`);
+  });
+
+  // Deep link: the feed's #date, or the older ?day= form.
+  const wanted = decodeURIComponent((location.hash || "").slice(1))
+    || new URLSearchParams(location.search).get("day");
+  if (wanted && days.includes(wanted)) {
+    const section = document.getElementById(wanted);
+    await loadDay(section);
+    section.scrollIntoView({block: "start"});
+  }
 })();
 </script>
 </body>
