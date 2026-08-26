@@ -1168,6 +1168,33 @@ class TestFrontendTextHasAStyle(unittest.TestCase):
         self.assertIn("Active voice", PLAIN_ENGLISH)
         self.assertIn("Present tense", PLAIN_ENGLISH)
 
+    def test_the_spec_states_the_evidence_rules(self):
+        from arxiv_feed.style import PLAIN_ENGLISH
+        for rule in (
+            "Answer in the first sentence",             # the answer, then the detail
+            "Give facts, not justifications",
+            "Never supply a number",                    # no invented n, no invented spread
+            "measured, observed",                       # say which kind of claim it is
+            "inferred from a model, or assumed",
+            "Name what the paper does not check",
+            "Where you do not know",                    # say so, do not guess
+        ):
+            with self.subTest(rule=rule):
+                self.assertIn(rule, PLAIN_ENGLISH)
+
+    def test_the_table_and_chart_rules_stay_out_but_stay_written_down(self):
+        """A summary renders as one sentence in a <div>. It has no axes."""
+        from arxiv_feed import style
+        for word in ("table", "chart", "axes", "colour", "visualis"):
+            with self.subTest(word=word):
+                self.assertNotIn(word, style.PLAIN_ENGLISH.lower())
+        # Dropped on purpose, and the file says why -- see the comment above
+        # PLAIN_ENGLISH.
+        source = Path(style.__file__).read_text(encoding="utf-8")
+        for word in ("table", "chart", "axes"):
+            with self.subTest(word=word):
+                self.assertIn(word, source.lower())
+
 
 class TestSummaryDoesNotArgue(unittest.TestCase):
     def test_the_judge_is_told_to_describe_not_assess(self):

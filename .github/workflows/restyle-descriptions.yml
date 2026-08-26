@@ -1,0 +1,95 @@
+name: Restyle paper descriptions
+
+# Manual only. This rewrites text that is already published, in files nothing
+# else backs up, so it never runs on a schedule and never on a push. Run it
+# once with dry_run on, read the diff in the log, then run it for real.
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Print every old -> new pair and write nothing"
+        type: boolean
+        default: true
+      day:
+        description: "Restyle one day file only (YYYY-MM-DD). Blank = every day."
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  # The daily run's group, on purpose: both jobs write data/, and this one
+  # rewrites files the daily run appends to.
+  group: daily-feed
+  cancel-in-progress: false
+
+jobs:
+  restyle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # Every file the script may write, copied before it writes any of them.
+      # A bad rewrite is then one artifact download away from being undone,
+      # even on the run that made it.
+      - name: Back up the files this run can change
+        run: |
+          mkdir -p backup/canon
+          cp data/*.json backup/
+          cp data/feed.xml backup/
+          cp data/canon/candidates.csv backup/canon/
+          ls -l backup backup/canon
+
+      - name: Upload the backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: data-backup-${{ github.run_id }}
+          path: backup/
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Restyle the descriptions
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: |
+          python scripts/restyle_descriptions.py \
+            ${{ inputs.dry_run && '--dry-run' || '' }} \
+            ${{ inputs.day && format('--day {0}', inputs.day) || '' }}
+
+      # Runs even if the step above reported a failure: a run where one batch
+      # failed still rewrote the others, and that work is worth keeping. Never
+      # on a dry run, which wrote nothing to commit.
+      - name: Commit the rewritten descriptions
+        if: always() && !inputs.dry_run
+        run: |
+          git config user.name "arxiv-feed[bot]"
+          git config user.email "bot@largeagentsystems.org"
+          git add data/
+          if git diff --cached --quiet; then
+            echo "nothing to commit"
+            exit 0
+          fi
+          git commit -m "data: restyle paper descriptions to the house style [skip ci]"
+
+          # The same retry-with-rebase loop the daily job uses. A plain push
+          # here loses a paid-for run to a race it could have rebased past,
+          # and this job's work cannot be recomputed -- the old text is gone.
+          # Only data/ is touched, and the concurrency group means no other
+          # run of either workflow is writing it, so a rebase is safe.
+          for attempt in 1 2 3; do
+            if git push; then
+              exit 0
+            fi
+            echo "push rejected (attempt ${attempt}); rebasing onto origin/main"
+            git pull --rebase origin main || exit 1
+          done
+          echo "could not push after 3 attempts"
+          exit 1
