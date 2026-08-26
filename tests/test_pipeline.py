@@ -831,6 +831,130 @@ class TestBackfillDays(unittest.TestCase):
                 self.assertEqual(backfill_days(cfg, "2026-08-24"), [])
 
 
+class TestDayFileIsAdditive(unittest.TestCase):
+    """A second run of a day must never subtract from it.
+
+    The first run marks its papers seen, so the second run's screen cannot
+    see them again. Writing only the second run's papers therefore drops the
+    first run's for good -- seen.json guarantees they never come back. On
+    2026-08-25 that turned 9 published papers into 4; on 2026-08-20, ten into
+    two across five runs.
+    """
+
+    def _result(self, date, ids, **counts):
+        base = {"fetched": 100, "unseen": 100, "screened": 50, "relevant": 10,
+                "kept": len(ids)}
+        base.update(counts)
+        return {
+            "date": date,
+            "counts": base,
+            "papers": [{"arxiv_id": i, "title": f"T{i}", "open_questions": []} for i in ids],
+            "screened": [{"arxiv_id": i, "relevant": True} for i in ids],
+            "problems": [],
+        }
+
+    def _write(self, path, result):
+        path.write_text(json.dumps(result), encoding="utf-8")
+
+    def test_a_rerun_keeps_the_papers_the_first_run_published(self):
+        from arxiv_feed.run import merge_into_existing
+
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "2026-08-25.json"
+            self._write(path, self._result("2026-08-25", ["a", "b", "c"], unseen=243))
+
+            # The rerun saw fewer unseen papers and kept different ones.
+            rerun = self._result("2026-08-25", ["x", "y"], unseen=234)
+            merge_into_existing(rerun, path)
+
+            self.assertEqual([p["arxiv_id"] for p in rerun["papers"]],
+                             ["a", "b", "c", "x", "y"])
+            self.assertEqual(rerun["counts"]["kept"], 5)      # recomputed, not 2
+            self.assertEqual(rerun["counts"]["unseen"], 243)  # the larger of the two
+
+    def test_a_day_that_finds_nothing_new_does_not_empty_the_file(self):
+        """The 'no unseen papers' path writes papers: [] -- on a day that
+        already has papers that must not blank it."""
+        from arxiv_feed.run import merge_into_existing
+
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "2026-08-25.json"
+            self._write(path, self._result("2026-08-25", ["a", "b"]))
+
+            empty = self._result("2026-08-25", [], unseen=0)
+            merge_into_existing(empty, path)
+
+            self.assertEqual([p["arxiv_id"] for p in empty["papers"]], ["a", "b"])
+            self.assertEqual(empty["counts"]["kept"], 2)
+
+    def test_a_repeated_paper_is_not_duplicated(self):
+        from arxiv_feed.run import merge_into_existing
+
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "2026-08-25.json"
+            self._write(path, self._result("2026-08-25", ["a", "b"]))
+
+            again = self._result("2026-08-25", ["b", "c"])
+            merge_into_existing(again, path)
+
+            self.assertEqual([p["arxiv_id"] for p in again["papers"]], ["a", "b", "c"])
+
+    def test_the_screening_record_is_unioned_too(self):
+        from arxiv_feed.run import merge_into_existing
+
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "2026-08-25.json"
+            self._write(path, self._result("2026-08-25", ["a"]))
+            rerun = self._result("2026-08-25", ["b"])
+            merge_into_existing(rerun, path)
+            self.assertEqual({r["arxiv_id"] for r in rerun["screened"]}, {"a", "b"})
+
+    def test_no_file_yet_writes_this_run_unchanged(self):
+        from arxiv_feed.run import merge_into_existing
+
+        with tempfile.TemporaryDirectory() as d:
+            fresh = self._result("2026-08-25", ["a"])
+            merge_into_existing(fresh, Path(d) / "2026-08-25.json")
+            self.assertEqual([p["arxiv_id"] for p in fresh["papers"]], ["a"])
+
+    def test_a_corrupt_day_file_does_not_stop_the_write(self):
+        from arxiv_feed.run import merge_into_existing
+
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "2026-08-25.json"
+            path.write_text("{not json", encoding="utf-8")
+            fresh = self._result("2026-08-25", ["a"])
+            merge_into_existing(fresh, path)
+            self.assertEqual([p["arxiv_id"] for p in fresh["papers"]], ["a"])
+
+    def test_a_file_for_another_date_is_never_merged_in(self):
+        from arxiv_feed.run import merge_into_existing
+
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "2026-08-25.json"
+            self._write(path, self._result("2026-08-24", ["old"]))
+            fresh = self._result("2026-08-25", ["new"])
+            merge_into_existing(fresh, path)
+            self.assertEqual([p["arxiv_id"] for p in fresh["papers"]], ["new"])
+
+    def test_write_output_goes_through_the_merge(self):
+        from unittest import mock
+
+        from arxiv_feed.config import Config
+        from arxiv_feed.run import write_output
+
+        with tempfile.TemporaryDirectory() as d:
+            with mock.patch("arxiv_feed.config.DATA_DIR", Path(d)):
+                cfg = Config(categories=["cs.MA"], anchors=["a1", "a2"], profile="p")
+                write_output(cfg, self._result("2026-08-25", ["a"]), "2026-08-25")
+                write_output(cfg, self._result("2026-08-25", ["b"]), "2026-08-25")
+
+                on_disk = json.loads(cfg.output_path("2026-08-25").read_text())
+                self.assertEqual([p["arxiv_id"] for p in on_disk["papers"]], ["a", "b"])
+                latest = json.loads((Path(d) / "latest.json").read_text())
+                self.assertEqual([p["arxiv_id"] for p in latest["papers"]], ["a", "b"])
+
+
 class TestCandidatesCsvSchema(unittest.TestCase):
     def test_a_stale_header_is_refused_not_silently_misaligned(self):
         """Appending under an old header would write values under wrong names."""

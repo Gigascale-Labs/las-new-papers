@@ -18,6 +18,7 @@ from __future__ import annotations
 import json
 import logging
 from datetime import date, datetime, timedelta, timezone
+from pathlib import Path
 
 from . import anchors as anchors_mod
 from . import arxiv, canon, feed as feed_mod, guard, judge, questions, screen
@@ -343,15 +344,79 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
     return result
 
 
+def _union_by_id(*groups) -> list[dict]:
+    """Rows from every group, first occurrence of each arxiv_id winning."""
+    out: dict[str, dict] = {}
+    for group in groups:
+        for row in group or []:
+            aid = row.get("arxiv_id")
+            if aid and aid not in out:
+                out[aid] = row
+    return list(out.values())
+
+
+def merge_into_existing(result: dict, path: Path) -> dict:
+    """Fold a day file already on disk into this run's result, in place.
+
+    Re-running a day is routine: a manual run and the scheduled run can both
+    land on it, or a crashed run gets retried. But the first run marked its
+    papers seen, so the second run's screen never sees them again -- and
+    writing only the second run's papers drops the first run's from the page
+    for good, while seen.json guarantees they can never come back. That is
+    how 2026-08-20 went from ten papers to two across five runs.
+
+    So the day file is additive. Papers and screening rows are unioned on
+    arxiv_id, keeping what is already published. Counts take the larger of
+    the two, except `kept`, which is recomputed from the union so it always
+    describes the file rather than the last run.
+    """
+    if not path.exists():
+        return result
+    try:
+        old = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as exc:
+        # A day file that cannot be read is one this run is about to replace
+        # anyway. Say so rather than failing the run.
+        log.warning("cannot merge %s (%s); writing this run's papers alone", path, exc)
+        return result
+
+    # A file for a different date means output_path changed shape; never
+    # merge across days.
+    if old.get("date") != result.get("date"):
+        return result
+
+    kept_before = len(result.get("papers", []))
+    result["papers"] = _union_by_id(old.get("papers"), result.get("papers"))
+    result["screened"] = _union_by_id(old.get("screened"), result.get("screened"))
+
+    counts = dict(result.get("counts") or {})
+    for key, was in (old.get("counts") or {}).items():
+        now = counts.get(key)
+        if isinstance(was, int) and isinstance(now, int):
+            counts[key] = max(now, was)
+    counts["kept"] = len(result["papers"])
+    result["counts"] = counts
+
+    recovered = len(result["papers"]) - kept_before
+    if recovered:
+        log.info("%s: kept %d paper(s) already on file, %d in this run",
+                 result["date"], recovered, kept_before)
+    return result
+
+
 def write_output(cfg: Config, result: dict, day: str) -> None:
     """`data/YYYY-MM-DD.json`, plus `data/latest.json` as a stable read URL.
 
     latest.json is a copy, not a symlink: this repo is read over
     raw.githubusercontent.com by largeagentsystems.org, and raw serves the link
     text for a symlink, not the file it points at.
+
+    Additive: see merge_into_existing. A second run of a day adds to it, and
+    can never subtract from it.
     """
     path = cfg.output_path(day)
     path.parent.mkdir(parents=True, exist_ok=True)
+    merge_into_existing(result, path)
     payload = json.dumps(result, indent=2, ensure_ascii=False)
     path.write_text(payload, encoding="utf-8")
     (path.parent / "latest.json").write_text(payload, encoding="utf-8")
