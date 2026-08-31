@@ -21,7 +21,8 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 from . import anchors as anchors_mod
-from . import arxiv, canon, feed as feed_mod, guard, judge, questions, screen
+from . import (arxiv, canon, feed as feed_mod, guard, judge, questions, screen,
+               vectors as vectors_mod)
 from .config import DATA_DIR, Config, anchor_count_warning
 from .embed import Embedder
 from .llm import ModelClient, ModelError
@@ -153,6 +154,11 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
     # Not a filter any more: on a day under the cap nothing is dropped here at
     # all. It exists so a 400-paper day still costs a bounded number of tokens.
     vectors = embedder.encode([p.embed_text for p in unseen])
+    # Keyed by id here, while the row order still matches `unseen`. The
+    # candidate list below is reordered by similarity, and `kept` is a further
+    # subset of it, so position stops being an index into `vectors` from the
+    # next line on.
+    vector_by_id = {p.arxiv_id: vectors[i] for i, p in enumerate(unseen)}
     candidates = preselect(unseen, vectors, store, screen_n=cfg.screen_n)
     counts["screened"] = len(candidates)
 
@@ -318,6 +324,13 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
 
     # 9. write the archive. A failed delivery must not cost the data.
     write_output(cfg, result, day)
+    # The kept papers' vectors, which this run would otherwise discard.
+    vectors_mod.write(
+        cfg.embeddings_path(day),
+        day,
+        cfg.embed_model,
+        {e["arxiv_id"]: vector_by_id.get(e["arxiv_id"]) for e in result["papers"]},
+    )
     canon.append_candidates(cfg.candidates_csv, candidate_rows)
 
     # 10. rebuild the feed from every day file on disk, including today's. No

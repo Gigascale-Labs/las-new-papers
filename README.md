@@ -27,6 +27,7 @@ arXiv, 7 lists, ~200-500 new papers
   ONE model call per paper            open questions, marked approachable or not
   write data/feed.xml                 rebuilt fresh every run -- the RSS/Atom feed
   write data/YYYY-MM-DD.json          the page (web/index.html) reads this
+  write data/embeddings/...json       the kept papers' vectors, for downstream maps
 ```
 
 US$0.24 a day in token cost. Measured on a live run over 155 papers: $0.15 to
@@ -144,6 +145,7 @@ nothing is lost.
 | `data/YYYY-MM-DD.json` | The day's ten papers with questions, every screened paper with its verdict and scores, and any problems. |
 | `data/latest.json` | The newest day, at a fixed URL the site can read. |
 | `data/feed.xml` | An Atom feed of the last 60 days. No password needed to read it. |
+| `data/embeddings/YYYY-MM-DD.json` | The kept papers' embedding vectors, 768-dim, 4 dp. ~6.5KB per paper. |
 | `data/raw/YYYY-MM-DD.jsonl.gz` | Every paper scraped that day. ~120KB. |
 | `data/canon/candidates.csv` | Every screened paper ever seen, in the canon's schema, with the screen's yes/no. |
 | `data/seen.json` | IDs already shown. Nothing appears twice. |
@@ -152,6 +154,23 @@ nothing is lost.
 
 `data/raw/` is what makes this an archive. You can re-rank an old day with
 different anchors, or a different embedding model, without fetching again.
+
+`data/embeddings/` holds the run's own coordinate instead of discarding it.
+Every run encodes the day's papers to order them and then throws the vectors
+away; these are the ones belonging to papers it kept.
+largeagentsystems.org projects them to two dimensions to draw the reading list
+as a map.
+
+They sit in a file of their own, not a field on the day file: 768 floats per
+paper adds about 6.5KB per paper that every reader of the reading list would
+otherwise download. Measured: 52 papers over 7 days take 337KB. See
+`arxiv_feed/vectors.py`.
+
+`scripts/backfill_vectors.py` fills in days published before this existed by
+re-encoding the title and abstract the day file already holds. Checked on the
+first backfill: recomputing each vector's nearest anchor reproduced the
+published similarity for 49 of 52 papers (median absolute error 3e-5, max
+9.9e-3). The 3 misses each name an anchor no longer in the anchor set.
 
 Nothing either model call learns is thrown away. Every screened paper keeps its
 yes/no verdict and its one-line reason. Everything that passed the screen also

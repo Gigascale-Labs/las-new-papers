@@ -597,12 +597,15 @@ class TestRunWiring(unittest.TestCase):
                                return_value=store()), \
              mock.patch.object(run_mod, "ModelClient", side_effect=client_factory), \
              mock.patch.object(run_mod, "write_output"), \
+             mock.patch.object(run_mod.vectors_mod, "write",
+                               return_value=0) as wrote_vectors, \
              mock.patch.object(run_mod.canon, "append_candidates", return_value=0), \
              mock.patch.object(run_mod.canon, "known_tags", return_value=[]), \
              mock.patch.object(run_mod.feed_mod, "rebuild", return_value=1), \
              mock.patch.object(run_mod, "SeenStore") as seen:
             seen.return_value.filter_unseen.side_effect = lambda ps: ps
             result = run_mod.run(cfg, day="2026-08-20", dry_run=True)
+        self.wrote_vectors = wrote_vectors
         return result, made
 
     def test_screen_reads_everything_and_judge_reads_only_the_passes(self):
@@ -631,6 +634,45 @@ class TestRunWiring(unittest.TestCase):
         self.assertIn(papers[1].arxiv_id, judge_user)
         for p in papers[2:]:
             self.assertNotIn(p.arxiv_id, judge_user)
+
+    def test_kept_papers_vectors_are_written_by_id_not_by_row(self):
+        """The vector file must follow the paper, not its row.
+
+        preselect reorders the day by similarity and `kept` subsets that, so a
+        row index into the encoder output addresses nothing after step 3.
+
+        This keeps papers 3 and 4, not 0 and 1. An implementation that sliced
+        the matrix instead of looking each id up passes on the first two papers
+        and fails here.
+        """
+        papers = [paper(i) for i in range(6)]
+        screen = {"verdicts": [
+            {"arxiv_id": p.arxiv_id, "relevant": i in (3, 4), "reason": "r"}
+            for i, p in enumerate(papers)
+        ]}
+        judged = {"judgements": [
+            {"arxiv_id": papers[3].arxiv_id, "significance": 5, "novelty": 4,
+             "one_sentence": "Three."},
+            {"arxiv_id": papers[4].arxiv_id, "significance": 3, "novelty": 3,
+             "one_sentence": "Four."},
+        ]}
+        result, _ = self._run(self._cfg(), papers, [screen], judged,
+                              {"open_questions": [], "canon": {}})
+
+        self.assertEqual(result["counts"]["kept"], 2)
+        self.wrote_vectors.assert_called_once()
+        path, day, model, by_id = self.wrote_vectors.call_args.args
+        self.assertEqual(day, "2026-08-20")
+        self.assertEqual(path, self._cfg().embeddings_path("2026-08-20"))
+        self.assertEqual(sorted(by_id),
+                         sorted([papers[3].arxiv_id, papers[4].arxiv_id]))
+        # The encoder stub gives paper i the vector unit([1 - i/100, 0.1, 0, 0]).
+        for i in (3, 4):
+            np.testing.assert_allclose(
+                by_id[papers[i].arxiv_id],
+                unit([1.0 - i * 0.01, 0.1, 0, 0]),
+                rtol=1e-6,
+            )
 
     def test_every_screened_paper_is_recorded_including_the_rejects(self):
         papers = [paper(i) for i in range(4)]

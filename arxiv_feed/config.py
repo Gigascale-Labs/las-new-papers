@@ -99,6 +99,14 @@ class Config:
     def output_path(self, day: str) -> Path:
         return DATA_DIR / f"{day}.json"
 
+    def embeddings_path(self, day: str) -> Path:
+        """Returns the path to the day's kept-paper vectors.
+
+        A separate file from the day archive. vectors.py records the size that
+        decision saves every reader of the reading list.
+        """
+        return DATA_DIR / "embeddings" / f"{day}.json"
+
     # ---- secrets -----------------------------------------------------------
     @staticmethod
     def openrouter_key() -> str | None:
