@@ -251,7 +251,7 @@ python main.py --dry-run
 | `Lakera screening did not run` | `guard.enabled: true` with no key | Set `guard.enabled: false`, or add the key. The other defences run either way. |
 | `arXiv did not answer after 3 attempts` | arXiv is down | Wait. Run it again later with `--date` set to that day. |
 | `no unseen papers found` | You already ran that day | Normal. Nothing was lost. |
-| `question extraction failed` for one paper | One model call failed twice | Normal. The other papers still appear. |
+| `question extraction failed` for one paper | One model call failed twice | Normal. The other papers still appear. To add the missing questions later, run the "Repair missing questions" workflow for that day. |
 | `FAILED: every screening call failed`, with `Key limit exceeded` in the problems | The OpenRouter key is out of credit or over its limit | Top up the key, or raise its limit, at openrouter.ai. The next daily run retries every failed day from the 5 days before it. Run an older day again with `--date`. A failed screen marks no papers seen, so its papers are still there. |
 | `FAILED: ...` of any other kind | One model stage returned nothing for that day | Read the `problem:` lines above it. The job exits 1 and the workflow opens an issue. |
 | Every paper says `withheld from the model calls` | Lakera is flagging everything | Set `guard.enabled: false`. That is the default. |

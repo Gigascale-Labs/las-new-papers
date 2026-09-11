@@ -1,0 +1,71 @@
+name: Repair missing questions
+
+# Manual only. A sent paper is marked seen, so a rerun of its day never makes
+# the question call for it again. This makes that call for exactly the sent
+# papers whose extraction failed on the day. See scripts/repair_questions.py.
+on:
+  workflow_dispatch:
+    inputs:
+      day:
+        description: "Day file to repair (YYYY-MM-DD)"
+        required: true
+      dry_run:
+        description: "Print the new questions and write nothing"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  # The daily run's group, on purpose: both jobs write data/.
+  group: daily-feed
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Repair the day's missing questions
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          DAY: ${{ inputs.day }}
+        run: |
+          python scripts/repair_questions.py --day "$DAY" \
+            ${{ inputs.dry_run && '--dry-run' || '' }}
+
+      # Never on a dry run, which wrote nothing to commit.
+      - name: Commit the repaired day
+        if: always() && !inputs.dry_run
+        env:
+          DAY: ${{ inputs.day }}
+        run: |
+          git config user.name "arxiv-feed[bot]"
+          git config user.email "bot@largeagentsystems.org"
+          git add data/
+          if git diff --cached --quiet; then
+            echo "nothing to commit"
+            exit 0
+          fi
+          git commit -m "data: repair missing questions for ${DAY} [skip ci]"
+
+          # The daily job's retry-with-rebase loop, for the same reason.
+          for attempt in 1 2 3; do
+            if git push; then
+              exit 0
+            fi
+            echo "push rejected (attempt ${attempt}); rebasing onto origin/main"
+            git pull --rebase origin main || exit 1
+          done
+          echo "could not push after 3 attempts"
+          exit 1
