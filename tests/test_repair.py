@@ -62,7 +62,8 @@ class TestRepairDay(unittest.TestCase):
         self.day_path.write_text(json.dumps({
             "date": DAY,
             "generated_at": "2026-09-04T12:00:00+00:00",
-            "counts": {"fetched": 3, "kept": 3},
+            "counts": {"fetched": 3, "unseen": 3, "screened": 3, "relevant": 3,
+                       "kept": 3},
             "papers": [self.broken, self.fine, self.empty],
             "screened": [],
             "problems": [f"{self.broken['arxiv_id']}: question extraction failed "
