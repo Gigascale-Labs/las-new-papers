@@ -244,8 +244,64 @@
       "novelty": 3,
       "one_sentence": "Introduces GPS-Bench, a benchmark linking policies to actors, actions and impacts using legislative, lobbying and regulatory records. Actors are reconstructed from dated evidence rather than prompted personas, with human-annotated gold and LLM-labeled silver data. Compares joint reasoning, independent and communicating agent modes, graph methods and fine-tuning for predicting policy impacts and coalition formation.",
       "screen_reason": "Multi-agent simulation of policy outcomes with evidence-grounded actor modeling and emergent coalition formation.",
-      "open_questions": [],
-      "canon": {},
+      "open_questions": [
+        {
+          "question": "Fine-tuning on the grounded record gives the strongest actor-level impact prediction, and decomposition does not beat it. Does this ranking hold on policy domains and time periods outside the benchmark's records?",
+          "label": "approachable",
+          "reason": "Public legislative, lobbying and filing records support an out-of-domain replication."
+        },
+        {
+          "question": "The benchmark treats LLM-labelled cases as Silver supervision and human-annotated cases as the Gold test set. How much does Silver label noise shift the measured ranking of inference modes?",
+          "label": "approachable",
+          "reason": "Needs only label-perturbation experiments on the released benchmark."
+        },
+        {
+          "question": "Agents hold private, non-identical evidence and propose coalitions to named partners. Do the coalitions they form match the commitments in the historical record, and under which conditions do they diverge?",
+          "label": "approachable",
+          "reason": "Coalition outputs can be compared against public lobbying and legislative records."
+        },
+        {
+          "question": "Multi-agent decomposition adds mechanism rather than accuracy. Does adding more actors change aggregate policy-outcome predictions, or only the stated reasoning?",
+          "label": "approachable",
+          "reason": "Scaling actor counts in the released simulation harness is feasible with public APIs."
+        },
+        {
+          "question": "Personas are reconstructed from dated records rather than prompted as archetypes. Does evidence-grounded persona construction reduce the herding and monoculture seen in archetype-prompted agent populations?",
+          "label": "approachable",
+          "reason": "Comparable persona pipelines and diversity metrics can be built from public records."
+        },
+        {
+          "question": "The benchmark scores prediction of actor actions and downstream impacts. Can validated policy simulations be used to steer real policy design, and what error rate makes that use unsafe?",
+          "label": "not approachable",
+          "reason": "Needs institutional deployment and policymaker access."
+        }
+      ],
+      "canon": {
+        "summary": "GPS-Bench is a benchmark for LLM-based governance policy simulation that links policies to actors, actor actions and downstream impacts using legislative records, lobbying disclosures, regulatory documents, corporate filings and economic data. Actors are reconstructed from dated records with provenance; human-annotated cases form the Gold test set and LLM-labelled cases serve as Silver supervision. Controlled comparison over one policy state contrasts joint reasoning, independent and communicating actor agents, graph-based methods and fine-tuning; fine-tuning gives the strongest actor-level impact prediction, and decomposition adds mechanism rather than accuracy.",
+        "tags": [
+          "Evaluations",
+          "Simulation and Digital Twins",
+          "Policy and Governance"
+        ],
+        "system_type": [],
+        "participant_mix": [
+          "pure-AI"
+        ],
+        "observability": [
+          "interactions observable",
+          "agents observable"
+        ],
+        "focus_area": [
+          "Simulation"
+        ],
+        "threat_model": [
+          "Outdated Models"
+        ],
+        "claim_type": [
+          "dataset/tool",
+          "empirical study"
+        ]
+      },
       "suspicious_markers": []
     }
   ],
@@ -5501,9 +5557,7 @@
       "kept": false
     }
   ],
-  "problems": [
-    "2609.03553: question extraction failed (call 3 (2609.03553): failed twice: OpenRouter error: Key limit exceeded (total limit). Manage it using https://openrouter.ai/workspaces/default/keys/2a44995d9cd2d3d9f980f0d8048b07a108c8bda8ad2abfb1b327ffdb8e6e40d4)"
-  ],
+  "problems": [],
   "guard": {
     "lakera_enabled": false,
     "lakera_available": false,
