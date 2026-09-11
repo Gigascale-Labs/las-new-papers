@@ -134,9 +134,22 @@ data, including the rebuilt feed. It needs one repository secret,
 `OPENROUTER_API_KEY`. `LAKERA_GUARD_API_KEY` is read only if you set
 `guard.enabled: true`.
 
-The commit step runs even when the run failed. A run that wrote its JSON but
-rebuilt an empty feed exits non-zero; that day's archive is still committed so
+The commit step runs even when the run failed. A run exits non-zero in two
+cases: the primary day rebuilt an empty feed, or a model stage on any day had
+work and returned nothing. The second case means every screening call failed,
+the judging call failed, or every question call failed. An exhausted
+OpenRouter key causes all three. That day's archive is still committed so
 nothing is lost.
+
+When the job fails, the last step opens an issue titled "Daily feed run
+failed" and @-mentions the account in its `MENTION` variable. If that issue is
+already open, the step comments on it instead. The issue quotes the run's
+failures and problems and links the run. Close it once the cause is fixed.
+The next daily run retries every failed day from the 5 days before it.
+
+To test the alert, run the workflow by hand with `test_failure_alert` ticked.
+That run is a dry run with a key OpenRouter rejects. It commits nothing and
+opens an issue titled "Test of the daily feed failure alert".
 
 ## What it writes
 
@@ -281,6 +294,9 @@ Set `guard.enabled: true` in `config.yaml` to turn Lakera back on.
 - The scoring call fails: fall back to the similarity ranking.
 - One paper's question call fails twice: drop that paper, keep the rest, name
   it in the feed's problems list.
+- Every call in one model stage fails, as when the OpenRouter key runs out:
+  the day's file is still written, but the run exits 1 and the workflow opens
+  an issue.
 
 ## Tests
 

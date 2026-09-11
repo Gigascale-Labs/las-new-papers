@@ -335,6 +335,32 @@ class TestCanonRows(unittest.TestCase):
             self.assertEqual(canon.append_candidates(path, [row]), 0)
             self.assertEqual(len(path.read_text(encoding="utf-8").strip().splitlines()), 2)
 
+    def test_append_refills_a_row_a_failed_screen_left_blank(self):
+        """Every screening call failed on 2026-09-04 to 2026-09-09, so each
+        paper's row had no verdict. The rerun's row must replace it."""
+        def row(p, relevant, significance=None):
+            return canon.to_canon_row(
+                paper=p, tags={}, summary="", similarity=0.5, similarity_rank=1,
+                nearest_anchor_id="a", significance=significance, novelty=None,
+                screen_relevant=relevant, first_seen="2026-09-05")
+
+        a, b, c = paper(1), paper(2), paper(3)
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "candidates.csv"
+            canon.append_candidates(path, [row(a, None), row(b, False)])
+            written = canon.append_candidates(
+                path, [row(a, True, 4), row(b, True, 5), row(c, False)])
+            with path.open(newline="", encoding="utf-8") as f:
+                got = [r for r in csv.DictReader(f)]
+
+        self.assertEqual(written, 2)                    # a refilled, c appended
+        self.assertEqual([r["arxiv_id"] for r in got],
+                         [a.arxiv_id, b.arxiv_id, c.arxiv_id])   # order kept
+        self.assertEqual(got[0]["screen_relevant"], "yes")
+        self.assertEqual(got[0]["significance"], "4")
+        self.assertEqual(got[1]["screen_relevant"], "no")   # a verdict is never replaced
+        self.assertEqual(got[1]["significance"], "")
+
 
 class TestCandidateRecord(unittest.TestCase):
     """Every screened paper is recorded, not just the ten that were sent."""
@@ -761,6 +787,78 @@ class TestRunWiring(unittest.TestCase):
         screened_user = clients[0].calls[0]["user"]
         self.assertNotIn(papers[20].arxiv_id, screened_user)
 
+    # From 2026-09-04 to 2026-09-09 an exhausted OpenRouter key failed every
+    # model call, and each of those days read as a normal empty day.
+
+    def test_a_healthy_day_is_not_marked_failed(self):
+        papers = [paper(i) for i in range(3)]
+        screen = {"verdicts": [
+            {"arxiv_id": p.arxiv_id, "relevant": i == 0, "reason": "r"}
+            for i, p in enumerate(papers)
+        ]}
+        judged = {"judgements": [
+            {"arxiv_id": papers[0].arxiv_id, "significance": 4, "novelty": 4,
+             "one_sentence": "x"}]}
+        result, _ = self._run(self._cfg(), papers, [screen], judged,
+                              {"open_questions": [], "canon": {}})
+        self.assertEqual(result["failed"], [])
+
+    def test_a_day_the_screen_rejects_entirely_is_not_marked_failed(self):
+        papers = [paper(i) for i in range(3)]
+        screen = {"verdicts": [
+            {"arxiv_id": p.arxiv_id, "relevant": False, "reason": "no"}
+            for p in papers
+        ]}
+        result, _ = self._run(self._cfg(), papers, [screen], None)
+        self.assertEqual(result["failed"], [])
+
+    def test_every_screening_call_failing_marks_the_day_failed(self):
+        papers = [paper(i) for i in range(4)]
+        limit = ModelError("OpenRouter error: Key limit exceeded (total limit)")
+        result, clients = self._run(self._cfg(screen_batch_size=2), papers,
+                                    [limit, limit], None)
+        self.assertEqual(len(clients[0].calls), 2)     # both batches tried
+        self.assertEqual(result["counts"]["kept"], 0)
+        self.assertEqual(len(result["failed"]), 1)
+        self.assertIn("every screening call failed", result["failed"][0])
+
+    def test_one_failed_screening_batch_is_a_problem_not_a_failure(self):
+        papers = [paper(i) for i in range(4)]
+        second = {"verdicts": [
+            {"arxiv_id": p.arxiv_id, "relevant": False, "reason": "no"}
+            for p in papers[2:]
+        ]}
+        result, _ = self._run(self._cfg(screen_batch_size=2), papers,
+                              [ModelError("transient"), second], None)
+        self.assertEqual(result["failed"], [])
+        self.assertTrue(any("screening batch 1/2 failed" in p
+                            for p in result["problems"]))
+
+    def test_a_failed_judge_marks_the_day_failed_but_still_sends(self):
+        papers = [paper(i) for i in range(3)]
+        screen = {"verdicts": [
+            {"arxiv_id": p.arxiv_id, "relevant": True, "reason": "r"} for p in papers
+        ]}
+        result, _ = self._run(self._cfg(top_n=2), papers, [screen],
+                              ModelError("judge down"),
+                              {"open_questions": [], "canon": {}})
+        self.assertEqual(result["counts"]["kept"], 2)   # the fallback still sends
+        self.assertTrue(any("judging call" in f for f in result["failed"]))
+
+    def test_every_question_call_failing_marks_the_day_failed(self):
+        papers = [paper(i) for i in range(3)]
+        screen = {"verdicts": [
+            {"arxiv_id": p.arxiv_id, "relevant": i < 2, "reason": "r"}
+            for i, p in enumerate(papers)
+        ]}
+        judged = {"judgements": [
+            {"arxiv_id": papers[i].arxiv_id, "significance": 4, "novelty": 4,
+             "one_sentence": "x"} for i in range(2)]}
+        # No question responses scripted: every extraction raises ModelError.
+        result, _ = self._run(self._cfg(), papers, [screen], judged)
+        self.assertEqual(result["counts"]["kept"], 2)
+        self.assertTrue(any("question" in f for f in result["failed"]))
+
 
 class TestBackfillDays(unittest.TestCase):
     """Two known causes leave a day with nothing on record: arXiv does not
@@ -872,6 +970,24 @@ class TestBackfillDays(unittest.TestCase):
                 self._write(cfg, "2026-08-18", fetched=0)   # 6 days before target
                 self.assertEqual(backfill_days(cfg, "2026-08-24"), [])
 
+    def test_a_day_whose_model_calls_failed_is_picked_up(self):
+        """2026-09-04 to 2026-09-09: 200 papers fetched a day, every screening
+        call failed on an exhausted OpenRouter key, and nothing was sent."""
+        from unittest import mock
+
+        from arxiv_feed.run import backfill_days
+
+        with tempfile.TemporaryDirectory() as d:
+            with mock.patch("arxiv_feed.config.DATA_DIR", Path(d)):
+                cfg = self._cfg()
+                self._fill_window(cfg, exclude=("2026-08-22",))
+                cfg.output_path("2026-08-22").write_text(json.dumps(
+                    {"date": "2026-08-22",
+                     "counts": {"fetched": 200, "unseen": 200},
+                     "failed": ["every screening call failed"]}
+                ), encoding="utf-8")
+                self.assertEqual(backfill_days(cfg, "2026-08-24"), ["2026-08-22"])
+
 
 class TestDayFileIsAdditive(unittest.TestCase):
     """A second run of a day must never subtract from it.
@@ -953,6 +1069,42 @@ class TestDayFileIsAdditive(unittest.TestCase):
             rerun = self._result("2026-08-25", ["b"])
             merge_into_existing(rerun, path)
             self.assertEqual({r["arxiv_id"] for r in rerun["screened"]}, {"a", "b"})
+
+    def test_a_rerun_verdict_replaces_the_failed_runs_blank_row(self):
+        """A failed screen wrote relevant: None for every paper. The rerun's
+        verdicts must replace those rows, not hide behind them."""
+        from arxiv_feed.run import merge_into_existing
+
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "2026-09-05.json"
+            failed_run = self._result("2026-09-05", [])
+            failed_run["screened"] = [{"arxiv_id": i, "relevant": None} for i in "abc"]
+            self._write(path, failed_run)
+
+            rerun = self._result("2026-09-05", ["a"])
+            rerun["screened"] = [{"arxiv_id": "a", "relevant": True},
+                                 {"arxiv_id": "b", "relevant": False},
+                                 {"arxiv_id": "c", "relevant": None}]
+            merge_into_existing(rerun, path)
+
+            by_id = {r["arxiv_id"]: r["relevant"] for r in rerun["screened"]}
+            self.assertEqual(by_id, {"a": True, "b": False, "c": None})
+            self.assertEqual([r["arxiv_id"] for r in rerun["screened"]],
+                             ["a", "b", "c"])   # the old order is kept
+
+    def test_a_blank_rerun_row_never_replaces_a_verdict(self):
+        from arxiv_feed.run import merge_into_existing
+
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "2026-08-25.json"
+            first = self._result("2026-08-25", [])
+            first["screened"] = [{"arxiv_id": "a", "relevant": False}]
+            self._write(path, first)
+
+            rerun = self._result("2026-08-25", [])
+            rerun["screened"] = [{"arxiv_id": "a", "relevant": None}]
+            merge_into_existing(rerun, path)
+            self.assertIs(rerun["screened"][0]["relevant"], False)
 
     def test_no_file_yet_writes_this_run_unchanged(self):
         from arxiv_feed.run import merge_into_existing

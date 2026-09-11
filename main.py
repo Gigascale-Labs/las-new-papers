@@ -35,6 +35,8 @@ def _report(result: dict) -> bool:
           f"{c['kept']} kept, {n_q} questions, feed {n_feed} entries")
     for problem in result["problems"]:
         print(f"  problem: {problem}")
+    for failure in result.get("failed", []):
+        print(f"  FAILED: {failure}")
 
     # A run that wrote its JSON but rebuilt an empty feed is still a
     # failure. CI must show it, even though the data was saved.
@@ -71,6 +73,7 @@ def main(argv: list[str] | None = None) -> int:
     days = [day] if args.date else backfill_days(cfg, day) + [day]
 
     delivered_ok = True
+    failed_days: list[str] = []
     for i, d in enumerate(days):
         try:
             result = run(cfg, day=d, dry_run=args.dry_run,
@@ -85,9 +88,20 @@ def main(argv: list[str] | None = None) -> int:
             delivered_ok = False
             continue
         delivered_ok = _report(result)
+        if result.get("failed"):
+            failed_days.append(d)
 
-    # Only the last day (the primary, requested one) decides the exit code:
-    # a backfilled day that is still empty is not a fault in today's run.
+    # A model stage that had work and returned nothing fails the job on any
+    # day, backfilled or primary, dry run or not. The feed check below cannot
+    # see it: the feed keeps earlier days' entries. From 2026-09-04 to
+    # 2026-09-09 an exhausted OpenRouter key sent nothing and every run passed.
+    if failed_days:
+        print(f"model calls failed for {', '.join(failed_days)}")
+        return 1
+
+    # Otherwise only the last day (the primary, requested one) decides the
+    # exit code: a backfilled day that is still empty is not a fault in
+    # today's run.
     if not args.dry_run and not delivered_ok:
         return 1
     return 0

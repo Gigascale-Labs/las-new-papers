@@ -157,12 +157,12 @@ def append_candidates(path: Path, rows: list[dict]) -> int:
         return 0
     path.parent.mkdir(parents=True, exist_ok=True)
 
-    existing: set[str] = set()
+    existing_rows: list[dict] = []
     if path.exists():
         with path.open(newline="", encoding="utf-8") as f:
             reader = csv.DictReader(f)
             header = reader.fieldnames or []
-            existing = {r.get("url", "") for r in reader}
+            existing_rows = list(reader)
         # Appending rows in a column order the file's header does not use would
         # write every value under the wrong name, silently and forever. Refuse
         # instead: a stale header means the file predates a schema change and
@@ -174,6 +174,26 @@ def append_candidates(path: Path, rows: list[dict]) -> int:
                 f"unexpected: {sorted(set(header) - set(CANDIDATE_COLUMNS))}."
             )
 
+    # A row with no screen verdict is what a failed screen leaves behind: on
+    # 2026-09-04 to 2026-09-09 every screening call failed on an exhausted
+    # OpenRouter key. The rerun's row for the same paper, with a verdict,
+    # replaces it in place. Any other repeat is still skipped.
+    by_url = {r["url"]: r for r in rows}
+    refill = {r.get("url", "") for r in existing_rows
+              if not r.get("screen_relevant")
+              and by_url.get(r.get("url", ""), {}).get("screen_relevant")}
+    if refill:
+        tmp = path.with_suffix(path.suffix + ".tmp")
+        with tmp.open("w", newline="", encoding="utf-8") as f:
+            w = csv.DictWriter(f, fieldnames=CANDIDATE_COLUMNS)
+            w.writeheader()
+            for r in existing_rows:
+                if r.get("url", "") in refill:
+                    r = {k: neutralize_cell(v) for k, v in by_url[r["url"]].items()}
+                w.writerow(r)
+        tmp.replace(path)
+
+    existing = {r.get("url", "") for r in existing_rows}
     fresh = [r for r in rows if r["url"] not in existing]
     write_header = not path.exists()
     with path.open("a", newline="", encoding="utf-8") as f:
@@ -185,9 +205,9 @@ def append_candidates(path: Path, rows: list[dict]) -> int:
             # people open in Excel. A cell starting = + - @ executes there.
             w.writerow({k: neutralize_cell(v) for k, v in r.items()})
 
-    log.info("candidates.csv: %d new row(s), %d already present",
-             len(fresh), len(rows) - len(fresh))
-    return len(fresh)
+    log.info("candidates.csv: %d new row(s), %d refilled, %d already present",
+             len(fresh), len(refill), len(rows) - len(fresh) - len(refill))
+    return len(fresh) + len(refill)
 
 
 GROUND_TRUTH_CSV = Path(__file__).resolve().parent.parent / "data" / "ground-truth" / "las-canon-frozen.csv"

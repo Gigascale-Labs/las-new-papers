@@ -59,6 +59,12 @@ def backfill_days(cfg: Config, target_day: str, window: int = 5) -> list[str]:
     gap: a single stretch of bad luck (a rate limit landing right after a
     weekend, say) can leave several consecutive days unresolved, and this
     must still reach all of them once things clear up.
+
+    A third cause: a model stage failed, and the file records it in
+    `failed`. From 2026-09-04 to 2026-09-09 the OpenRouter key was out of
+    credit, every screening call failed, and nothing was sent or marked
+    seen. Once the key works, a retry recovers the whole day. A retry of a
+    judge or question failure screens again only the papers not yet sent.
     """
     target = date.fromisoformat(target_day)
     candidates = []
@@ -66,13 +72,16 @@ def backfill_days(cfg: Config, target_day: str, window: int = 5) -> list[str]:
         day = (target - timedelta(days=i)).isoformat()
         path = cfg.output_path(day)
         fetched = None
+        failed = False
         if path.exists():
             try:
-                fetched = json.loads(path.read_text(encoding="utf-8")).get("counts", {}).get("fetched")
+                record = json.loads(path.read_text(encoding="utf-8"))
+                fetched = record.get("counts", {}).get("fetched")
+                failed = bool(record.get("failed"))
             except (json.JSONDecodeError, OSError) as exc:
                 log.warning("backfill: %s is unreadable (%s); treating %s as unresolved",
                            path, exc, day)
-        if not fetched:
+        if not fetched or failed:
             candidates.append(day)
     return candidates
 
@@ -82,6 +91,9 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
     """Execute one day's run and return the result record that is written to disk."""
     day = day or arxiv.default_day()
     problems: list[str] = []
+    # A model stage that had work to do and returned nothing. Unlike a
+    # problem, any entry here fails the job: see main.py.
+    failed: list[str] = []
 
     warning = anchor_count_warning(cfg)
     if warning:
@@ -132,6 +144,7 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
         "papers": [],
         "screened": [],
         "problems": problems,
+        "failed": failed,
     }
 
     if not unseen:
@@ -215,6 +228,13 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
     counts["relevant"] = len(passed)
     log.info("screen kept %d of %d paper(s)", len(passed), len(candidates))
 
+    # No verdicts at all is not a thin day: nothing was judged. From
+    # 2026-09-04 to 2026-09-09 this was an exhausted OpenRouter key, and each
+    # day read as an ordinary empty one.
+    if candidates and not verdicts:
+        failed.append(f"every screening call failed; {len(candidates)} paper(s) "
+                      f"unscreened, nothing sent")
+
     if not passed and verdicts:
         problems.append(
             f"the screen found nothing relevant in {len(verdicts)} paper(s); "
@@ -236,6 +256,8 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
             problems.append(
                 "no judgements returned; falling back to the screen's verdicts"
             )
+            failed.append(f"the judging call returned nothing for {len(passed)} "
+                          f"paper(s); sent the screen's picks unranked")
         kept = passed[: cfg.top_n]
     else:
         kept = judge.rank(passed, judgements, cfg.top_n)
@@ -245,6 +267,7 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
     client = ModelClient(cfg.model, effort=cfg.effort, api_key=key)
     tag_vocab = canon.known_tags()
     kept_ids = {c.paper.arxiv_id for c in kept}
+    n_extract_failed = 0
     for c in kept:
         entry = c.to_dict()
         j = judgements.get(c.paper.arxiv_id, {})
@@ -271,8 +294,13 @@ def run(cfg: Config, day: str | None = None, dry_run: bool = False,
             msg = f"{c.paper.arxiv_id}: question extraction failed ({exc})"
             problems.append(msg)
             log.error(msg)
+            n_extract_failed += 1
 
         result["papers"].append(entry)
+
+    if kept and n_extract_failed == len(kept):
+        failed.append(f"every question call failed; {len(kept)} paper(s) "
+                      f"sent without questions")
 
     # 8. record every paper that was screened, not just the ten that were sent.
     #
@@ -368,6 +396,25 @@ def _union_by_id(*groups) -> list[dict]:
     return list(out.values())
 
 
+def _union_screened(old: list[dict] | None, new: list[dict] | None) -> list[dict]:
+    """Screening rows from both runs. A row with a verdict replaces one without.
+
+    A day whose screening calls all failed recorded every paper with
+    `relevant: None`. Its rerun screens the same papers, because none were
+    sent. First-occurrence-wins, as in _union_by_id, would hide every rerun
+    verdict behind a blank row.
+    """
+    out: dict[str, dict] = {}
+    for row in [*(old or []), *(new or [])]:
+        aid = row.get("arxiv_id")
+        if not aid:
+            continue
+        if aid not in out or (out[aid].get("relevant") is None
+                              and row.get("relevant") is not None):
+            out[aid] = row
+    return list(out.values())
+
+
 def merge_into_existing(result: dict, path: Path) -> dict:
     """Fold a day file already on disk into this run's result, in place.
 
@@ -400,7 +447,7 @@ def merge_into_existing(result: dict, path: Path) -> dict:
 
     kept_before = len(result.get("papers", []))
     result["papers"] = _union_by_id(old.get("papers"), result.get("papers"))
-    result["screened"] = _union_by_id(old.get("screened"), result.get("screened"))
+    result["screened"] = _union_screened(old.get("screened"), result.get("screened"))
 
     counts = dict(result.get("counts") or {})
     for key, was in (old.get("counts") or {}).items():
