@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-17",
+  "generated_at": "2026-10-18T12:08:29+00:00",
+  "config": {
+    "categories": [
+      "cs.MA",
+      "cs.AI",
+      "cs.LG",
+      "cs.DC",
+      "econ.GN",
+      "econ.TH",
+      "econ.EM"
+    ],
+    "search_queries": [
+      "gradual disempowerment",
+      "power concentration",
+      "cooperative ai",
+      "large multi-agent systems",
+      "social-scale ai"
+    ],
+    "screen_n": 200,
+    "screen_batch_size": 25,
+    "top_n": 10,
+    "embed_model": "allenai/specter2_base",
+    "screen_model": "anthropic/claude-haiku-4.5",
+    "screen_effort": "low",
+    "judge_model": "anthropic/claude-sonnet-5",
+    "model": "anthropic/claude-opus-5",
+    "effort": "medium",
+    "anchor_count": 20
+  },
+  "counts": {
+    "fetched": 0,
+    "unseen": 0,
+    "screened": 0,
+    "relevant": 0,
+    "kept": 0,
+    "anchors": 20
+  },
+  "papers": [],
+  "screened": [],
+  "problems": [
+    "no unseen papers found for 2026-10-17"
+  ],
+  "failed": []
+}
